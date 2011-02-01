@@ -1,0 +1,81 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+  	<artifactId>jbundle-util-reactor</artifactId>
+  	<groupId>org.jbundle.util</groupId>
+  	<version>0.7.7-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>org.jbundle.util.jbackup</artifactId>
+  <name>jbundle-util-jbackup - Backup utility</name>
+  <packaging>bundle</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven-bundle-pluginVersion}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+            <Main-Class>org.jbundle.jbackup.JBackup</Main-Class>
+            <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+            <Export-Package>org.jbundle.jbackup;version=${project.version}</Export-Package>
+            <Import-Package>
+                *;resolution:=optional,
+            </Import-Package>
+            <Bundle-Version>${project.version}</Bundle-Version>
+            <!-- These jars must be in the same directory as jbackup.jar -->
+            <Class-Path>jbundle-util-jproperties-${project.version}.jar commons-httpclient-3.1.jar commons-codec-1.4.jar commons-logging-1.1.1-api.jar commons-net-2.2-ftp.jar</Class-Path>
+          </instructions>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>${maven-site-pluginVersion}</version>
+      </plugin>
+
+    </plugins>
+  </build>
+      
+  <dependencies>
+
+    <dependency>
+      <groupId>org.jbundle.util</groupId>
+      <artifactId>org.jbundle.util.jproperties</artifactId>
+      <version>0.7.7-SNAPSHOT</version>
+    </dependency>
+    <!-- dependency>
+      <groupId>net.sourceforge.bbtools</groupId>
+      <artifactId>bbtools</artifactId>
+      <version>1.0.5</version>
+    </dependency -->
+	<dependency>
+	   <groupId>commons-net</groupId>
+	   <artifactId>commons-net</artifactId>
+	   <version>2.2</version>
+	   <classifier>ftp</classifier>
+	</dependency>
+	<dependency>
+	   <groupId>commons-httpclient</groupId>
+	   <artifactId>commons-httpclient</artifactId>
+	   <version>3.1</version>
+	</dependency>
+	<dependency>
+	   <groupId>commons-logging</groupId>
+	   <artifactId>commons-logging</artifactId>
+	   <version>1.1.1</version>
+	   <classifier>api</classifier>
+	</dependency>
+	<dependency>
+	   <groupId>commons-codec</groupId>
+	   <artifactId>commons-codec</artifactId>
+	   <version>1.4</version>
+	</dependency>
+  </dependencies>
+</project>
