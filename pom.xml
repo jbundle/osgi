@@ -5,7 +5,7 @@
   <parent>
     <artifactId>jbundle-parent</artifactId>
     <groupId>org.jbundle.config</groupId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>../../jbundle-parent</relativePath>
   </parent>
 
@@ -22,10 +22,8 @@
     <module>muffinmanager</module>
   </modules>
   
-  <scm>
-    <url>http://scm.jbundle.org/gitweb/scm/git/workspace/jbundle/util/util</url>
-    <connection>scm:git:http://scm.jbundle.org/scm/git/workspace/jbundle/util/util</connection>
-    <developerConnection>scm:git:ssh://scm.jbundle.org/scm/git/workspace/jbundle/util/util</developerConnection>
-  </scm>
+  <properties>
+    <jbundleScmPath>util/util</jbundleScmPath>
+  </properties>
 
 </project>
