@@ -78,7 +78,7 @@ public class Util extends Object {
 	 * Create a new object using this class name.
 	 * Conform to the standardized classname format: com.tourapp.terminal.src/dest.name.namesrc/dest
 	 */
-	public static Object makeObjectFromClassName(String strPackage, String strClassName)
+	public static Object makeObjectFromClassName(String interfaceName, String strPackage, String strClassName)
 	{
 		if (strClassName == null)
 			return null;
@@ -148,7 +148,7 @@ public class Util extends Object {
 		String strFilter = properties.getProperty(JBackupConstants.FILTER_PARAM);
 		if (strFilter != null)
 		if (strFilter.indexOf('.') != -1)
-			return (FilenameFilter)Util.makeObjectFromClassName(null, strFilter);
+			return (FilenameFilter)Util.makeObjectFromClassName(Object.class.getName(), null, strFilter);
 		else
 			return new PathFilter(strFilter);
 		return null;	// Add+++ Make the filename filter!

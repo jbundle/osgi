@@ -101,7 +101,7 @@ public class FtpDestination extends BaseDestination
 			if(FTPReply.isPositiveCompletion(reply))
 			{
 					client.login(strUsername, strPassword);
-					client.enterLocalPassiveMode();
+//					client.enterLocalPassiveMode();
 					m_client = client;	// Flag success
 			}
 			else

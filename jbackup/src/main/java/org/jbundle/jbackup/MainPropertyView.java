@@ -152,14 +152,14 @@ public class MainPropertyView extends PropertyView
 		if (e.getSource() == m_buttonSource)
 		{
 			strClass = m_properties.getProperty(Scanner.SOURCE_PARAM);
-			objClass = Util.makeObjectFromClassName(SOURCE_PARAM, strClass);
+			objClass = Util.makeObjectFromClassName(Object.class.getName(), SOURCE_PARAM, strClass);
 			if (objClass instanceof BaseSource)	// Always
 				((BaseSource)objClass).init(m_properties);
 		}
 		else if (e.getSource() == m_buttonDestination)
 		{
 			strClass = m_properties.getProperty(Scanner.DESTINATION_PARAM);
-			objClass = Util.makeObjectFromClassName(DESTINATION_PARAM, strClass);
+			objClass = Util.makeObjectFromClassName(Object.class.getName(), DESTINATION_PARAM, strClass);
 			if (objClass instanceof BaseDestination)	// Always
 				((BaseDestination)objClass).init(m_properties);
 		}

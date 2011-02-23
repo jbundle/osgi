@@ -91,8 +91,8 @@ public class Scanner extends Object
 			System.out.println("Must supply source and destination class names.");
 			return;
 		}
-		SourceFileList sourceList = (SourceFileList)Util.makeObjectFromClassName("source", strSourceClass);
-		DestinationFile destination = (DestinationFile)Util.makeObjectFromClassName("destination", strDestinationClass);
+		SourceFileList sourceList = (SourceFileList)Util.makeObjectFromClassName(Object.class.getName(), "source", strSourceClass);
+		DestinationFile destination = (DestinationFile)Util.makeObjectFromClassName(Object.class.getName(), "destination", strDestinationClass);
 		this.process(sourceList, destination);
 	}
 	/**
