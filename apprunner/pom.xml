@@ -9,8 +9,8 @@
   	<version>0.7.7-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.jbundle.util.jproperties</artifactId>
+  <artifactId>org.jbundle.util.apprunner</artifactId>
   <packaging>bundle</packaging>
-  <name>jbundle-util-jproperties - App property access</name>
+  <name>jbundle-util-apprunner - Application runner</name>
   
 </project>

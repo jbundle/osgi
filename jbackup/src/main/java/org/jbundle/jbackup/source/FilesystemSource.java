@@ -11,7 +11,7 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 
 import org.jbundle.jbackup.JBackupConstants;
-import org.jbundle.jproperties.PropertyView;
+import org.jbundle.util.apprunner.PropertyView;
 
 
 /** 

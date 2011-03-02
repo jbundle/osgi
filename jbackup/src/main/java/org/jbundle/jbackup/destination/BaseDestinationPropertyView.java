@@ -9,8 +9,8 @@ import java.util.Properties;
 import javax.swing.JPanel;
 
 import org.jbundle.jbackup.JBackupConstants;
-import org.jbundle.jproperties.PropertyOwner;
-import org.jbundle.jproperties.PropertyView;
+import org.jbundle.util.apprunner.PropertyOwner;
+import org.jbundle.util.apprunner.PropertyView;
 
 /**
  * Main property view screen.

@@ -29,7 +29,7 @@
             </Import-Package>
             <Bundle-Version>${project.version}</Bundle-Version>
             <!-- These jars must be in the same directory as jbackup.jar -->
-            <Class-Path>jbundle-util-jproperties-${project.version}.jar commons-httpclient-3.1.jar commons-codec-1.4.jar commons-logging-1.1.1-api.jar commons-net-2.2-ftp.jar</Class-Path>
+            <Class-Path>org.jbundle.util.apprunner-${project.version}.jar commons-httpclient-3.1.jar commons-codec-1.4.jar commons-logging-1.1.1-api.jar commons-net-2.2-ftp.jar</Class-Path>
           </instructions>
         </configuration>
       </plugin>
@@ -47,7 +47,7 @@
 
     <dependency>
       <groupId>org.jbundle.util</groupId>
-      <artifactId>org.jbundle.util.jproperties</artifactId>
+      <artifactId>org.jbundle.util.apprunner</artifactId>
       <version>0.7.7-SNAPSHOT</version>
     </dependency>
     <!-- dependency>

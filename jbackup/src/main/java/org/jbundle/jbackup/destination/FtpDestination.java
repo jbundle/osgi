@@ -16,7 +16,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 import org.jbundle.jbackup.JBackupConstants;
 import org.jbundle.jbackup.source.SourceFile;
-import org.jbundle.jproperties.PropertyView;
+import org.jbundle.util.apprunner.PropertyView;
 
 /** 
  * Directory scanner.

@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.jbundle.jbackup.JBackupConstants;
-import org.jbundle.jproperties.PropertyOwner;
+import org.jbundle.util.apprunner.PropertyOwner;
 
 /**
  * Main property view screen.

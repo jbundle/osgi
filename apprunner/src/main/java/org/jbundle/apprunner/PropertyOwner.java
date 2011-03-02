@@ -2,7 +2,7 @@
  * Copyright (c) 2009 jbundle.org. All Rights Reserved.
  *		Don_Corley@msn.com
  */
-package org.jbundle.jproperties;
+package org.jbundle.util.apprunner;
 
 import java.util.*;
 

@@ -15,7 +15,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.jbundle.jbackup.JBackupConstants;
-import org.jbundle.jproperties.PropertyView;
+import org.jbundle.util.apprunner.PropertyView;
 
 
 /** 

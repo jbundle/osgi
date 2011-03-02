@@ -15,7 +15,7 @@ import java.util.Properties;
 
 import org.jbundle.jbackup.source.SourceFile;
 import org.jbundle.jbackup.util.Util;
-import org.jbundle.jproperties.PropertyView;
+import org.jbundle.util.apprunner.PropertyView;
 
 
 /** 

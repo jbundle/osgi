@@ -19,8 +19,8 @@ import javax.swing.JPanel;
 import org.jbundle.jbackup.destination.BaseDestination;
 import org.jbundle.jbackup.source.BaseSource;
 import org.jbundle.jbackup.util.Util;
-import org.jbundle.jproperties.PropertyOwner;
-import org.jbundle.jproperties.PropertyView;
+import org.jbundle.util.apprunner.PropertyOwner;
+import org.jbundle.util.apprunner.PropertyView;
 
 
 /**

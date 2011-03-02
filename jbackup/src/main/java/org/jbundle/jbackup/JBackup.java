@@ -20,9 +20,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
-import org.jbundle.jproperties.PropertyOwner;
-import org.jbundle.jproperties.PropertyUtilities;
-import org.jbundle.jproperties.PropertyView;
+import org.jbundle.util.apprunner.PropertyOwner;
+import org.jbundle.util.apprunner.PropertyUtilities;
+import org.jbundle.util.apprunner.PropertyView;
 
 
 /**

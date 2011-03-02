@@ -10,8 +10,8 @@ import java.util.Properties;
 
 import org.jbundle.jbackup.JBackupConstants;
 import org.jbundle.jbackup.source.SourceFile;
-import org.jbundle.jproperties.PropertyOwner;
-import org.jbundle.jproperties.PropertyView;
+import org.jbundle.util.apprunner.PropertyOwner;
+import org.jbundle.util.apprunner.PropertyView;
 
 
 /** 

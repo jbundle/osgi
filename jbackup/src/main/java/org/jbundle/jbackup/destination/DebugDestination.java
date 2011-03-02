@@ -14,7 +14,7 @@ import java.io.PrintStream;
 import java.util.Properties;
 
 import org.jbundle.jbackup.source.SourceFile;
-import org.jbundle.jproperties.PropertyView;
+import org.jbundle.util.apprunner.PropertyView;
 
 
 /** 

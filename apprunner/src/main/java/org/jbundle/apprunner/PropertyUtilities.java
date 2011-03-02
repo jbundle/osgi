@@ -4,7 +4,7 @@
  * Created on April 10, 2000, 1:38 AM
  */
  
-package org.jbundle.jproperties;
+package org.jbundle.util.apprunner;
 
 import java.io.*;
 import java.util.*;

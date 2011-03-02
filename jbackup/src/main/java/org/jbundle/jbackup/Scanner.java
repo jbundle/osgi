@@ -12,7 +12,7 @@ import org.jbundle.jbackup.destination.DestinationFile;
 import org.jbundle.jbackup.source.SourceFile;
 import org.jbundle.jbackup.source.SourceFileList;
 import org.jbundle.jbackup.util.Util;
-import org.jbundle.jproperties.PropertyUtilities;
+import org.jbundle.util.apprunner.PropertyUtilities;
 
 /** 
  * Directory scanner.

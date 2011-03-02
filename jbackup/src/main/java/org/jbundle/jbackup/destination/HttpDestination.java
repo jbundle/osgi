@@ -21,7 +21,7 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.jbundle.jbackup.JBackupConstants;
 import org.jbundle.jbackup.source.SourceFile;
-import org.jbundle.jproperties.PropertyView;
+import org.jbundle.util.apprunner.PropertyView;
 
 /** 
  * Directory scanner.

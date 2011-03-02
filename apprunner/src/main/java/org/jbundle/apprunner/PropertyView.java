@@ -1,7 +1,7 @@
 /*
  * @(#)PropertyView.java	1.13 98/08/28
  */
-package org.jbundle.jproperties;
+package org.jbundle.util.apprunner;
 
 import java.awt.*;
 import java.awt.event.*;
