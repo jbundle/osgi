@@ -20,6 +20,7 @@
     <module>apprunner</module>
     <module>jbackup</module>
     <module>muffinmanager</module>
+    <module>org.jbundle.util.backup</module>
   </modules>
   
   <properties>
