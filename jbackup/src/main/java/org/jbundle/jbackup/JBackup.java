@@ -23,7 +23,7 @@ import javax.swing.JProgressBar;
 import org.jbundle.util.apprunner.PropertyOwner;
 import org.jbundle.util.apprunner.PropertyUtilities;
 import org.jbundle.util.apprunner.PropertyView;
-
+import org.jbundle.util.apprunner.AppRunner;
 
 /**
  * An Application to scan files in source directories and
@@ -32,14 +32,12 @@ import org.jbundle.util.apprunner.PropertyView;
  * @author Don Corley
  * @version 1.0.0
  */
-public class JBackup extends JApplet
+public class JBackup extends AppRunner
 	implements PropertyOwner, ActionListener, JBackupConstants
 {
 	private static final long serialVersionUID = 1L;
 
 	public String m_strFileName = DEFAULT_PROPERTY_FILENAME;
-
-	protected Properties m_properties = null;
 	
 	protected JButton m_buttonGo = null;
 	protected JButton m_buttonSave = null;
@@ -87,22 +85,11 @@ public class JBackup extends JApplet
 	{
         try {
 			JBackup applet = new JBackup();
-			JFrame frame = new JFrame();
-			frame.setTitle("JBackup");
-			frame.setBackground(Color.lightGray);
-			frame.getContentPane().setLayout(new BorderLayout());
-	
-			frame.getContentPane().add(applet, BorderLayout.CENTER);
-			frame.addWindowListener(new WindowAdapter()
-			{
-				public void windowClosing(WindowEvent e) {
-					System.exit(0);
-				}
-			});
-			frame.pack();
-			frame.setSize(frame.getPreferredSize().width, frame.getPreferredSize().height);
 			if (!Boolean.TRUE.toString().equalsIgnoreCase(System.getProperty(PROPERTY_QUIET_PARAM)))
+			{
+				JFrame frame = applet.addAppToFrame();
 				frame.setVisible(true);
+			}
 			else
 			{
 				Scanner scanner = new Scanner(applet.m_properties);
@@ -135,13 +122,6 @@ public class JBackup extends JApplet
 		{
 			PropertyUtilities.writeProperties(m_strFileName, m_properties);
 		}
-	}
-	/**
-	 * Set this control up to implement these new properties.
-	 */
-	public void setProperties(Properties properties)
-	{
-		m_properties = properties;
 	}
 	/**
 	 * Screen that is used to change the properties.
