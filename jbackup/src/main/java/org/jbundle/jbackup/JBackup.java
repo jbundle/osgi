@@ -21,7 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
 import org.jbundle.util.apprunner.PropertyOwner;
-import org.jbundle.util.apprunner.PropertyUtilities;
+import org.jbundle.util.apprunner.AppUtilities;
 import org.jbundle.util.apprunner.PropertyView;
 import org.jbundle.util.apprunner.AppRunner;
 
@@ -49,11 +49,26 @@ public class JBackup extends AppRunner
 	public JBackup()
 	{
 		super();
+	}
 	
+	/*
+	 * Constructor.
+	 */
+	public JBackup(String title)
+	{
+		this();
+		init(title);
+	}
+	/*
+	 * Constructor.
+	 */
+	public void init(String title)
+	{
+		super.init(title);
 		Container contentPane = this.getContentPane();
 		contentPane.setLayout(new BorderLayout());
 	
-		m_properties = PropertyUtilities.readProperties(m_strFileName = System.getProperty(PROPERTY_FILENAME_PARAM, DEFAULT_PROPERTY_FILENAME));
+		m_properties = AppUtilities.readProperties(m_strFileName = System.getProperty(PROPERTY_FILENAME_PARAM, DEFAULT_PROPERTY_FILENAME));
 		
 		JPanel panel = this.getPropertyView(m_properties);
 		contentPane.add(panel, BorderLayout.CENTER);
@@ -84,7 +99,7 @@ public class JBackup extends AppRunner
     public static void main(String[] args)
 	{
         try {
-			JBackup applet = new JBackup();
+			JBackup applet = new JBackup("JBackup");
 			if (!Boolean.TRUE.toString().equalsIgnoreCase(System.getProperty(PROPERTY_QUIET_PARAM)))
 			{
 				JFrame frame = applet.addAppToFrame();
@@ -95,7 +110,7 @@ public class JBackup extends AppRunner
 				Scanner scanner = new Scanner(applet.m_properties);
 				scanner.run();
 				
-				PropertyUtilities.writeProperties(applet.m_strFileName, applet.m_properties);				
+				AppUtilities.writeProperties(applet.m_strFileName, applet.m_properties);				
 				System.exit(0);
 			}
 		} catch (Throwable t) {
@@ -116,11 +131,11 @@ public class JBackup extends AppRunner
 			scanner.run();
 			progressBar.setIndeterminate(false);
 			
-			PropertyUtilities.writeProperties(m_strFileName, m_properties);
+			AppUtilities.writeProperties(m_strFileName, m_properties);
 		}
 		if (e.getSource() == m_buttonSave)
 		{
-			PropertyUtilities.writeProperties(m_strFileName, m_properties);
+			AppUtilities.writeProperties(m_strFileName, m_properties);
 		}
 	}
 	/**

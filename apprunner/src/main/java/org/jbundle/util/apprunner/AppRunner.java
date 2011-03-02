@@ -14,15 +14,46 @@ public abstract class AppRunner extends JApplet
 {
 	protected Properties m_properties = null;
 
+	protected String title;
+
 	/**
 	 * Set the application properties.
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Constructor.
+	 */
+	public AppRunner()
+	{
+		super();
+	}
+	
+	/**
+	 * Constructor.
+	 */
+	public AppRunner(String title)
+	{
+		this();
+		init(title);
+	}
+	/*
+	 * Constructor.
+	 */
+	public void init(String title)
+	{
+		this.title = title;
+	}
 
 	@Override
 	public void setProperties(Properties properties)
 	{
 		m_properties = properties;
+	}
+	
+	public String getTitle()
+	{
+		return title;
 	}
 
 	/**
@@ -32,7 +63,7 @@ public abstract class AppRunner extends JApplet
 	public JFrame addAppToFrame()
 	{
 		JFrame frame = new JFrame();
-		frame.setTitle("JBackup");
+		frame.setTitle(this.getTitle());
 		frame.setBackground(Color.lightGray);
 		frame.getContentPane().setLayout(new BorderLayout());
 
@@ -47,4 +78,8 @@ public abstract class AppRunner extends JApplet
 		frame.setSize(frame.getPreferredSize().width, frame.getPreferredSize().height);
 		return frame;
 	}
+    public Properties argsToProperties(String[] args)
+    {
+    	return null;
+    }
 }

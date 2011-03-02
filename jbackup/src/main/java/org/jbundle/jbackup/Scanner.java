@@ -12,7 +12,7 @@ import org.jbundle.jbackup.destination.DestinationFile;
 import org.jbundle.jbackup.source.SourceFile;
 import org.jbundle.jbackup.source.SourceFileList;
 import org.jbundle.jbackup.util.Util;
-import org.jbundle.util.apprunner.PropertyUtilities;
+import org.jbundle.util.apprunner.AppUtilities;
 
 /** 
  * Directory scanner.
@@ -66,13 +66,13 @@ public class Scanner extends Object
 		String strPropertyFileName = properties.getProperty(PROPERTY_FILENAME_PARAM);
 		if (strPropertyFileName != null)
 		{
-			Properties propertiesRead = PropertyUtilities.readProperties(strPropertyFileName);
+			Properties propertiesRead = AppUtilities.readProperties(strPropertyFileName);
 			propertiesRead.putAll(properties);		// Add the read-in properties
 			properties = propertiesRead;
 		}
 		Scanner scanner = new Scanner(properties);
 		scanner.run();
-		PropertyUtilities.writeProperties(strPropertyFileName, properties);
+		AppUtilities.writeProperties(strPropertyFileName, properties);
 	}
 	/**
 	 * Move files from the source to the destination.

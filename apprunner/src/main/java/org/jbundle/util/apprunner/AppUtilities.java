@@ -14,15 +14,9 @@ import java.util.*;
  * @author  Don Corley don@tourgeek.com
  * @version 1.0.0
  */
-public class PropertyUtilities extends Object {
+public class AppUtilities extends Object {
 	public static final boolean DEBUG = false;
 
-	/**
-	  * Creates new PropertyUtilities
-	  */
-	public PropertyUtilities()
-	{
-	}
 	/*
 	 * Open and read the properties file.
 	 * @param strFileName The name of the properties file.
