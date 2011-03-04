@@ -50,6 +50,16 @@ public abstract class AppRunner extends JApplet
 	{
 		m_properties = properties;
 	}
+	/**
+	 * Get property.
+	 * @param key
+	 * @return
+	 */
+    public String getProperty(String key)
+    {
+    	return m_properties.getProperty(key);
+    }
+
 	
 	public String getTitle()
 	{
@@ -78,8 +88,4 @@ public abstract class AppRunner extends JApplet
 		frame.setSize(frame.getPreferredSize().width, frame.getPreferredSize().height);
 		return frame;
 	}
-    public Properties argsToProperties(String[] args)
-    {
-    	return null;
-    }
 }
