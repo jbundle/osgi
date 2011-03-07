@@ -3,6 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
 
+	<!-- This version of jbackup includes all the dependent classes in one runnable jar -->
   <parent>
     <artifactId>jbundle-util-reactor</artifactId>
     <groupId>org.jbundle.util</groupId>
@@ -21,7 +22,6 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>${maven-bundle-pluginVersion}</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>

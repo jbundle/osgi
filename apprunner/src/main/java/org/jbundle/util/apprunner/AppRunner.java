@@ -12,15 +12,21 @@ import javax.swing.JFrame;
 public abstract class AppRunner extends JApplet
 	implements PropertyOwner
 {
-	protected Properties m_properties = null;
-
-	protected String title;
-
 	/**
 	 * Set the application properties.
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
+	/**
+	 * App properties
+	 */
+	protected Properties m_properties = null;
+
+	/**
+	 * Frame title
+	 */
+	protected String title;
+
 	/**
 	 * Constructor.
 	 */
@@ -57,9 +63,22 @@ public abstract class AppRunner extends JApplet
 	 */
     public String getProperty(String key)
     {
+    	if (m_properties == null)
+    		return null;
     	return m_properties.getProperty(key);
     }
 
+	/**
+	 * Set property.
+	 * @param key
+	 * @return
+	 */
+    public void setProperty(String key, String value)
+    {
+    	if (m_properties == null)
+    		m_properties = new Properties();
+    	m_properties.setProperty(key, value);
+    }
 	
 	public String getTitle()
 	{

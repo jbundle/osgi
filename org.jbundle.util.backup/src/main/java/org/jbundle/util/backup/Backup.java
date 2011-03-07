@@ -3,12 +3,17 @@ package org.jbundle.util.backup;
 import org.jbundle.jbackup.JBackup;
 
 /**
- * Hello world!
- *
+ * Standalone backup program.
+ * This version of jbackup includes all the dependent classes in one runnable jar.
  */
 public class Backup extends JBackup
 {
-    public static void main( String[] args )
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public static void main( String[] args )
     {
     	JBackup.main(args);
     }
