@@ -1,4 +1,4 @@
-package org.jbundle.thin.base.util.osgi.obr;
+package org.jbundle.util.osgi.obr;
 
 import java.io.File;
 import java.util.Dictionary;

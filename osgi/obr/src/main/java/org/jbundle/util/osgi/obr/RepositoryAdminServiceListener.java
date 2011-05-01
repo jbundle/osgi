@@ -1,4 +1,4 @@
-package org.jbundle.thin.base.util.osgi.obr;
+package org.jbundle.util.osgi.obr;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.osgi.framework.Bundle;
