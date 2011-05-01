@@ -286,13 +286,18 @@ public class ObrClassFinderImpl extends BaseClassFinder
     		return null;
         DataModelHelper helper = repositoryAdmin.getHelper();
         String packageName = ClassFinderUtility.getPackageName(className, resourceType);
+        if (this.getResourceFromCache(packageName) != null)
+        	return this.getResourceFromCache(packageName);
         String filter2 = "(package=" + packageName + ")"; // + "(version=xxx)"
         Requirement requirement = helper.requirement("package", filter2);
         Requirement[] requirements = { requirement };// repositoryAdmin
         Resource[] resources = repositoryAdmin.discoverResources(requirements);
         this.deployResources(resources, options);
         if ((resources != null) && (resources.length > 0))
+        {
+        	this.addResourceToCache(packageName, resources[0]);
         	return resources[0];
+        }
         else
         	return null;
     }

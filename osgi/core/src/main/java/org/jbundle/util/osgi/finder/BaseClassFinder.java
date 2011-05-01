@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
@@ -248,20 +250,26 @@ public abstract class BaseClassFinder extends Object
     private Class<?> getClassFromBundle(Object resource, String className)
     {
         Class<?> c = null;
-        try {
-            if (resource == null)
+        if (resource == null)
+        {
+            BundleService classAccess = this.getClassBundleService(null, className);
+            if (classAccess != null)
             {
-                BundleService classAccess = this.getClassBundleService(null, className);
-                if (classAccess != null)
+            	try {
                 	c = classAccess.makeClass(className);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
-            else
-            {
-            	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderUtility.getPackageName(className, false));
+        }
+        else
+        {
+        	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderUtility.getPackageName(className, false));
+        	try {
 	            c = bundle.loadClass(className);
+            } catch (ClassNotFoundException e) {
+                c = null;
             }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
         return c;
     }
@@ -288,7 +296,7 @@ public abstract class BaseClassFinder extends Object
         return url;
     }
     /**
-     * makeClassFromBundle
+     * Get the Resource Bundle from the Bundle
      * 
      * @param className
      * @return
@@ -413,4 +421,20 @@ public abstract class BaseClassFinder extends Object
 				}
     		}
     }
+    
+
+    /**
+     * Resource cache code.
+     * TODO(don) - Need to listen for stopped bundles.
+     */
+    protected Map<String,Object> resourceMap = new HashMap<String,Object>(); 
+    public Object getResourceFromCache(String packageName)
+    {
+    	return resourceMap.get(packageName);
+    }
+    public void addResourceToCache(String packageName, Object resource)
+    {
+    	resourceMap.put(packageName, resource);
+    }
+
 }
