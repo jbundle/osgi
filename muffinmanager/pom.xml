@@ -35,7 +35,7 @@
           <instructions>
             <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
             <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.jbundle.thin.base.util.muffinmanager.*;version=${project.version}</Export-Package>
+            <Export-Package>org.jbundle.util.muffinmanager.*;version=${project.version}</Export-Package>
             <Import-Package>
                 *;resolution:=optional,
             </Import-Package>

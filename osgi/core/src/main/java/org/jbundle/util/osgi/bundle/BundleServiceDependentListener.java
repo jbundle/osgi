@@ -1,4 +1,4 @@
-package org.jbundle.thin.base.util.osgi.bundle;
+package org.jbundle.util.osgi.bundle;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

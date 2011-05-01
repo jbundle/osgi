@@ -1,4 +1,4 @@
-package org.jbundle.thin.base.util.osgi.bundle;
+package org.jbundle.util.osgi.bundle;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.jbundle.thin.base.util.osgi.finder.ClassFinderUtility;
+import org.jbundle.util.osgi.finder.ClassFinderUtility;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;

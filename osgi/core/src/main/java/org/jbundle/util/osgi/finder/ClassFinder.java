@@ -1,10 +1,10 @@
-package org.jbundle.thin.base.util.osgi.finder;
+package org.jbundle.util.osgi.finder;
 
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import org.jbundle.thin.base.util.osgi.bundle.BundleService;
+import org.jbundle.util.osgi.bundle.BundleService;
 
 public interface ClassFinder {
 	

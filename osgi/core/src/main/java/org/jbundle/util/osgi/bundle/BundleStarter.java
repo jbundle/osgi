@@ -1,7 +1,7 @@
-package org.jbundle.thin.base.util.osgi.bundle;
+package org.jbundle.util.osgi.bundle;
 
-import org.jbundle.thin.base.util.osgi.finder.BaseClassFinder;
-import org.jbundle.thin.base.util.osgi.finder.ClassFinderUtility;
+import org.jbundle.util.osgi.finder.BaseClassFinder;
+import org.jbundle.util.osgi.finder.ClassFinderUtility;
 import org.osgi.framework.BundleContext;
 
 /**

@@ -35,7 +35,7 @@
                 org.jbundle.main.msg.app;resolution:=optional,
                 org.jbundle.base.field.event;resolution:=optional, -->
             </Import-Package>
-            <Bundle-Activator>org.jbundle.thin.base.util.osgi.obr.ObrClassFinderImpl</Bundle-Activator>
+            <Bundle-Activator>org.jbundle.util.osgi.obr.ObrClassFinderImpl</Bundle-Activator>
             <!-- Embed-Dependency>*;scope=compile|runtime;groupId=org.jbundle.res|org.jbundle.thin|org.jbundle.base|mysql</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive -->
           </instructions>

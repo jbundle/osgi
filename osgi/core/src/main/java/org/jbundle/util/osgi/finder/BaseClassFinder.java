@@ -1,4 +1,4 @@
-package org.jbundle.thin.base.util.osgi.finder;
+package org.jbundle.util.osgi.finder;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
-import org.jbundle.thin.base.util.osgi.bundle.BundleService;
+import org.jbundle.util.osgi.bundle.BundleService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

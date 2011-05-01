@@ -1,4 +1,4 @@
-package org.jbundle.thin.base.util.osgi.bundle;
+package org.jbundle.util.osgi.bundle;
 
 import java.net.URL;
 

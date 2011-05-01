@@ -1,4 +1,4 @@
-package org.jbundle.thin.base.util.osgi.finder;
+package org.jbundle.util.osgi.finder;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;

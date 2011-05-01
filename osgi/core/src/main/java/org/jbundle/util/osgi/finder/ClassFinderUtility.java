@@ -1,10 +1,10 @@
-package org.jbundle.thin.base.util.osgi.finder;
+package org.jbundle.util.osgi.finder;
 
 import java.io.File;
 
-import org.jbundle.thin.base.util.osgi.bundle.BaseBundleService;
-import org.jbundle.thin.base.util.osgi.bundle.BundleServiceDependentListener;
-import org.jbundle.thin.base.util.osgi.bundle.BundleStarter;
+import org.jbundle.util.osgi.bundle.BaseBundleService;
+import org.jbundle.util.osgi.bundle.BundleServiceDependentListener;
+import org.jbundle.util.osgi.bundle.BundleStarter;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
