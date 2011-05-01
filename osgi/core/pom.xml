@@ -11,7 +11,7 @@
   </parent>
 
   <artifactId>org.jbundle.util.osgi</artifactId>
-  <name>jbundle-thin-base-util-osgi - osgi core code</name>
+  <name>jbundle-util-osgi - osgi core code</name>
   <packaging>bundle</packaging>
 
  <build>
