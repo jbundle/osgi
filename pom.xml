@@ -21,6 +21,7 @@
     <module>jbackup</module>
     <module>muffinmanager</module>
     <module>org.jbundle.util.backup</module>
+    <module>osgi</module>
   </modules>
   
   <properties>

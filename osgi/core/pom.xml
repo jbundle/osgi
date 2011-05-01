@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>jbundle-util-osgi-reactor</artifactId>
+    <groupId>org.jbundle.util.osgi</groupId>
+    <version>0.7.7-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>org.jbundle.util.osgi</artifactId>
+  <name>jbundle-thin-base-util-osgi - osgi core code</name>
+  <packaging>bundle</packaging>
+
+ <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+            <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+            <Export-Package>${project.artifactId}.*;version=${project.version}</Export-Package>
+            <Import-Package>
+                *;resolution:=optional,
+            <!-- Note: These are some of the possible classes that will be created by the ClassService
+              Remove them only after your have converted them to services -->
+            <!--	org.jbundle.base.db.jdbc;resolution:=optional,       Class.createInstance() looks up bundle in obr -->
+             <!--    org.jbundle.main.schedule.app;resolution:=optional, Trx message listener creates JobSchedulerApp -->
+             <!--     org.jbundle.main.msg.process;resolution:=optional,    Process runner task creates MessageTimeoutProcess -->
+             <!--     org.jbundle.main.msg.app;resolution:=optional,
+                org.jbundle.base.field.event;resolution:=optional,
+                org.jbundle.base.screen.view.html;resolution:=optional,
+                org.jbundle.app.test.test.screen.basic;resolution:=optional, -->
+            </Import-Package>
+            <DynamicImport-Package>*</DynamicImport-Package>
+            <Bundle-Activator>org.jbundle.thin.base.util.osgi.finder.ClassFinderUtility</Bundle-Activator>
+            <!-- Embed-Dependency>*;scope=compile|runtime;groupId=org.jbundle.res|org.jbundle.thin|org.jbundle.base|mysql</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive -->
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+<dependencies>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope> <!-- This better be provided -->
+    </dependency>
+</dependencies>
+
+</project>
