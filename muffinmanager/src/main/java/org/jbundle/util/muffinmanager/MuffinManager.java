@@ -4,7 +4,7 @@
  * Created on January 30, 2001, 12:14 AM
  */
  
-package org.jbundle.thin.base.util.muffinmanager;
+package org.jbundle.util.muffinmanager;
 
 import java.io.InputStream;
 import java.io.OutputStream;
