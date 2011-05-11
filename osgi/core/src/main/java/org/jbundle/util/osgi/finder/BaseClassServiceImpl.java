@@ -56,6 +56,7 @@ public class BaseClassServiceImpl
    {
 	   if (className == null)
 		   return null;
+	   className = BaseClassServiceImpl.getFullClassName(className);
       
 	   Class<?> clazz = null;
        try {
@@ -227,6 +228,45 @@ public class BaseClassServiceImpl
     */
    public void handleClassException(Exception ex, String className, Object task, boolean bErrorIfNotFound)
    {
-	   // Override this
+       if (bErrorIfNotFound)
+       {
+           if (ex != null)
+        	   ex.printStackTrace();
+           this.setLastError("Error on create class: " + className);
+       }
    }
+   private String lastError = null;
+   void setLastError(String error)
+   {
+	   lastError = error;
+   }
+   public String getLastError()
+   {
+	   return lastError;
+   }
+   /**
+   * If class name starts with '.' append base package.
+   */
+  public static String getFullClassName(String strClassName) {
+      return BaseClassServiceImpl.getFullClassName(null, strClassName);
+  }
+  /**
+   * If class name starts with '.' append base package.
+   */
+  public static String getFullClassName(String strPackage, String strClass) {
+      if (strPackage != null)
+          if (strPackage.length() > 0) {
+              if (strPackage.charAt(strPackage.length() - 1) != '.')
+                  strPackage = strPackage + '.';
+          }
+      if (strClass != null)
+          if (strClass.length() > 0) {
+              if (strClass.indexOf('.') == -1)
+                  if (strPackage != null)
+                      strClass = strPackage + strClass;
+              if (strClass.charAt(0) == '.')
+                  strClass = ClassService.ROOT_PACKAGE + strClass.substring(1);
+          }
+      return strClass;
+  }
 }

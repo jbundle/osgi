@@ -14,6 +14,7 @@ public interface ClassService
      * The byte to char and back encoding that I use.
      */
     public static final String OBJECT_ENCODING = "ISO-8859-1";
+    public static String ROOT_PACKAGE = "org.jbundle.";  // Default package prefix
 
    /**
     * Get the Osgi class service.
