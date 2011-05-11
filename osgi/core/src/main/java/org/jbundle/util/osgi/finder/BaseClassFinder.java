@@ -12,8 +12,9 @@ import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
-import org.jbundle.model.osgi.BundleService;
-import org.jbundle.model.osgi.ClassFinder;
+import org.jbundle.util.osgi.BundleService;
+import org.jbundle.util.osgi.ClassFinder;
+import org.jbundle.util.osgi.ClassService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -189,7 +190,7 @@ public abstract class BaseClassFinder extends Object
             }
             else
             {
-            	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderUtility.getPackageName(className, false));
+            	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderActivator.getPackageName(className, false));
 	            object = this.convertStringToObject(string);
             }
         } catch (ClassNotFoundException e) {
@@ -210,7 +211,7 @@ public abstract class BaseClassFinder extends Object
         if ((string == null) || (string.length() == 0))
             return null;
         try {
-            InputStream reader = new ByteArrayInputStream(string.getBytes(ClassFinderUtility.OBJECT_ENCODING));//Constants.STRING_ENCODING));
+            InputStream reader = new ByteArrayInputStream(string.getBytes(ClassService.OBJECT_ENCODING));//Constants.STRING_ENCODING));
             ObjectInputStream inStream = new ObjectInputStream(reader);
             Object obj = inStream.readObject();
             reader.close();
@@ -229,7 +230,7 @@ public abstract class BaseClassFinder extends Object
     public BundleService getClassBundleService(String interfaceName, String className)
     {
         try {
-            String filter = "(" + BundleService.PACKAGE_NAME + "=" + ClassFinderUtility.getPackageName(className, true) + ")";
+            String filter = "(" + BundleService.PACKAGE_NAME + "=" + ClassFinderActivator.getPackageName(className, true) + ")";
             if (interfaceName == null)
             	interfaceName = className;
             if (interfaceName == null)
@@ -265,7 +266,7 @@ public abstract class BaseClassFinder extends Object
         }
         else
         {
-        	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderUtility.getPackageName(className, false));
+        	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderActivator.getPackageName(className, false));
         	try {
 	            c = bundle.loadClass(className);
             } catch (ClassNotFoundException e) {
@@ -291,7 +292,7 @@ public abstract class BaseClassFinder extends Object
         }
         else
         {
-        	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderUtility.getPackageName(className, true));
+        	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderActivator.getPackageName(className, true));
             url = bundle.getEntry(className);
         }
         return url;
@@ -330,12 +331,12 @@ public abstract class BaseClassFinder extends Object
         }
         else
         {
-        	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderUtility.getPackageName(baseName, true));
+        	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderActivator.getPackageName(baseName, true));
             if (USE_NO_RESOURCE_HACK)
             {
                 try {
                 	// TODO - If I have to do this, then I will have to link up the resourcebundle using the locales.
-                	baseName = baseName.replace('.', File.separatorChar) + ClassFinderUtility.PROPERTIES;
+                	baseName = baseName.replace('.', File.separatorChar) + ClassFinderActivator.PROPERTIES;
 					URL url = bundle.getEntry(baseName);
 					if (url != null)
 						resourceBundle = new PropertyResourceBundle(url.openStream());
@@ -383,7 +384,7 @@ public abstract class BaseClassFinder extends Object
         // If the repository is not up, but the bundle is deployed, this will find it
         Object resource = this.deployThisResource(dependentBaseBundleClassName, false, false);  // Get the bundle info from the repos
         
-        String packageName = ClassFinderUtility.getPackageName(dependentBaseBundleClassName, false);
+        String packageName = ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false);
         Bundle bundle = this.getBundleFromResource(resource, context, packageName);
         
         if (bundle != null)
@@ -411,7 +412,7 @@ public abstract class BaseClassFinder extends Object
     	// Lame code
     	String dependentBaseBundleClassName = service.getClass().getName();
         Object resource = this.deployThisResource(dependentBaseBundleClassName, false, false);  // Get the bundle info from the repos
-    	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderUtility.getPackageName(dependentBaseBundleClassName, false));
+    	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false));
     	if (bundle != null)
     		if (bundle.getState() == Bundle.ACTIVE)
     		{

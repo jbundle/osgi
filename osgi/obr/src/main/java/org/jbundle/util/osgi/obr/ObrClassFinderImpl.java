@@ -11,7 +11,7 @@ import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
 import org.jbundle.util.osgi.finder.BaseClassFinder;
-import org.jbundle.util.osgi.finder.ClassFinderUtility;
+import org.jbundle.util.osgi.finder.ClassFinderActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -30,7 +30,7 @@ import org.osgi.framework.Version;
 public class ObrClassFinderImpl extends BaseClassFinder
 	implements BundleActivator
 {
-	private ClassFinderUtility cachedClassFinderUtility = null;
+	private ClassFinderActivator cachedClassFinderUtility = null;
 	
     protected RepositoryAdmin repositoryAdmin = null;
 
@@ -158,7 +158,7 @@ public class ObrClassFinderImpl extends BaseClassFinder
      * This call should activate this bundle and start the ClassService.
      * @return
      */
-	public ClassFinderUtility getClassFinderUtility()
+	public ClassFinderActivator getClassFinderUtility()
 	{
 		if (cachedClassFinderUtility != null)
 			return cachedClassFinderUtility;
@@ -173,7 +173,7 @@ public class ObrClassFinderImpl extends BaseClassFinder
 	 * @param waitForStart TODO
 	 * @return The class service or null if it doesn't exist.
 	 */
-	public ClassFinderUtility findClassFinderUtility(boolean waitForStart)
+	public ClassFinderActivator findClassFinderUtility(boolean waitForStart)
 	{
         if (bundleContext == null)
 		{
@@ -182,13 +182,13 @@ public class ObrClassFinderImpl extends BaseClassFinder
 			return null;
 		}
 
-        ClassFinderUtility classFinderUtility = null;
+        ClassFinderActivator classFinderUtility = null;
     	
 		try {
-            ServiceReference[] ref = bundleContext.getServiceReferences(ClassFinderUtility.class.getName(), null);
+            ServiceReference[] ref = bundleContext.getServiceReferences(ClassFinderActivator.class.getName(), null);
 		
 			if ((ref != null) && (ref.length > 0))
-				classFinderUtility =  (ClassFinderUtility)bundleContext.getService(ref[0]);
+				classFinderUtility =  (ClassFinderActivator)bundleContext.getService(ref[0]);
 		} catch (InvalidSyntaxException e) {
 			e.printStackTrace();
 		}
@@ -202,7 +202,7 @@ public class ObrClassFinderImpl extends BaseClassFinder
 			Thread thread = Thread.currentThread();
 			ClassFinderUtilityListener classFinderListener = null;
 			try {
-				bundleContext.addServiceListener(classFinderListener = new ClassFinderUtilityListener(thread, bundleContext), "(" + Constants.OBJECTCLASS + "=" + ClassFinderUtility.class.getName() + ")");
+				bundleContext.addServiceListener(classFinderListener = new ClassFinderUtilityListener(thread, bundleContext), "(" + Constants.OBJECTCLASS + "=" + ClassFinderActivator.class.getName() + ")");
 			} catch (InvalidSyntaxException e) {
 				e.printStackTrace();
 			}
@@ -220,10 +220,10 @@ public class ObrClassFinderImpl extends BaseClassFinder
 			waitingForClassService = false;
 			
 			try {
-				ServiceReference[] ref = bundleContext.getServiceReferences(ClassFinderUtility.class.getName(), null);
+				ServiceReference[] ref = bundleContext.getServiceReferences(ClassFinderActivator.class.getName(), null);
 			
 				if ((ref != null) && (ref.length > 0))
-					classFinderUtility =  (ClassFinderUtility)bundleContext.getService(ref[0]);
+					classFinderUtility =  (ClassFinderActivator)bundleContext.getService(ref[0]);
 			} catch (InvalidSyntaxException e) {
 				e.printStackTrace();
 			}
@@ -250,9 +250,9 @@ public class ObrClassFinderImpl extends BaseClassFinder
     	if (cachedClassFinderUtility != null)
     		return true;	// Already up!
         // If the repository is not up, but the bundle is deployed, this will find it
-        Resource resource = (Resource)this.deployThisResource(ClassFinderUtility.class.getName(), false, false);  // Get the bundle info from the repos
+        Resource resource = (Resource)this.deployThisResource(ClassFinderActivator.class.getName(), false, false);  // Get the bundle info from the repos
         
-        String packageName = ClassFinderUtility.getPackageName(ClassFinderUtility.class.getName(), false);
+        String packageName = ClassFinderActivator.getPackageName(ClassFinderActivator.class.getName(), false);
         Bundle bundle = this.getBundleFromResource(resource, context, packageName);
         
         if (bundle != null)
@@ -285,7 +285,7 @@ public class ObrClassFinderImpl extends BaseClassFinder
     	if (repositoryAdmin == null)
     		return null;
         DataModelHelper helper = repositoryAdmin.getHelper();
-        String packageName = ClassFinderUtility.getPackageName(className, resourceType);
+        String packageName = ClassFinderActivator.getPackageName(className, resourceType);
         if (this.getResourceFromCache(packageName) != null)
         	return this.getResourceFromCache(packageName);
         String filter2 = "(package=" + packageName + ")"; // + "(version=xxx)"

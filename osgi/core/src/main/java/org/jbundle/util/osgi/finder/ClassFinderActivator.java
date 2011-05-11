@@ -2,7 +2,7 @@ package org.jbundle.util.osgi.finder;
 
 import java.io.File;
 
-import org.jbundle.model.osgi.ClassFinder;
+import org.jbundle.util.osgi.ClassFinder;
 import org.jbundle.util.osgi.bundle.BaseBundleService;
 import org.jbundle.util.osgi.bundle.BundleServiceDependentListener;
 import org.jbundle.util.osgi.bundle.BundleStarter;
@@ -18,14 +18,9 @@ import org.osgi.framework.ServiceReference;
  * @author don
  * 
  */
-public final class ClassFinderUtility extends BaseBundleService
+public final class ClassFinderActivator extends BaseBundleService
 	implements BundleActivator
 {
-    /**
-     * The byte to char and back encoding that I use. TODO(don) Move this to shared place
-     */
-    public static final String OBJECT_ENCODING = "ISO-8859-1";
-
     /**
 	 * Good from start to stop.
 	 */
@@ -69,7 +64,7 @@ public final class ClassFinderUtility extends BaseBundleService
     	{	// This bundle was never started, so start it!
     		bundleContext = (BundleContext)context;
     		try {
-    			String dependentBaseBundleClassName = ClassFinderUtility.class.getName();
+    			String dependentBaseBundleClassName = ClassFinderActivator.class.getName();
     			bundleContext.addServiceListener(new BundleServiceDependentListener(null, bundleContext), /*"(&" +*/ "(objectClass=" + dependentBaseBundleClassName + ")");	// This will call startupThisService once the service is up
     	    	new BundleStarter(null, bundleContext, dependentBaseBundleClassName).start();
     		} catch (InvalidSyntaxException e) {
@@ -89,7 +84,7 @@ public final class ClassFinderUtility extends BaseBundleService
     	}
 		if (classFinder == null)
 			if (waitForStart)
-				classFinder = (ClassFinder)ClassFinderUtility.waitForBundleStartup(bundleContext, ClassFinder.class.getName());
+				classFinder = (ClassFinder)ClassFinderActivator.waitForBundleStartup(bundleContext, ClassFinder.class.getName());
 
 		return classFinder;
     }

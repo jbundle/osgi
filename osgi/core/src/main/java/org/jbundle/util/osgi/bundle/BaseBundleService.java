@@ -8,8 +8,9 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.jbundle.model.osgi.BundleService;
-import org.jbundle.util.osgi.finder.ClassFinderUtility;
+import org.jbundle.util.osgi.BundleService;
+import org.jbundle.util.osgi.ClassService;
+import org.jbundle.util.osgi.finder.ClassFinderActivator;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -46,7 +47,7 @@ public class BaseBundleService extends Object
         
         String packageName = this.getProperty(BundleService.PACKAGE_NAME);
         if (packageName == null)
-        	this.setProperty(BundleService.PACKAGE_NAME, packageName = ClassFinderUtility.getPackageName(this.getClass().getName(), false));
+        	this.setProperty(BundleService.PACKAGE_NAME, packageName = ClassFinderActivator.getPackageName(this.getClass().getName(), false));
 
 		String objectClass = this.getProperty(BundleService.INTERFACE);
 		if (objectClass == null)
@@ -136,7 +137,7 @@ public class BaseBundleService extends Object
         if ((string == null) || (string.length() == 0))
             return null;
         try {
-            InputStream reader = new ByteArrayInputStream(string.getBytes(ClassFinderUtility.OBJECT_ENCODING));//Constants.STRING_ENCODING));
+            InputStream reader = new ByteArrayInputStream(string.getBytes(ClassService.OBJECT_ENCODING));//Constants.STRING_ENCODING));
             ObjectInputStream inStream = new ObjectInputStream(reader);
             Object obj = inStream.readObject();
             reader.close();
@@ -154,7 +155,7 @@ public class BaseBundleService extends Object
      */
     public boolean checkDependentServicesAndStartup(BundleContext bundleContext, String dependentBaseBundleClassName)
     {
-    	BaseBundleService bundleService = (BaseBundleService)ClassFinderUtility.getClassFinder(bundleContext, true).getClassBundleService(null, dependentBaseBundleClassName);
+    	BaseBundleService bundleService = (BaseBundleService)ClassFinderActivator.getClassFinder(bundleContext, true).getClassBundleService(null, dependentBaseBundleClassName);
     	if (bundleService != null)
     		return this.startupThisService(bundleService);	// TODO - Synchronization issue
     	// Service has not started, so I need to start it and then listen

@@ -38,7 +38,7 @@
                 org.jbundle.app.test.test.screen.basic;resolution:=optional, -->
             </Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
-            <Bundle-Activator>org.jbundle.util.osgi.finder.ClassFinderUtility</Bundle-Activator>
+            <Bundle-Activator>org.jbundle.util.osgi.finder.ClassFinderActivator</Bundle-Activator>
             <!-- Embed-Dependency>*;scope=compile|runtime;groupId=org.jbundle.res|org.jbundle.thin|org.jbundle.base|mysql</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive -->
           </instructions>
@@ -52,12 +52,6 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope> <!-- This better be provided -->
-    </dependency>
-
-    <dependency>
-      <groupId>org.jbundle</groupId>
-      <artifactId>org.jbundle.model</artifactId>
-      <version>0.7.7-SNAPSHOT</version>
     </dependency>
 </dependencies>
 

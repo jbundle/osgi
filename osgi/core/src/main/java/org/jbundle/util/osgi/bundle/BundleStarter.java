@@ -1,7 +1,7 @@
 package org.jbundle.util.osgi.bundle;
 
 import org.jbundle.util.osgi.finder.BaseClassFinder;
-import org.jbundle.util.osgi.finder.ClassFinderUtility;
+import org.jbundle.util.osgi.finder.ClassFinderActivator;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -23,7 +23,7 @@ public class BundleStarter extends Thread
 	}
 	public void run()
 	{
-		BaseClassFinder classFinder = (BaseClassFinder)ClassFinderUtility.getClassFinder(bundleContext, true);
+		BaseClassFinder classFinder = (BaseClassFinder)ClassFinderActivator.getClassFinder(bundleContext, true);
 		classFinder.startBaseBundle(bundleContext, dependentBaseBundleClassName);
 	}
 }
