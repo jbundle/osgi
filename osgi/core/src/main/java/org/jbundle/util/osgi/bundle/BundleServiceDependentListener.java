@@ -1,5 +1,6 @@
 package org.jbundle.util.osgi.bundle;
 
+import org.jbundle.model.osgi.BundleService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;

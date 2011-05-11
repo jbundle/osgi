@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
-import org.jbundle.util.osgi.bundle.BundleService;
+import org.jbundle.model.osgi.BundleService;
+import org.jbundle.model.osgi.ClassFinder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

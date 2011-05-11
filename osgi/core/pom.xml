@@ -53,6 +53,12 @@
       <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope> <!-- This better be provided -->
     </dependency>
+
+    <dependency>
+      <groupId>org.jbundle</groupId>
+      <artifactId>org.jbundle.model</artifactId>
+      <version>0.7.7-SNAPSHOT</version>
+    </dependency>
 </dependencies>
 
 </project>

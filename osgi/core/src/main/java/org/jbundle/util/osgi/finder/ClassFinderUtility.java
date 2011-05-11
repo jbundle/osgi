@@ -2,6 +2,7 @@ package org.jbundle.util.osgi.finder;
 
 import java.io.File;
 
+import org.jbundle.model.osgi.ClassFinder;
 import org.jbundle.util.osgi.bundle.BaseBundleService;
 import org.jbundle.util.osgi.bundle.BundleServiceDependentListener;
 import org.jbundle.util.osgi.bundle.BundleStarter;

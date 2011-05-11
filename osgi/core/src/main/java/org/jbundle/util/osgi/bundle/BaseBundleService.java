@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.jbundle.model.osgi.BundleService;
 import org.jbundle.util.osgi.finder.ClassFinderUtility;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
