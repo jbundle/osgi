@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URL;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -19,8 +20,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
 
 /**
  * OsgiClassService - Service to find and load bundle classes and resources.
@@ -190,7 +193,7 @@ public abstract class BaseClassFinder extends Object
             }
             else
             {
-            	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderActivator.getPackageName(className, false));
+            	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), null);
 	            object = this.convertStringToObject(string);
             }
         } catch (ClassNotFoundException e) {
@@ -266,7 +269,7 @@ public abstract class BaseClassFinder extends Object
         }
         else
         {
-        	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderActivator.getPackageName(className, false));
+        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), null);
         	try {
 	            c = bundle.loadClass(className);
             } catch (ClassNotFoundException e) {
@@ -292,7 +295,7 @@ public abstract class BaseClassFinder extends Object
         }
         else
         {
-        	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderActivator.getPackageName(className, true));
+        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, true), null);
             url = bundle.getEntry(className);
         }
         return url;
@@ -331,7 +334,7 @@ public abstract class BaseClassFinder extends Object
         }
         else
         {
-        	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderActivator.getPackageName(baseName, true));
+        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(baseName, true), null);
             if (USE_NO_RESOURCE_HACK)
             {
                 try {
@@ -359,14 +362,6 @@ public abstract class BaseClassFinder extends Object
      * @return
      */
     public abstract Object deployThisResource(String className, boolean start, boolean resourceType);
-    /**
-     * Find the currently installed bundle that exports this package.
-     * NOTE: This is stupid, there has to be a way to do this.
-     * @param resource
-     * @param context
-     * @return
-     */
-    public abstract Bundle getBundleFromResource(Object resource, BundleContext context, String packageName);
 
     /**
      * Start up a basebundle service.
@@ -385,7 +380,7 @@ public abstract class BaseClassFinder extends Object
         Object resource = this.deployThisResource(dependentBaseBundleClassName, false, false);  // Get the bundle info from the repos
         
         String packageName = ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false);
-        Bundle bundle = this.getBundleFromResource(resource, context, packageName);
+        Bundle bundle = this.findBundle(resource, context, packageName, null);
         
         if (bundle != null)
         {
@@ -412,7 +407,7 @@ public abstract class BaseClassFinder extends Object
     	// Lame code
     	String dependentBaseBundleClassName = service.getClass().getName();
         Object resource = this.deployThisResource(dependentBaseBundleClassName, false, false);  // Get the bundle info from the repos
-    	Bundle bundle = this.getBundleFromResource(resource, bundleContext, ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false));
+    	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), null);
     	if (bundle != null)
     		if (bundle.getState() == Bundle.ACTIVE)
     		{
@@ -424,7 +419,6 @@ public abstract class BaseClassFinder extends Object
     		}
     }
     
-
     /**
      * Resource cache code.
      * TODO(don) - Need to listen for stopped bundles.
@@ -439,4 +433,90 @@ public abstract class BaseClassFinder extends Object
     	resourceMap.put(packageName, resource);
     }
 
+    /**
+     * Find the currently installed bundle that exports this package.
+     * @param context
+     * @param resource
+     * @return
+     */
+    public Bundle findBundle(Object objResource, BundleContext context, String packageName, String version)
+    {
+        if (context == null)
+            return null;
+        Bundle[] bundles = context.getBundles();
+        Bundle bestBundle = null;
+        Version bestVersion = (version == null) ? null : new Version(version);
+        for (Bundle bundle : bundles)
+        {
+            if (objResource != null)
+            {
+            	if (this.isResourceBundleMatch(objResource, bundle))
+                    return bundle;               
+            }
+            else if (packageName != null)
+            {
+                Dictionary<?, ?> dictionary = bundle.getHeaders();
+                String packages = (String)dictionary.get(Constants.EXPORT_PACKAGE);
+                Version bundleVersion = new Version((String)dictionary.get(Constants.BUNDLE_VERSION));
+                if (packages != null)
+                {
+                    StringBuilder sb = new StringBuilder(packages);
+                    while (true)
+                    {
+                        int start = sb.indexOf("=\"");
+                        if (start == -1)
+                            break;
+                        int end = sb.indexOf("\"", start + 2);
+                        if ((start > -1) && (end > -1))
+                            sb.delete(start, end + 1);
+                        else
+                            break;  // never
+                    }
+                    while (true)
+                    {
+                        int semi = sb.indexOf(";");
+                        if (semi == -1)
+                            break;
+                        int comma = sb.indexOf(",", semi);
+                        if (comma == -1)
+                            comma = sb.length();
+                        else if (sb.charAt(comma + 1) == ' ')
+                            comma++;
+                        if ((semi > -1) && (comma > -1))
+                            sb.delete(semi, comma);
+                        else
+                            break;  // never
+                    }
+                    
+                    String[] packs = sb.toString().split(",");
+                    for (String pack : packs)
+                    {
+                        if (packageName.equals(pack))
+                        {
+                        	if ((bestVersion == null)
+                        		|| ((bestVersion.getMajor() == bundleVersion.getMajor())
+                                	&& (bestVersion.getMinor() == bundleVersion.getMinor())
+                                	&& (bestVersion.getMicro() <= bundleVersion.getMicro())))
+                        	{
+                        		bestBundle = bundle;
+                        		bestVersion = bundleVersion;
+                        	}
+                        }
+                    }
+                }
+            }
+        }
+        
+        return bestBundle;
+    }
+    /**
+     * Is this the same bundle (override this if you use a persistence finder - like obr)
+     * @param objResource
+     * @param bundle
+     * @return
+     */
+    public boolean isResourceBundleMatch(Object objResource, Bundle bundle)
+    {
+    	return false;	// Override this
+    }
 }

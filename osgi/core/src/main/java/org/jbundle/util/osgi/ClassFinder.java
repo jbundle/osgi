@@ -4,6 +4,9 @@ import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+
 
 public interface ClassFinder {
 	
@@ -39,12 +42,28 @@ public interface ClassFinder {
     public Object findResourceConvertStringToObject(String className, String string);
 
     /**
+     * Find the currently installed bundle that exports this package.
+     * @param context
+     * @param version TODO
+     * @param resource
+     * @return
+     */
+    public Bundle findBundle(Object objResource, BundleContext context, String packageName, String version);
+
+    /**
      * Find this class's class access registered class access service in the current workspace.
      * @param interfaceName The registered object name
      * @param className The class name (that has the package that the object was registered under)
      * @return
      */
     public BundleService getClassBundleService(String interfaceName, String className);
+    /**
+     * Find this resource in the repository, then deploy and optionally start it.
+     * @param className
+     * @param options 
+     * @return
+     */
+    public Object deployThisResource(String className, boolean start, boolean resourceType);
     /**
      * Shutdown the bundle for this service.
      * @param service The service object

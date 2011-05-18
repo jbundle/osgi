@@ -253,7 +253,7 @@ public class ObrClassFinderImpl extends BaseClassFinder
         Resource resource = (Resource)this.deployThisResource(ClassFinderActivator.class.getName(), false, false);  // Get the bundle info from the repos
         
         String packageName = ClassFinderActivator.getPackageName(ClassFinderActivator.class.getName(), false);
-        Bundle bundle = this.getBundleFromResource(resource, context, packageName);
+        Bundle bundle = this.findBundle(resource, context, packageName, null);
         
         if (bundle != null)
         {
@@ -328,80 +328,21 @@ public class ObrClassFinderImpl extends BaseClassFinder
     }
     /**
      * Find the currently installed bundle that exports this package.
-     * NOTE: This is stupid, there has to be a way to do this.
      * @param resource
      * @param context
      * @return
      */
-    public Bundle getBundleFromResource(Object objResource, BundleContext context, String packageName)
+    public boolean isResourceBundleMatch(Object objResource, Bundle bundle)
     {
     	Resource resource = (Resource)objResource;
-        if (context == null)
-            return null;
-        Bundle[] bundles = context.getBundles();
-        Bundle bestBundle = null;
-        String bestVersion = null;
-        for (Bundle bundle : bundles)
-        {
-            if (resource != null)
-            {
-                if ((bundle.getSymbolicName().equals(resource.getSymbolicName())) && (compareVersion(bundle, resource)))
-                    return bundle;               
-            }
-            else if (packageName != null)
-            {
-                Dictionary<?, ?> dictionary = bundle.getHeaders();
-                String packages = (String)dictionary.get("Export-Package");
-                String version = (String)dictionary.get("Bundle-Version");
-                if (packages != null)
-                {
-                    StringBuilder sb = new StringBuilder(packages);
-                    while (true)
-                    {
-                        int start = sb.indexOf("=\"");
-                        if (start == -1)
-                            break;
-                        int end = sb.indexOf("\"", start + 2);
-                        if ((start > -1) && (end > -1))
-                            sb.delete(start, end + 1);
-                        else
-                            break;  // never
-                    }
-                    while (true)
-                    {
-                        int semi = sb.indexOf(";");
-                        if (semi == -1)
-                            break;
-                        int comma = sb.indexOf(",", semi);
-                        if (comma == -1)
-                            comma = sb.length();
-                        else if (sb.charAt(comma + 1) == ' ')
-                            comma++;
-                        if ((semi > -1) && (comma > -1))
-                            sb.delete(semi, comma);
-                        else
-                            break;  // never
-                    }
-                    
-                    String[] packs = sb.toString().split(",");
-                    for (String pack : packs)
-                    {
-                        if (packageName.equals(pack))
-                        {
-                        	if ((bestVersion == null)
-                        		|| (bestVersion.compareTo(version) < 0))
-                        	{
-                        		bestBundle = bundle;	// TODO Newest version NO NO NO - Should get requested versions ie., 'x.x.)'
-                        		bestVersion = version;
-                        	}
-                        }
-                    }
-                }
-            }
-        }
-        
-        return bestBundle;
+    	return ((bundle.getSymbolicName().equals(resource.getSymbolicName())) && (compareVersion(bundle, resource)));
     }
+    /**
+     * 
+     * @param bundle
+     * @param resource
+     * @return
+     */
     public boolean compareVersion(Bundle bundle, Resource resource)
     {
     	if (bundle.getVersion().equals(resource.getVersion()))

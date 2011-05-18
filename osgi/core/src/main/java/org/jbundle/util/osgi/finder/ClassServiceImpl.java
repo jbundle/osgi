@@ -29,28 +29,28 @@ public class ClassServiceImpl
 	}
 
 	/**
-	    * Get the Osgi class service.
-	    * NOTE: Don't import this package as the ClassService class may not be available until this service is started.
-	    * @return
-	    */
-	   public static boolean classServiceAvailable = true;
-	   public org.jbundle.util.osgi.ClassFinder getClassFinder()
-	   {
-		   if (!classServiceAvailable)
-			   return null;
-		   try {
-			   Class.forName("org.osgi.framework.BundleActivator");	// This tests to see if osgi exists
-			   return (org.jbundle.util.osgi.ClassFinder)org.jbundle.util.osgi.finder.ClassFinderActivator.getClassFinder(null, true);
-	       } catch (Exception ex) {
-			   classServiceAvailable = false;
-	    	   return null;	// Osgi is not installed
-	       }
-	   }
-	   /**
-	    * Create this object given the class name.
-	 * @param className
-	    * @return
-	    */
+    * Get the Osgi class service.
+    * NOTE: Don't import this package as the ClassService class may not be available until this service is started.
+    * @return
+    */
+    public static boolean classServiceAvailable = true;
+    public org.jbundle.util.osgi.ClassFinder getClassFinder()
+    {
+	    if (!classServiceAvailable)
+	 	   return null;
+	    try {
+		    Class.forName("org.osgi.framework.BundleActivator");	// This tests to see if osgi exists
+		    return (org.jbundle.util.osgi.ClassFinder)org.jbundle.util.osgi.finder.ClassFinderActivator.getClassFinder(null, true);
+        } catch (Exception ex) {
+ 		   classServiceAvailable = false;
+     	   return null;	// Osgi is not installed
+        }
+    }
+    /**
+    * Create this object given the class name.
+    * @param className
+    * @return
+    */
 	   public Object makeObjectFromClassName(String className)
 	   {
 		   return this.makeObjectFromClassName(className, null, true);
