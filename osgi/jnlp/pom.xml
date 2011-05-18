@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>jbundle-util-osgi-reactor</artifactId>
+    <groupId>org.jbundle.util.osgi</groupId>
+    <version>0.7.7-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>org.jbundle.util.osgi.jnlp</artifactId>
+
+	<name>jbundle-util-osgi-jnlp - osgi to jnlp servlet</name>
+	<description>osgi to jnlp servlet</description>
+
+	<packaging>bundle</packaging>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+						<Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+						<Export-Package>${project.artifactId}.*;version=${project.version}</Export-Package>
+						<Import-Package>*;resolution:=optional</Import-Package>
+						<Bundle-Activator>org.jbundle.util.osgi.jnlp.HttpServiceActivator</Bundle-Activator>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.codehaus.mojo.webstart</groupId>
+			<artifactId>webstart-jnlp-servlet</artifactId>
+		</dependency>
+
+	    <dependency>
+		    <groupId>org.jibx.schema.net.java</groupId>
+		    <artifactId>org.jibx.schema.net.java.jnlp_6_0</artifactId>
+		    <version>1.0.0-SNAPSHOT</version>
+	    </dependency>
+
+		<dependency>
+			<groupId>org.jbundle.util.osgi</groupId>
+			<artifactId>org.jbundle.util.osgi</artifactId>
+			<version>0.7.7-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope> <!-- This better be provided -->
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<scope>provided</scope> <!-- This better be provided -->
+		</dependency>
+	</dependencies>
+
+</project>
+

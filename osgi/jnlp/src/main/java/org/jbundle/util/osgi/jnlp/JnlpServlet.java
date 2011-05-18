@@ -1,0 +1,738 @@
+package org.jbundle.util.osgi.jnlp;
+
+import static java.util.jar.JarFile.MANIFEST_NAME;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import jnlp.sample.servlet.JnlpDownloadServlet;
+
+import org.jbundle.util.osgi.ClassFinder;
+import org.jbundle.util.osgi.ClassService;
+import org.jbundle.util.osgi.finder.ClassFinderActivator;
+import org.jbundle.util.osgi.finder.ClassServiceImpl;
+import org.jibx.runtime.BindingDirectory;
+import org.jibx.runtime.IBindingFactory;
+import org.jibx.runtime.IMarshallingContext;
+import org.jibx.runtime.IUnmarshallingContext;
+import org.jibx.runtime.JiBXException;
+import org.jibx.schema.net.java.jnlp_6_0.ApplicationDesc;
+import org.jibx.schema.net.java.jnlp_6_0.Description;
+import org.jibx.schema.net.java.jnlp_6_0.Description.Kind;
+import org.jibx.schema.net.java.jnlp_6_0.Desktop;
+import org.jibx.schema.net.java.jnlp_6_0.Homepage;
+import org.jibx.schema.net.java.jnlp_6_0.Icon;
+import org.jibx.schema.net.java.jnlp_6_0.Information;
+import org.jibx.schema.net.java.jnlp_6_0.J2se;
+import org.jibx.schema.net.java.jnlp_6_0.Jar;
+import org.jibx.schema.net.java.jnlp_6_0.Jar.Download;
+import org.jibx.schema.net.java.jnlp_6_0.Jar.Main;
+import org.jibx.schema.net.java.jnlp_6_0.Jnlp;
+import org.jibx.schema.net.java.jnlp_6_0.Menu;
+import org.jibx.schema.net.java.jnlp_6_0.OfflineAllowed;
+import org.jibx.schema.net.java.jnlp_6_0.Resources;
+import org.jibx.schema.net.java.jnlp_6_0.Resources.Choice;
+import org.jibx.schema.net.java.jnlp_6_0.Security;
+import org.jibx.schema.net.java.jnlp_6_0.Shortcut;
+import org.jibx.schema.net.java.jnlp_6_0.Shortcut.Online;
+import org.jibx.schema.net.java.jnlp_6_0.Title;
+import org.jibx.schema.net.java.jnlp_6_0.Vendor;
+import org.jibx.schema.net.java.jnlp_6_0._Package;
+import org.jibx.schema.net.java.jnlp_6_0._Package.Recursive;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+
+/**
+ * OSGi to Jnlp translation Servlet.
+ * Note: Is it not required that this inherits from JnlpDownloadServlet,
+ * I was hoping to using some of the code, but most of the useful stuff is private.
+ * I do call JnlpDownloadServlet methods if I don't know what to do with the call.
+ * @author don
+ *
+ */
+public class JnlpServlet extends JnlpDownloadServlet {
+	private static final long serialVersionUID = 1L;
+
+    public static final String JNLP_MIME_TYPE = "application/x-java-jnlp-file";
+    public final static String URL_ENCODING = "UTF-8";
+
+    // Servlet params
+    public static final String MAIN_CLASS = "mainClass";
+    public static final String VERSION = "version";
+    public static final String TEMPLATE = "template";
+    
+    BundleContext context = null;
+
+    /**
+     * Constructor.
+     * @param context
+     */
+    public JnlpServlet() {
+    	super();
+    }
+    
+    /**
+     * Constructor.
+     * @param context
+     */
+    public JnlpServlet(BundleContext context) {
+    	this();
+    	init(context);
+    }
+    
+    /**
+     * Constructor.
+     * @param context
+     */
+    public void init(BundleContext context) {
+    	this.context = context;
+    }
+    
+    /**
+     * Main entry point for a web get request.
+     */
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+    	String className = request.getParameter(MAIN_CLASS);
+    	boolean jarFound = false;
+    	if (className != null)
+    		makeJnlp(request, response);
+    	else
+    		jarFound = getJarFile(request, response);
+    	if (!jarFound)
+    		super.doGet(request, response);
+    }
+    
+    /**
+     * Create the jnlp file give the main class name.
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void makeJnlp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+    {
+		ServletContext context = getServletContext();
+
+		response.setContentType(JNLP_MIME_TYPE);
+		PrintWriter writer = response.getWriter();
+		
+	    try {
+			IBindingFactory jc = BindingDirectory.getFactory(Jnlp.class);
+
+			Jnlp jnlp = null;
+			
+			String template = request.getParameter(TEMPLATE);
+			if (template == null)
+				jnlp = new Jnlp();
+			else
+			{
+				URL url = context.getResource(template);
+				InputStream inStream = url.openStream();
+				
+				IUnmarshallingContext unmarshaller = jc.createUnmarshallingContext();
+				jnlp = (Jnlp)unmarshaller.unmarshalDocument(inStream, URL_ENCODING);
+			}
+	
+			setupJnlp(jnlp, request);
+	
+			IMarshallingContext marshaller = jc.createMarshallingContext();
+			marshaller.setIndent(4);
+			marshaller.marshalDocument(jnlp, URL_ENCODING, null, writer);
+		} catch (JiBXException e) {
+			e.printStackTrace();
+		}
+	}
+    
+    /**
+     * Populate the Jnlp xml.
+     * @param jnlp
+     * @param request
+     */
+    protected void setupJnlp(Jnlp jnlp, HttpServletRequest request)
+    {
+    	Set<Bundle> bundles = new HashSet<Bundle>();	// Bundle list
+
+        jnlp.setCodebase(getCodebase(request));
+		jnlp.setHref(getHref(request));
+		
+		setInformation(jnlp);
+    	Security security = new Security();
+    	jnlp.setSecurity(security);
+				
+		setJ2se(jnlp);
+		
+		String mainClass = request.getParameter(MAIN_CLASS);
+		String version = request.getParameter(VERSION);
+		String packageName = ClassFinderActivator.getPackageName(mainClass, false);
+		Bundle bundle = findBundle(packageName, version);
+		addBundle(jnlp, bundle, Main.TRUE);
+		isNewBundle(bundle, bundles);	// Add only once
+		
+		addDependentBundles(jnlp, bundle, bundles);
+		
+		setApplicationDesc(jnlp, mainClass);
+    }
+    
+    /**
+     * Get the codebase from the request path.
+     * @param request
+     * @return
+     */
+    private String getCodebase(HttpServletRequest request)
+    {
+        String urlprefix = getUrlPrefix(request);
+        String respath = request.getRequestURI();
+        if (respath == null)
+        	respath = "";
+        int idx = respath.lastIndexOf('/'); //
+        String codebase = respath.substring(0, idx + 1); // Include /
+        codebase = urlprefix + request.getContextPath() + codebase;
+        return codebase;
+    }
+    
+    /**
+     * Get the jnlp href from the request path.
+     * @param request
+     * @return
+     */
+    private String getHref(HttpServletRequest request)
+    {
+        String respath = request.getRequestURI();
+        if (respath == null)
+        	respath = "";
+        int idx = respath.lastIndexOf('/'); //
+        String href = respath.substring(idx + 1);    // Exclude /
+        href = href + '?' + request.getQueryString();
+        return href;
+    }
+    /**
+     *  This code is heavily inspired by the stuff in HttpUtils.getRequestURL
+     */
+    private String getUrlPrefix(HttpServletRequest req) {
+        StringBuffer url = new StringBuffer();
+        String scheme = req.getScheme();
+        int port = req.getServerPort();
+        url.append(scheme);		// http, https
+        url.append("://");
+        url.append(req.getServerName());
+        if ((scheme.equals("http") && port != 80)
+	    || (scheme.equals("https") && port != 443)) {
+            url.append(':');
+            url.append(req.getServerPort());
+        }
+        return url.toString();
+    }
+
+    /**
+     * Set up the jnlp information fields.
+     * @param jnlp
+     */
+    public void setInformation(Jnlp jnlp)
+	{
+    	if (jnlp.getInformationList() == null)
+    		jnlp.setInformationList(new ArrayList<Information>());
+    	List<Information> informationList = jnlp.getInformationList();
+    	if (informationList.size() == 0)
+    		informationList.add(new Information());
+    	Information information = informationList.get(0);
+    	
+    	Title title = new Title();
+    	title.setTitle("org.jbundle.util.biorhythm.test - Biorhythm jnlp packaging");
+    	information.setTitle(title);
+    	
+    	Vendor vendor = new Vendor();
+    	vendor.setVendor("jbundle.org");
+    	information.setVendor(vendor);
+    	
+    	Homepage homepage = new Homepage();
+    	homepage.setHref("http://www.jbundle.org");
+    	information.setHomepage(homepage);
+    	
+    	if (information.getDescriptionList() == null)
+    		information.setDescriptionList(new ArrayList<Description>());
+    	if (information.getDescriptionList().size() == 0)
+    	{
+	    	Description description = new Description();
+	    	description.setKind(Kind.ONELINE);
+	    	String string = 
+	    		"Biorhythm Theory states that our lives are influenced by a Physical,\n"
+			    + "Emotional, and Intellectual cycle which begin at birth.\n"
+			    + "At birth, all three states start at the critical point and begin to rise\n"
+			    + "to a positive peak, then cycle to a low point.\n"
+			    + "On a day where the cycle crosses the critical point your abilities can vary wildly.";
+	    	description.setString(string);
+	    	information.getDescriptionList().add(description);
+    	}
+    	
+    	if (information.getIconList() == null)
+    		information.setIconList(new ArrayList<Icon>());
+    	if (information.getIconList().size() == 0)
+    	{
+	    	Icon icon = new Icon();
+	    	icon.setHref("images/icons/Bio32.jpg");
+	    	information.getIconList().add(icon);
+    	}
+    	
+    	OfflineAllowed offlineAllowed = new OfflineAllowed();
+    	information.setOfflineAllowed(offlineAllowed);
+    	
+    	Shortcut shortcut = new Shortcut();
+    	shortcut.setOnline(Online.FALSE);
+    	information.setShortcut(shortcut);
+    	Desktop desktop = new Desktop();
+    	shortcut.setDesktop(desktop);
+    	Menu menu = new Menu();
+    	menu.setSubmenu("Biorhythm");
+    	shortcut.setMenu(menu);
+	}
+    
+    /**
+     * Add the j2se lines.
+     * @param jnlp
+     */
+    public void setJ2se(Jnlp jnlp)
+	{
+		Choice choice = getResource(jnlp, true);	// Clear the entries and create a new one
+		J2se j2se = new J2se();
+		choice.setJ2se(j2se);
+		j2se.setVersion("1.6+");
+		j2se.setInitialHeapSize("128m");
+		j2se.setMaxHeapSize("256m");
+	}
+    
+    /**
+     * Call the osgi utility to find the bundle for this package and version.
+     * @param packageName
+     * @param version
+     * @return
+     */
+	public Bundle findBundle(String packageName, String version)
+	{
+		ClassService classService = ClassServiceImpl.getClassService();
+		if (classService == null)
+			return null;	// Never
+		ClassFinder classFinder = classService.getClassFinder();
+		if (classFinder == null)
+			return null;
+		Bundle bundle = classFinder.findBundle(null, context, packageName, version);
+		if (bundle == null)
+		{
+	        Object resource = classFinder.deployThisResource(packageName + ".ClassName", true, false);
+	        if (resource != null)
+	        	bundle = classFinder.findBundle(resource, context, packageName, version);
+		}
+		return bundle;
+	}
+	
+	/**
+	 * Has the bundle been added yet?
+	 * @param bundle
+	 * @param bundles
+	 * @return true If this bundle is not in the cache.
+	 */
+	public boolean isNewBundle(Bundle bundle, Set<Bundle> bundles)
+	{
+		if (bundle == null)
+			return false;
+		return bundles.add(bundle);
+	}
+	
+	/**
+	 * Add this bundle to the jnlp jar and package information.
+	 * @param jnlp
+	 * @param bundle
+	 * @param main
+	 */
+	public void addBundle(Jnlp jnlp, Bundle bundle, Main main)
+	{
+		String name = getBundleProperty(bundle, Constants.BUNDLE_SYMBOLICNAME);
+		String version = getBundleProperty(bundle, Constants.BUNDLE_VERSION);
+		String activationPolicy = getBundleProperty(bundle, Constants.BUNDLE_ACTIVATIONPOLICY);
+		Download download = Constants.ACTIVATION_LAZY.equalsIgnoreCase(activationPolicy) ? Download.LAZY : Download.EAGER;
+		String filename = name + '-' + version + ".jar";
+		String[] packages = moveBundleToJar(bundle, filename);
+		if (main == null)
+			main = Main.FALSE;
+		Jar jar = addJar(jnlp, filename, name, main, download);
+		for (String packageName : packages)
+		{
+			addPackage(jnlp, jar, packageName, Recursive.FALSE);
+		}
+	}
+	
+	/**
+	 * Add all the dependent bundles (of this bundle) to the jar and package list.
+	 * @param jnlp
+	 * @param bundle
+	 * @param bundles
+	 */
+	public void addDependentBundles(Jnlp jnlp, Bundle bundle, Set<Bundle> bundles)
+	{
+		String[] packages = parseHeader(getBundleProperty(bundle, Constants.IMPORT_PACKAGE));
+		for (String packageName : packages)
+		{
+			String properties[] = parseImport(packageName);
+			String version = getVersion(properties);
+			packageName = properties[0];
+			Bundle subBundle = findBundle(packageName, version);
+			if (isNewBundle(subBundle, bundles))
+			{
+				addBundle(jnlp, subBundle, Main.FALSE);
+				addDependentBundles(jnlp, subBundle, bundles);	// Recursive
+			}
+		}
+	}
+	
+	/**
+	 * Get this bundle header property.
+	 * @param bundle
+	 * @param property
+	 * @return
+	 */
+	public static String getBundleProperty(Bundle bundle, String property)
+	{
+		return (String)bundle.getHeaders().get(property);
+	}
+	public static final String MANIFEST_DIR = "META-INF/";
+	public static final String MANIFEST_PATH = MANIFEST_DIR + "MANIFEST.MF";
+	
+	/**
+	 * Create a jar for this bundle and move all the classes to the new jar.
+	 * Note: I followed the same logic as in the java jar tool.
+	 * @param bundle
+	 * @param filename
+	 * @return
+	 */
+	public String[] moveBundleToJar(Bundle bundle, String filename)
+	{
+		Set<String> packages = new HashSet<String>();
+		try {
+			Manifest manifest = null;
+			String path = MANIFEST_PATH;
+			URL url = bundle.getEntry(path);
+			InputStream in = null;
+			if (url != null)
+			{
+				try {
+					in = url.openStream();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			if (in != null)
+			{
+                manifest = new Manifest(new BufferedInputStream(in));
+            } else {
+                manifest = new Manifest();
+            }
+			
+			File fileOut = context.getDataFile(filename);
+			FileOutputStream out = new FileOutputStream(fileOut);
+			
+	        JarOutputStream zos = new JarOutputStream(out);
+	        if (manifest != null) {
+	            JarEntry e = new JarEntry(MANIFEST_DIR);
+	            e.setTime(System.currentTimeMillis());
+	            e.setSize(0);
+	            e.setCrc(0);
+	            zos.putNextEntry(e);
+	            e = new JarEntry(MANIFEST_NAME);
+	            e.setTime(System.currentTimeMillis());
+	            zos.putNextEntry(e);
+	            manifest.write(zos);
+	            zos.closeEntry();
+	        }
+			String paths = "/";
+			String filePattern = "*";
+			@SuppressWarnings("unchecked")
+			Enumeration<URL> entries = bundle.findEntries(paths, filePattern, true);
+			while (entries.hasMoreElements())
+			{
+				url = entries.nextElement();
+				String name = url.getPath();
+				if (name.startsWith("/"))
+					name = name.substring(1);
+    		    name = entryName(name);
+    	        if (name.equals("") || name.equals("."))
+    	            continue;
+    	        if ((name.equalsIgnoreCase(MANIFEST_DIR)) || (name.equalsIgnoreCase(MANIFEST_PATH)))
+            		continue;
+    	        boolean isDir = name.endsWith("/");
+    	        long size = isDir ? 0 : -1; // ***????****  file.length();
+    	        JarEntry e = new JarEntry(name);
+//?    	        e.setTime(file.lastModified());
+    	        if (size == 0) {
+    	            e.setMethod(JarEntry.STORED);
+    	            e.setSize(0);
+    	            e.setCrc(0);
+    	        }
+    	        zos.putNextEntry(e);
+    	        if (!isDir) {
+    		        InputStream inStream = url.openStream();
+    		        copyStream(inStream, zos);
+    	            inStream.close();
+    	        }
+    	        zos.closeEntry();
+
+        		packages.add(getPackageFromName(name));
+			}
+	        zos.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return packages.toArray(EMPTY_ARRAY);
+	}
+	
+	/**
+	 * Very similar to the code in jar tool.
+	 * @param name
+	 * @return
+	 */
+    private String entryName(String name) {
+        name = name.replace(File.separatorChar, '/');
+        String matchPath = "";
+        /* Need to add code to consolidate paths
+        for (String path : paths) {
+            if (name.startsWith(path)
+                && (path.length() > matchPath.length())) {
+                matchPath = path;
+            }
+        }
+        */
+        name = name.substring(matchPath.length());
+
+        if (name.startsWith("/")) {
+            name = name.substring(1);
+        } else if (name.startsWith("./")) {
+            name = name.substring(2);
+        }
+        return name;
+    }
+	public static final String[] EMPTY_ARRAY = new String[0];
+	
+	/**
+	 * Add jar information to jnlp.
+	 * @param jnlp
+	 * @param href
+	 * @param part
+	 * @param main
+	 * @param download
+	 * @return
+	 */
+    public Jar addJar(Jnlp jnlp, String href,String part, Main main, Download download)
+    {
+    	if (main == null)
+    		main = Main.FALSE;
+    	if (download == null)
+    		download = Download.LAZY;
+		Choice choice = getResource(jnlp, false);
+		Jar jar = new Jar();
+		choice.setJar(jar);
+		jar.setHref(href);
+		jar.setPart(part);
+		jar.setDownload(download);
+		jar.setMain(main);
+		return jar;
+    }
+    
+    /**
+     * Add package jnlp entry.
+     * @param jnlp
+     * @param jar
+     * @param packagePath
+     * @param recursive
+     * @return
+     */
+    public _Package addPackage(Jnlp jnlp, Jar jar, String packagePath, Recursive recursive)
+    {
+		Choice choice = getResource(jnlp, false);
+		_Package pack = new _Package();
+		choice.setPackage(pack);
+		pack.setPart(jar.getPart());
+		pack.setName(packagePath);
+		if (recursive == null)
+			recursive = Recursive.FALSE;
+		pack.setRecursive(recursive);
+		return pack;
+    }
+    
+    /**
+     * Set jnlp application description.
+     * @param jnlp
+     * @param mainClass
+     */
+    public void setApplicationDesc(Jnlp jnlp, String mainClass)
+    {
+    	if (jnlp.getApplicationDesc() == null)
+    		jnlp.setApplicationDesc(new ApplicationDesc());
+    	ApplicationDesc applicationDesc = jnlp.getApplicationDesc();
+    	applicationDesc.setMainClass(mainClass);
+    }
+    
+    /**
+     * Create a new resource entry.
+     * @param jnlp
+     * @return
+     */
+    protected Choice getResource(Jnlp jnlp, boolean firstTime)
+    {
+		if (jnlp.getResourceList() == null)
+			jnlp.setResourceList(new ArrayList<Resources>());
+		List<Resources> resourcesList = jnlp.getResourceList();
+		if (resourcesList.size() == 0)
+			resourcesList.add(new Resources());
+		Resources resources = resourcesList.get(0);
+		List<Choice> choiceList = resources.getChoiceList();
+		
+		if (firstTime)
+		for (int i = choiceList.size() - 1; i >= 0; i--)
+		{
+			choiceList.remove(i);
+		}
+		
+		Choice choice = new Choice();
+		choiceList.add(choice);
+		return choice;    	
+    }
+
+    /**
+     * Jnlp is asking for the jar file that I just created, return it.
+     * @param request
+     * @param response
+     * @return
+     * @throws IOException
+     */
+    public boolean getJarFile(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
+    	String path = request.getPathInfo();
+    	if (path == null)
+    		return false;
+    	if (path.startsWith("/"))	// Always
+    		path = path.substring(1);
+
+    	File file = context.getDataFile(path);
+    	if ((file == null) || (!file.exists()))
+    		return false;
+    	InputStream inStream = new FileInputStream(file);
+
+    	ServletOutputStream outStream = response.getOutputStream();
+
+    	copyStream(inStream, outStream);
+    	
+        return true;
+    }
+
+	/**
+	 * Get the package name from the jar entry path.
+	 * @param name
+	 * @return
+	 */
+	public static String getPackageFromName(String name)
+	{
+		if (name.lastIndexOf('/') != -1)
+			name = name.substring(0, name.lastIndexOf('/'));
+		if (name.startsWith("/"))
+			name = name.substring(1);
+		return name.replace('/', '.');		
+	}
+	
+	/**
+	 * Get the version number from the import properties.
+	 * @param properties
+	 * @return
+	 */
+    public static String getVersion(String[] properties)
+    {
+		if (properties.length > 0)
+		{
+			for (String property : properties)
+			{
+				if (property.startsWith(Constants.VERSION_ATTRIBUTE))
+				{
+					String[] props = property.split("\\ |\\[|\\]|\\(|\\)|\\=|\\\"");
+					for (int i = 1; i < props.length; i++)
+					{
+						if (props[i].length() > 0)
+							return props[i];
+					}
+				}
+			}
+		}
+    	return null;
+    }
+    
+    /**
+     * Split the import properties.
+     * @param value
+     * @return
+     */
+    static public String[] parseImport(String value) {
+    	return value.split(";");
+    }
+    
+    /**
+     * Split the import header properties.
+     * @param value
+     * @return
+     */
+    static public String[] parseHeader(String value) {
+
+    	if (value == null)
+    		return EMPTY_ARRAY;
+    	String[] properties = value.split(",");
+    	for (int i = 0; i < properties.length; i++)
+    	{
+    		if (properties[i].indexOf(Constants.VERSION_ATTRIBUTE + "=") != -1)
+    		{	// Version may have been split because it has spaces
+    			for (int j = i + 1; j < properties.length; j++)
+    			{
+    	    		if (!properties[j].endsWith("\""))
+    	    			break;
+	    			properties[i] = properties[i] + "," + properties[j];	// Version	
+	    			properties[j] = "";
+    			}
+    		}
+    	}
+    	return properties;
+    }
+	static final int BUFFER = 2048;
+    public static void copyStream(InputStream inStream, OutputStream outStream)
+    {
+    	byte[] data = new byte[BUFFER];
+        int count;
+        try {
+			while((count = inStream.read(data, 0, BUFFER)) != -1)
+			{
+				outStream.write(data, 0, count);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}    	
+    }
+}
