@@ -73,7 +73,7 @@ import org.osgi.framework.Constants;
  * @author don
  *
  */
-public class JnlpServlet extends JnlpDownloadServlet {
+public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	private static final long serialVersionUID = 1L;
 
     public static final String JNLP_MIME_TYPE = "application/x-java-jnlp-file";
@@ -90,7 +90,7 @@ public class JnlpServlet extends JnlpDownloadServlet {
      * Constructor.
      * @param context
      */
-    public JnlpServlet() {
+    public OsgiJnlpServlet() {
     	super();
     }
     
@@ -98,7 +98,7 @@ public class JnlpServlet extends JnlpDownloadServlet {
      * Constructor.
      * @param context
      */
-    public JnlpServlet(BundleContext context) {
+    public OsgiJnlpServlet(BundleContext context) {
     	this();
     	init(context);
     }
