@@ -445,7 +445,7 @@ public abstract class BaseClassFinder extends Object
             return null;
         Bundle[] bundles = context.getBundles();
         Bundle bestBundle = null;
-        Version bestVersion = (version == null) ? null : new Version(version);
+        Version bestVersion = (version == null) ? null : new Version(version.replace(',', '.'));
         for (Bundle bundle : bundles)
         {
             if (objResource != null)
