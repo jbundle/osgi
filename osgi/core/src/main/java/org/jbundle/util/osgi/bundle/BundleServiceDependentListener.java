@@ -37,9 +37,9 @@ public class BundleServiceDependentListener implements ServiceListener
             Bundle bundle = serviceReference.getBundle();
             BundleContext context = bundle.getBundleContext();
             Object service = context.getService(serviceReference);
-            if (bundleService == null)
-            	if (service instanceof BaseBundleService)
-            		bundleService = (BaseBundleService)service;
+//x            if (bundleService == null)
+//x            	if (service instanceof BaseBundleService)
+//x            		bundleService = (BaseBundleService)service;
 //x            context.removeServiceListener(this);	// Don't need this anymore
             bundleService.startupThisService((BundleService)service);
         }
