@@ -17,9 +17,9 @@ public class RepositoryAdminServiceListener implements ServiceListener
 {
     BundleContext context = null;
     
-    ObrClassFinderImpl classServiceBootstrap = null;
+    ObrClassFinderService classServiceBootstrap = null;
     
-    public RepositoryAdminServiceListener(ObrClassFinderImpl classServiceBootstrap, BundleContext context)
+    public RepositoryAdminServiceListener(ObrClassFinderService classServiceBootstrap, BundleContext context)
     {
         this.context = context;
         this.classServiceBootstrap = classServiceBootstrap;

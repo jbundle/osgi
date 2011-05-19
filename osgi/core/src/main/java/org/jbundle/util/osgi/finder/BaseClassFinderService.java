@@ -31,7 +31,7 @@ import org.osgi.framework.Version;
  * @author don
  * 
  */
-public abstract class BaseClassFinder extends Object
+public abstract class BaseClassFinderService extends Object
 	implements BundleActivator, ClassFinder
 {
 	/**
@@ -43,7 +43,7 @@ public abstract class BaseClassFinder extends Object
      * Service to find resources by class name.
      * Singleton.
      */
-    protected BaseClassFinder()
+    protected BaseClassFinderService()
     {
         super();
     }
@@ -54,7 +54,7 @@ public abstract class BaseClassFinder extends Object
      */
     public void start(BundleContext context) throws Exception
     {
-        System.out.println("Starting and registering the (repository) ClassService");
+        System.out.println("Starting and registering the (repository) " + this.getClass().getName() + " ClassService ");
         
         bundleContext = context;
 
@@ -64,7 +64,7 @@ public abstract class BaseClassFinder extends Object
      * Bundle shutting down.
      */
     public void stop(BundleContext context) throws Exception {
-        System.out.println("Stopping ClassService bundle");
+        System.out.println("Stopping the " + this.getClass().getName() + " ClassService bundle");
         // I'm unregistered automatically
 
         bundleContext = null;

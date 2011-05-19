@@ -87,8 +87,8 @@ public final class ClassFinderActivator extends BaseBundleService
 		if (classFinder == null)
 			if (waitForStart)
 			{
-				classFinder = new NoClassFinderImpl();
-				((NoClassFinderImpl)classFinder).setBundleContext(bundleContext);
+				classFinder = new NoClassFinderService();
+				((NoClassFinderService)classFinder).setBundleContext(bundleContext);
 			}
 
 		return classFinder;

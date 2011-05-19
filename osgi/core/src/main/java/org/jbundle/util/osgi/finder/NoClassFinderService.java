@@ -9,7 +9,7 @@ import org.osgi.framework.BundleActivator;
  * @author don
  * 
  */
-public class NoClassFinderImpl extends BaseClassFinder
+public class NoClassFinderService extends BaseClassFinderService
 	implements BundleActivator
 {
 

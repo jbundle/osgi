@@ -9,7 +9,7 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
-import org.jbundle.util.osgi.finder.BaseClassFinder;
+import org.jbundle.util.osgi.finder.BaseClassFinderService;
 import org.jbundle.util.osgi.finder.ClassFinderActivator;
 import org.jbundle.util.osgi.finder.ClassFinderListener;
 import org.osgi.framework.Bundle;
@@ -27,7 +27,7 @@ import org.osgi.framework.Version;
  * @author don
  * 
  */
-public class ObrClassFinderImpl extends BaseClassFinder
+public class ObrClassFinderService extends BaseClassFinderService
 	implements BundleActivator
 {
 	private ClassFinderActivator cachedClassFinderUtility = null;
@@ -46,8 +46,6 @@ public class ObrClassFinderImpl extends BaseClassFinder
      */
     public void start(BundleContext context) throws Exception
     {
-        System.out.println("Starting ObrClassFinderImpl");
-
         super.start(context);
         repositoryAdmin = this.getRepositoryAdmin(context, this);
         
@@ -63,7 +61,7 @@ public class ObrClassFinderImpl extends BaseClassFinder
      * @return
      * @throws InvalidSyntaxException
      */
-    public RepositoryAdmin getRepositoryAdmin(BundleContext context, ObrClassFinderImpl autoStartNotify) throws InvalidSyntaxException
+    public RepositoryAdmin getRepositoryAdmin(BundleContext context, ObrClassFinderService autoStartNotify) throws InvalidSyntaxException
     {
     	RepositoryAdmin admin = null;
     	
