@@ -34,45 +34,33 @@ public interface ClassService
     * Create this object given the class name.
     * @param className
     * @return
+    * @throws RuntimeException If Error flag is set, return a runtime exception if object can't be created.
     */
-   public Object makeObjectFromClassName(String className, Object task, boolean bErrorIfNotFound);
+   public Object makeObjectFromClassName(String className, boolean bErrorIfNotFound) throws RuntimeException;
    /**
     * Create this object given the class name.
     * @param filepath
     * @return
+    * @throws RuntimeException Not implemented yet
     */
-   public URL getResourceFromPathName(String filepath, Object task, boolean bErrorIfNotFound, URL urlCodeBase, ClassLoader classLoader);
+   public URL getResourceURL(String filepath, URL urlCodeBase, ClassLoader classLoader) throws RuntimeException;
    /**
     * Gets a resource bundle using the specified base name and locale,
-    * @param baseName the base name of the resource bundle, a fully qualified class name
-    * @param locale the locale for which a resource bundle is desired
-    * @exception NullPointerException if <code>baseName</code> or <code>locale</code> is <code>null</code>
-    * @exception MissingResourceException if no resource bundle for the specified base name can be found
-    * @return a resource bundle for the given base name and locale
+ * @param locale the locale for which a resource bundle is desired
+ * @param baseName the base name of the resource bundle, a fully qualified class name
+ * @throws MissingResourceException TODO
+ * @exception NullPointerException if <code>baseName</code> or <code>locale</code> is <code>null</code>
+ * @exception MissingResourceException if no resource bundle for the specified base name can be found
+ * @return a resource bundle for the given base name and locale
     */
-   public ResourceBundle getResourceBundle(String className, Locale locale, Object task, boolean bErrorIfNotFound, ClassLoader classLoader);
+   public ResourceBundle getResourceBundle(String className, Locale locale, ClassLoader classLoader) throws MissingResourceException;
    /**
     * Convert this encoded string back to a Java Object.
     * @param string The string to convert.
     * @return The java object.
+    * @throws RuntimeException TODO
     */
-   public Object convertStringToObject(String string, Object task, boolean bErrorIfNotFound);
-   /**
-    * Convert this encoded string back to a Java Object.
-    * @param string The string to convert.
-    * @return The java object.
-    * @throws ClassNotFoundException 
-    */
-   public Object convertStringToObject(String string)
-   		throws ClassNotFoundException;
-   /**
-    * Handle this error.
-    * @param ex
-    * @param className
-    * @param task
-    * @param bErrorIfNotFound
-    */
-   public void handleClassException(Exception ex, String className, Object task, boolean bErrorIfNotFound);
+   public Object convertStringToObject(String string, boolean bErrorIfNotFound) throws RuntimeException;
    /**
     * Shutdown the bundle for this service.
     * @param service The service object

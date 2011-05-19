@@ -16,14 +16,14 @@ public interface ClassFinder {
      * @param className
      * @return The class definition or null if not found.
      */
-    public Class<?> findClassBundle(String className);
+    public Class<?> findClass(String className);
     /**
      * Find, resolve, and return this resource's URL.
      * Static convenience method.
      * @param className
      * @return The class definition or null if not found.
      */
-    public URL findBundleResource(String className);
+    public URL findResourceURL(String className);
     /**
      * Find, resolve, and return this ResourceBundle.
      * Static convenience method.
@@ -39,7 +39,7 @@ public interface ClassFinder {
      * @param string The string to convert.
      * @return The java object.
      */
-    public Object findResourceConvertStringToObject(String className, String string);
+    public Object findConvertStringToObject(String className, String string);
 
     /**
      * Find the currently installed bundle that exports this package.

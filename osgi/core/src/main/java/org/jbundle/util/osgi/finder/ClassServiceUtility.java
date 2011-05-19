@@ -56,14 +56,14 @@ implements ClassService
      */
     public Object makeObjectFromClassName(String className)
     {
-        return this.makeObjectFromClassName(className, null, true);
+        return this.makeObjectFromClassName(className, false);
     }
     /**
      * Create this object given the class name.
      * @param className
      * @return
      */
-    public Object makeObjectFromClassName(String className, Object task, boolean bErrorIfNotFound)
+    public Object makeObjectFromClassName(String className, boolean bErrorIfNotFound) throws RuntimeException
     {
         if (className == null)
             return null;
@@ -74,9 +74,10 @@ implements ClassService
             clazz = Class.forName(className);
         } catch (ClassNotFoundException e) {
             if (this.getClassFinder(null, true) != null)
-                clazz = this.getClassFinder(null, true).findClassBundle(className);	// Try to find this class in the obr repos
+                clazz = this.getClassFinder(null, true).findClass(className);	// Try to find this class in the obr repos
             if (clazz == null)
-                this.handleClassException(e, className, task, bErrorIfNotFound);
+                if (bErrorIfNotFound)
+                    throw new RuntimeException(e.getMessage());
         }
 
         Object object = null;
@@ -84,29 +85,23 @@ implements ClassService
             if (clazz != null)
                 object = clazz.newInstance();
         } catch (InstantiationException e)   {
-            this.handleClassException(e, className, task, bErrorIfNotFound);
+            if (bErrorIfNotFound)
+                throw new RuntimeException(e.getMessage());
         } catch (IllegalAccessException e)   {
-            this.handleClassException(e, className, task, bErrorIfNotFound);
+            if (bErrorIfNotFound)
+                throw new RuntimeException(e.getMessage());
         } catch (Exception e) {
-            this.handleClassException(e, className, task, bErrorIfNotFound);
+            if (bErrorIfNotFound)
+                throw new RuntimeException(e.getMessage());
         }
         return object;
-    }
-    /**
-     * Shutdown the bundle for this service.
-     * @param service The service object
-     */
-    public void shutdownService(Object service)
-    {
-        if (this.getClassFinder(null, true) != null)
-            this.getClassFinder(null, true).shutdownService(service);	// Shutdown the bundle for this service
     }
     /**
      * Create this object given the class name.
      * @param filepath
      * @return
      */
-    public URL getResourceFromPathName(String filepath, Object task, boolean bErrorIfNotFound, URL urlCodeBase, ClassLoader classLoader)
+    public URL getResourceURL(String filepath, URL urlCodeBase, ClassLoader classLoader) throws RuntimeException
     {
         if (filepath == null)
             return null;
@@ -121,9 +116,7 @@ implements ClassService
         if (url == null)
         {
             if (this.getClassFinder(null, true) != null)
-                url = this.getClassFinder(null, true).findBundleResource(filepath);	// Try to find this class in the obr repos
-            if (url == null)
-                this.handleClassException(null, filepath, task, bErrorIfNotFound);
+                url = this.getClassFinder(null, true).findResourceURL(filepath);	// Try to find this class in the obr repos
         }
 
         if (url == null)
@@ -142,13 +135,13 @@ implements ClassService
     }
     /**
      * Gets a resource bundle using the specified base name and locale,
-     * @param baseName the base name of the resource bundle, a fully qualified class name
      * @param locale the locale for which a resource bundle is desired
+     * @param baseName the base name of the resource bundle, a fully qualified class name
      * @exception NullPointerException if <code>baseName</code> or <code>locale</code> is <code>null</code>
      * @exception MissingResourceException if no resource bundle for the specified base name can be found
      * @return a resource bundle for the given base name and locale
      */
-    public final ResourceBundle getResourceBundle(String className, Locale locale, Object task, boolean bErrorIfNotFound, ClassLoader classLoader)
+    public final ResourceBundle getResourceBundle(String className, Locale locale, ClassLoader classLoader) throws MissingResourceException
     {
         MissingResourceException ex = null;
         ResourceBundle resourceBundle = null;
@@ -166,8 +159,6 @@ implements ClassService
             } catch (MissingResourceException e) {
                 ex = e;
             }
-            if (resourceBundle == null)
-                this.handleClassException(null, className, task, bErrorIfNotFound);	// May throw MissingResourceException
         }
 
         if (resourceBundle == null)
@@ -182,7 +173,7 @@ implements ClassService
      * @param string The string to convert.
      * @return The java object.
      */
-    public Object convertStringToObject(String string, Object task, boolean bErrorIfNotFound)
+    public Object convertStringToObject(String string, boolean bErrorIfNotFound) throws RuntimeException
     {
         if (string == null)
             return null;
@@ -198,10 +189,11 @@ implements ClassService
                 int endClass = e.getMessage().indexOf('\'', startClass);
                 if (endClass != -1)
                     className = e.getMessage().substring(startClass, endClass);
-                object = this.getClassFinder(null, true).findResourceConvertStringToObject(className, string);	// Try to find this class in the obr repos
+                object = this.getClassFinder(null, true).findConvertStringToObject(className, string);	// Try to find this class in the obr repos
             }
             if (object == null)
-                this.handleClassException(e, null, task, bErrorIfNotFound);
+                if (bErrorIfNotFound)
+                    throw new RuntimeException(e.getMessage());
         }
 
         return object;
@@ -213,8 +205,8 @@ implements ClassService
      * @return The java object.
      * @throws ClassNotFoundException 
      */
-    public Object convertStringToObject(String string)
-    throws ClassNotFoundException
+    private Object convertStringToObject(String string)
+        throws ClassNotFoundException
     {
         if ((string == null) || (string.length() == 0))
             return null;
@@ -229,31 +221,6 @@ implements ClassService
             ex.printStackTrace();   // Never
         }
         return null;
-    }
-    /**
-     * 
-     * @param ex
-     * @param className
-     * @param task
-     * @param bErrorIfNotFound
-     */
-    public void handleClassException(Exception ex, String className, Object task, boolean bErrorIfNotFound)
-    {
-        if (bErrorIfNotFound)
-        {
-            if (ex != null)
-                ex.printStackTrace();
-            this.setLastError("Error on create class: " + className);
-        }
-    }
-    private String lastError = null;
-    void setLastError(String error)
-    {
-        lastError = error;
-    }
-    public String getLastError()
-    {
-        return lastError;
     }
     /**
      * If class name starts with '.' append base package.
@@ -280,5 +247,13 @@ implements ClassService
             }
         return strClass;
     }	
+    /**
+     * Shutdown the bundle for this service.
+     * @param service The service object
+     */
+    public void shutdownService(Object service)
+    {
+        if (this.getClassFinder(null, true) != null)
+            this.getClassFinder(null, true).shutdownService(service);   // Shutdown the bundle for this service
+    }
 }
-

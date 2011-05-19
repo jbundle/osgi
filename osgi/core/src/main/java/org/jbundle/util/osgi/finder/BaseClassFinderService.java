@@ -74,7 +74,7 @@ public abstract class BaseClassFinderService extends Object
      * @param className
      * @return The class definition or null if not found.
      */
-    public Class<?> findClassBundle(String className)
+    public Class<?> findClass(String className)
     {
         //if (ClassServiceBootstrap.repositoryAdmin == null)
         //    return null;
@@ -98,7 +98,7 @@ public abstract class BaseClassFinderService extends Object
      * @param className
      * @return The class definition or null if not found.
      */
-    public URL findBundleResource(String className)
+    public URL findResourceURL(String className)
     {
         //if (ClassServiceBootstrap.repositoryAdmin == null)
         //    return null;
@@ -157,17 +157,17 @@ public abstract class BaseClassFinderService extends Object
      * @param string The string to convert.
      * @return The java object.
      */
-    public Object findResourceConvertStringToObject(String className, String string)
+    public Object findConvertStringToObject(String className, String string)
     {
-    	Object object = this.getResourceConvertStringToObject(null, className, string);
+    	Object object = this.convertStringToObject(null, className, string);
 
         if (object == null) {
             Object resource = this.deployThisResource(className, true, false);
             if (resource != null)
             {
-            	object = this.getResourceConvertStringToObject(null, className, string);	// It is possible that the newly started bundle registered itself
+            	object = this.convertStringToObject(null, className, string);	// It is possible that the newly started bundle registered itself
             	if (object == null)
-            		object = this.getResourceConvertStringToObject(resource, className, string);
+            		object = this.convertStringToObject(resource, className, string);
             }
         }
 
@@ -179,7 +179,7 @@ public abstract class BaseClassFinderService extends Object
      * @param string The string to convert.
      * @return The java object.
      */
-    public Object getResourceConvertStringToObject(Object resource, String className, String string)
+    public Object convertStringToObject(Object resource, String className, String string)
     {
         if ((string == null) || (string.length() == 0))
             return null;
@@ -193,7 +193,7 @@ public abstract class BaseClassFinderService extends Object
             }
             else
             {
-            	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), null);
+            	/*Bundle bundle =*/ this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), null);
 	            object = this.convertStringToObject(string);
             }
         } catch (ClassNotFoundException e) {
@@ -208,7 +208,7 @@ public abstract class BaseClassFinderService extends Object
      * @return The java object.
      * @throws ClassNotFoundException 
      */
-    public Object convertStringToObject(String string)
+    private Object convertStringToObject(String string)
     	throws ClassNotFoundException
     {
         if ((string == null) || (string.length() == 0))
