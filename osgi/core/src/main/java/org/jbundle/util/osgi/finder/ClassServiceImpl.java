@@ -41,9 +41,12 @@ public class ClassServiceImpl
 	    try {
 		    Class.forName("org.osgi.framework.BundleActivator");	// This tests to see if osgi exists
 		    return (org.jbundle.util.osgi.ClassFinder)org.jbundle.util.osgi.finder.ClassFinderActivator.getClassFinder(null, true);
+        } catch (ClassNotFoundException ex) {
+  		   classServiceAvailable = false;	// Osgi is not installed, no need to keep trying
+      	   return null;
         } catch (Exception ex) {
- 		   classServiceAvailable = false;
-     	   return null;	// Osgi is not installed
+        	ex.printStackTrace();
+     	   return null;
         }
     }
     /**
