@@ -1,7 +1,6 @@
 package org.jbundle.util.osgi.obr;
 
 import java.io.File;
-import java.util.Dictionary;
 
 import org.apache.felix.bundlerepository.DataModelHelper;
 import org.apache.felix.bundlerepository.Reason;
@@ -12,7 +11,7 @@ import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
 import org.jbundle.util.osgi.finder.BaseClassFinder;
 import org.jbundle.util.osgi.finder.ClassFinderActivator;
-import org.jbundle.util.osgi.finder.ClassFinderUtilityListener;
+import org.jbundle.util.osgi.finder.ClassFinderListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -201,9 +200,9 @@ public class ObrClassFinderImpl extends BaseClassFinder
 			waitingForClassService = true;
 			// TODO Minor synchronization issue here
 			Thread thread = Thread.currentThread();
-			ClassFinderUtilityListener classFinderListener = null;
+			ClassFinderListener classFinderListener = null;
 			try {
-				bundleContext.addServiceListener(classFinderListener = new ClassFinderUtilityListener(thread, bundleContext), "(" + Constants.OBJECTCLASS + "=" + ClassFinderActivator.class.getName() + ")");
+				bundleContext.addServiceListener(classFinderListener = new ClassFinderListener(thread, bundleContext), "(" + Constants.OBJECTCLASS + "=" + ClassFinderActivator.class.getName() + ")");
 			} catch (InvalidSyntaxException e) {
 				e.printStackTrace();
 			}
