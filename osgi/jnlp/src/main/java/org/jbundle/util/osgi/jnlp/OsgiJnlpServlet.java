@@ -38,6 +38,7 @@ import org.jibx.runtime.IBindingFactory;
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.JiBXException;
+import org.jibx.schema.net.java.jnlp_6_0.AppletDesc;
 import org.jibx.schema.net.java.jnlp_6_0.ApplicationDesc;
 import org.jibx.schema.net.java.jnlp_6_0.Description;
 import org.jibx.schema.net.java.jnlp_6_0.Description.Kind;
@@ -45,10 +46,10 @@ import org.jibx.schema.net.java.jnlp_6_0.Desktop;
 import org.jibx.schema.net.java.jnlp_6_0.Homepage;
 import org.jibx.schema.net.java.jnlp_6_0.Icon;
 import org.jibx.schema.net.java.jnlp_6_0.Information;
-import org.jibx.schema.net.java.jnlp_6_0.J2se;
 import org.jibx.schema.net.java.jnlp_6_0.Jar;
 import org.jibx.schema.net.java.jnlp_6_0.Jar.Download;
 import org.jibx.schema.net.java.jnlp_6_0.Jar.Main;
+import org.jibx.schema.net.java.jnlp_6_0.Java;
 import org.jibx.schema.net.java.jnlp_6_0.Jnlp;
 import org.jibx.schema.net.java.jnlp_6_0.Menu;
 import org.jibx.schema.net.java.jnlp_6_0.OfflineAllowed;
@@ -81,6 +82,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 
     // Servlet params
     public static final String MAIN_CLASS = "mainClass";
+    public static final String APPLET_CLASS = "appletClass";
     public static final String VERSION = "version";
     public static final String TEMPLATE = "template";
     
@@ -116,9 +118,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-    	String className = request.getParameter(MAIN_CLASS);
     	boolean jarFound = false;
-    	if (className != null)
+    	if ((request.getParameter(MAIN_CLASS) != null) || (request.getParameter(APPLET_CLASS) != null))
     		makeJnlp(request, response);
     	else
     		jarFound = getJarFile(request, response);
@@ -176,25 +177,29 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     {
     	Set<Bundle> bundles = new HashSet<Bundle>();	// Bundle list
 
-        jnlp.setCodebase(getCodebase(request));
-		jnlp.setHref(getHref(request));
-		
-		setInformation(jnlp);
-    	Security security = new Security();
-    	jnlp.setSecurity(security);
-				
-		setJ2se(jnlp);
-		
-		String mainClass = request.getParameter(MAIN_CLASS);
+		String mainClass = (request.getParameter(MAIN_CLASS) != null) ? request.getParameter(MAIN_CLASS) : request.getParameter(APPLET_CLASS);
 		String version = request.getParameter(VERSION);
 		String packageName = ClassFinderActivator.getPackageName(mainClass, false);
 		Bundle bundle = findBundle(packageName, version);
+
+		jnlp.setCodebase(getCodebase(request));
+		jnlp.setHref(getHref(request));
+		
+		setInformation(jnlp, bundle, request);
+    	Security security = new Security();
+    	jnlp.setSecurity(security);
+				
+		setJ2se(jnlp, bundle, request);
+		
 		addBundle(jnlp, bundle, Main.TRUE);
 		isNewBundle(bundle, bundles);	// Add only once
 		
 		addDependentBundles(jnlp, bundle, bundles);
 		
-		setApplicationDesc(jnlp, mainClass);
+		if (request.getParameter(MAIN_CLASS) != null)
+			setApplicationDesc(jnlp, mainClass);
+		else
+			setAppletDesc(jnlp, mainClass);
     }
     
     /**
@@ -251,7 +256,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      * Set up the jnlp information fields.
      * @param jnlp
      */
-    public void setInformation(Jnlp jnlp)
+    public void setInformation(Jnlp jnlp, Bundle bundle, HttpServletRequest request)
 	{
     	if (jnlp.getInformationList() == null)
     		jnlp.setInformationList(new ArrayList<Information>());
@@ -261,15 +266,32 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	Information information = informationList.get(0);
     	
     	Title title = new Title();
-    	title.setTitle("org.jbundle.util.biorhythm.test - Biorhythm jnlp packaging");
+    	if (getRequestParam(request, "title", null) != null)
+    		title.setTitle(getRequestParam(request, "title", null));
+    	else if (getBundleProperty(bundle, Constants.BUNDLE_NAME) != null)
+    		title.setTitle(getBundleProperty(bundle, Constants.BUNDLE_NAME));
+    	else if (getBundleProperty(bundle, Constants.BUNDLE_SYMBOLICNAME) != null)
+    		title.setTitle(getBundleProperty(bundle, Constants.BUNDLE_SYMBOLICNAME));
+    	else
+    		title.setTitle("Jnlp Application");
     	information.setTitle(title);
     	
     	Vendor vendor = new Vendor();
-    	vendor.setVendor("jbundle.org");
+    	if (getRequestParam(request, "vendor", null) != null)
+        	vendor.setVendor(getRequestParam(request, "vendor", null));
+    	else if (getBundleProperty(bundle, Constants.BUNDLE_VENDOR) != null)
+    		vendor.setVendor(getBundleProperty(bundle, Constants.BUNDLE_VENDOR));
+    	else
+    		vendor.setVendor("jbundle.org");
     	information.setVendor(vendor);
     	
     	Homepage homepage = new Homepage();
-    	homepage.setHref("http://www.jbundle.org");
+    	if (getRequestParam(request, "homePage", null) != null)
+    		homepage.setHref(getRequestParam(request, "homePage", null));
+    	else if (getBundleProperty(bundle, Constants.BUNDLE_DOCURL) != null)
+    		homepage.setHref(getBundleProperty(bundle, Constants.BUNDLE_DOCURL));
+    	else
+    		homepage.setHref("http://www.jbundle.org");
     	information.setHomepage(homepage);
     	
     	if (information.getDescriptionList() == null)
@@ -278,13 +300,12 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	{
 	    	Description description = new Description();
 	    	description.setKind(Kind.ONELINE);
-	    	String string = 
-	    		"Biorhythm Theory states that our lives are influenced by a Physical,\n"
-			    + "Emotional, and Intellectual cycle which begin at birth.\n"
-			    + "At birth, all three states start at the critical point and begin to rise\n"
-			    + "to a positive peak, then cycle to a low point.\n"
-			    + "On a day where the cycle crosses the critical point your abilities can vary wildly.";
-	    	description.setString(string);
+	    	if (getRequestParam(request, "description", null) != null)
+	    		description.setString(getRequestParam(request, "description", null));
+	    	else if (getBundleProperty(bundle, Constants.BUNDLE_DESCRIPTION) != null)
+	    		description.setString(getBundleProperty(bundle, Constants.BUNDLE_DESCRIPTION));
+	    	else
+	    		description.setString("Jnlp Application");
 	    	information.getDescriptionList().add(description);
     	}
     	
@@ -293,7 +314,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	if (information.getIconList().size() == 0)
     	{
 	    	Icon icon = new Icon();
-	    	icon.setHref("images/icons/Bio32.jpg");
+	    	icon.setHref(getRequestParam(request, "icon", "images/icons/jbundle32.jpg"));
 	    	information.getIconList().add(icon);
     	}
     	
@@ -301,27 +322,37 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	information.setOfflineAllowed(offlineAllowed);
     	
     	Shortcut shortcut = new Shortcut();
-    	shortcut.setOnline(Online.FALSE);
+    	if (Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter("online")))
+    		shortcut.setOnline(Online.TRUE);
+    	else
+    		shortcut.setOnline(Online.FALSE);	// Default
     	information.setShortcut(shortcut);
-    	Desktop desktop = new Desktop();
-    	shortcut.setDesktop(desktop);
-    	Menu menu = new Menu();
-    	menu.setSubmenu("Biorhythm");
-    	shortcut.setMenu(menu);
+    	if (Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter("desktop")))
+    	{
+    		Desktop desktop = new Desktop();
+    		shortcut.setDesktop(desktop);
+    	}
+    	String menuItem = getRequestParam(request, "menu", null);
+    	if (menuItem != null)
+    	{
+	    	Menu menu = new Menu();
+	    	menu.setSubmenu(menuItem);
+	    	shortcut.setMenu(menu);
+    	}
 	}
     
     /**
      * Add the j2se lines.
      * @param jnlp
      */
-    public void setJ2se(Jnlp jnlp)
+    public void setJ2se(Jnlp jnlp, Bundle bundle, HttpServletRequest request)
 	{
 		Choice choice = getResource(jnlp, true);	// Clear the entries and create a new one
-		J2se j2se = new J2se();
-		choice.setJ2se(j2se);
-		j2se.setVersion("1.6+");
-		j2se.setInitialHeapSize("128m");
-		j2se.setMaxHeapSize("256m");
+		Java java = new Java();
+		choice.setJava(java);
+		java.setVersion(getRequestParam(request, "javaVersion", "1.6+"));
+		java.setInitialHeapSize(getRequestParam(request, "initialHeapSize", "128m"));
+		java.setMaxHeapSize(getRequestParam(request, "maxHeapSize", "256m"));
 	}
     
     /**
@@ -497,8 +528,9 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	            inStream.close();
     	        }
     	        zos.closeEntry();
-
-        		packages.add(getPackageFromName(name));
+    	        
+    	        if (!(name.toUpperCase().startsWith(MANIFEST_DIR)))
+    	        		packages.add(getPackageFromName(name));
 			}
 	        zos.close();
 		} catch (FileNotFoundException e) {
@@ -593,6 +625,19 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     		jnlp.setApplicationDesc(new ApplicationDesc());
     	ApplicationDesc applicationDesc = jnlp.getApplicationDesc();
     	applicationDesc.setMainClass(mainClass);
+    }
+    
+    /**
+     * Set jnlp applet description.
+     * @param jnlp
+     * @param mainClass
+     */
+    public void setAppletDesc(Jnlp jnlp, String mainClass)
+    {
+    	if (jnlp.getAppletDesc() == null)
+    		jnlp.setAppletDesc(new AppletDesc());
+    	AppletDesc appletDesc = jnlp.getAppletDesc();
+    	appletDesc.setMainClass(mainClass);
     }
     
     /**
@@ -735,4 +780,13 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 			e.printStackTrace();
 		}    	
     }
+
+    public static String getRequestParam(HttpServletRequest request, String param, String defaultValue)
+    {
+    	String value = request.getParameter(param);
+    	if (value == null)
+    		return defaultValue;
+    	return value;
+    }
+    
 }
