@@ -24,8 +24,11 @@ public class ClassFinderListener  implements ServiceListener
     public void serviceChanged(ServiceEvent event)
     {
         if (event.getType() == ServiceEvent.REGISTERED)
-        {   // Class finder came up 
-        	thread.notify();
+        {   // Class finder came up
+        	synchronized (thread)
+        	{
+        		thread.notify();
+        	}
         }
         if (event.getType() == ServiceEvent.UNREGISTERING)
         {
