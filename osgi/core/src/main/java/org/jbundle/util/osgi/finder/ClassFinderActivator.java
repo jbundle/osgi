@@ -34,8 +34,6 @@ public final class ClassFinderActivator extends BaseBundleService
      */
     public void start(BundleContext context) throws Exception
     {
-        System.out.println("Starting and registering the ClassFinderUtility");
-        
         bundleContext = context;
 
         super.start(context);
@@ -44,7 +42,6 @@ public final class ClassFinderActivator extends BaseBundleService
      * Bundle shutting down.
      */
     public void stop(BundleContext context) throws Exception {
-        System.out.println("Stopping ClassFinderUtility bundle");
         // I'm unregistered automatically
         
         super.stop(context);
@@ -84,7 +81,8 @@ public final class ClassFinderActivator extends BaseBundleService
     	}
 		if (classFinder == null)
 			if (waitForStart)
-				classFinder = (ClassFinder)ClassFinderActivator.waitForBundleStartup(bundleContext, ClassFinder.class.getName());
+				if (bundleContext != null)
+					classFinder = (ClassFinder)ClassFinderActivator.waitForBundleStartup(bundleContext, ClassFinder.class.getName());
 
 		return classFinder;
     }

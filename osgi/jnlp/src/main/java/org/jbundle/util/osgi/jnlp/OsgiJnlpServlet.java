@@ -366,7 +366,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 		ClassService classService = ClassServiceImpl.getClassService();
 		if (classService == null)
 			return null;	// Never
-		ClassFinder classFinder = classService.getClassFinder();
+		ClassFinder classFinder = classService.getClassFinder(context, true);
 		if (classFinder == null)
 			return null;
 		Bundle bundle = classFinder.findBundle(null, context, packageName, version);
