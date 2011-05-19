@@ -32,7 +32,7 @@ import jnlp.sample.servlet.JnlpDownloadServlet;
 import org.jbundle.util.osgi.ClassFinder;
 import org.jbundle.util.osgi.ClassService;
 import org.jbundle.util.osgi.finder.ClassFinderActivator;
-import org.jbundle.util.osgi.finder.ClassServiceImpl;
+import org.jbundle.util.osgi.finder.ClassServiceUtility;
 import org.jibx.runtime.BindingDirectory;
 import org.jibx.runtime.IBindingFactory;
 import org.jibx.runtime.IMarshallingContext;
@@ -363,7 +363,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      */
 	public Bundle findBundle(String packageName, String version)
 	{
-		ClassService classService = ClassServiceImpl.getClassService();
+		ClassService classService = ClassServiceUtility.getClassService();
 		if (classService == null)
 			return null;	// Never
 		ClassFinder classFinder = classService.getClassFinder(context, true);

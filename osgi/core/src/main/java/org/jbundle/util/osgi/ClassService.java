@@ -19,8 +19,8 @@ public interface ClassService
    /**
     * Get the Osgi class service.
     * NOTE: Don't import this package as the ClassService class may not be available until this service is started.
- * @param context TODO
- * @param waitForStart TODO
+    * @param context TODO
+    * @param waitForStart TODO
     * @return
     */
    public ClassFinder getClassFinder(Object context, boolean waitForStart);
@@ -36,11 +36,6 @@ public interface ClassService
     * @return
     */
    public Object makeObjectFromClassName(String className, Object task, boolean bErrorIfNotFound);
-   /**
-    * Shutdown the bundle for this service.
-    * @param service The service object
-    */
-   public void shutdownService(Object service);
    /**
     * Create this object given the class name.
     * @param filepath
@@ -71,11 +66,16 @@ public interface ClassService
    public Object convertStringToObject(String string)
    		throws ClassNotFoundException;
    /**
-    * 
+    * Handle this error.
     * @param ex
     * @param className
     * @param task
     * @param bErrorIfNotFound
     */
    public void handleClassException(Exception ex, String className, Object task, boolean bErrorIfNotFound);
+   /**
+    * Shutdown the bundle for this service.
+    * @param service The service object
+    */
+   public void shutdownService(Object service);
 }
