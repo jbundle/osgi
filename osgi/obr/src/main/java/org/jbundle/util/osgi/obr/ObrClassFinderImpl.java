@@ -12,6 +12,7 @@ import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
 import org.jbundle.util.osgi.finder.BaseClassFinder;
 import org.jbundle.util.osgi.finder.ClassFinderActivator;
+import org.jbundle.util.osgi.finder.ClassFinderUtilityListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

@@ -1,4 +1,4 @@
-package org.jbundle.util.osgi.obr;
+package org.jbundle.util.osgi.finder;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
