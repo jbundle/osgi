@@ -10,8 +10,8 @@
     <version>0.7.7-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.jbundle.util.osgi.obr</artifactId>
-  <name>jbundle-util-osgi-obr - obr bundle retrieval</name>
+  <artifactId>org.jbundle.util.osgi.p2</artifactId>
+  <name>jbundle-util-osgi-p2 - p2 bundle retrieval (Not finished)</name>
   <packaging>bundle</packaging>
 
  <build>
@@ -27,15 +27,8 @@
             <Export-Package>${project.artifactId}.*;version=${project.version}</Export-Package>
             <Import-Package>
                 *;resolution:=optional,
-            <!-- Note: These are some of the possible classes that will be created by the ClassService
-              Remove them only after your have converted them to services
-            	org.jbundle.base.db.jdbc;resolution:=optional,       Class.createInstance() looks up bundle in obr
-                org.jbundle.main.schedule.app;resolution:=optional,  Trx message listener creates JobSchedulerApp
-                org.jbundle.main.msg.process;resolution:=optional,      Process runner task creates MessageTimeoutProcess
-                org.jbundle.main.msg.app;resolution:=optional,
-                org.jbundle.base.field.event;resolution:=optional, -->
             </Import-Package>
-            <Bundle-Activator>org.jbundle.util.osgi.obr.ObrClassFinderService</Bundle-Activator>
+            <Bundle-Activator>org.jbundle.util.osgi.obr.P2ClassFinderService</Bundle-Activator>
             <!-- Embed-Dependency>*;scope=compile|runtime;groupId=org.jbundle.res|org.jbundle.thin|org.jbundle.base|mysql</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive -->
           </instructions>
@@ -55,11 +48,6 @@
       <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope> <!-- This better be provided -->
     </dependency>
-	<dependency>
-   		<groupId>org.apache.felix</groupId>
-   		<artifactId>org.apache.felix.bundlerepository</artifactId>
-        <scope>provided</scope> <!-- This better be provided -->
-	</dependency>
 </dependencies>
 
 </project>

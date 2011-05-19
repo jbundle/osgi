@@ -13,11 +13,12 @@
   <artifactId>jbundle-util-osgi-reactor</artifactId>
 
   <packaging>pom</packaging>
-  <name>jbundle-thin-base-util-osgi-reactor</name>
+  <name>jbundle-util-osgi-reactor</name>
 
   <modules>
     <module>core</module>
     <module>obr</module>
+    <module>p2</module>
     <module>jnlp</module>
   </modules>
 </project>

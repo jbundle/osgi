@@ -86,9 +86,13 @@ public final class ClassFinderActivator extends BaseBundleService
 
 		if (classFinder == null)
 			if (waitForStart)
-			{
+			{	// Start up the 'no persistent storage' service.
 				classFinder = new NoClassFinderService();
-				((NoClassFinderService)classFinder).setBundleContext(bundleContext);
+				try {	// Note: this does not start the service, it only registers it as a service.
+					((NoClassFinderService)classFinder).start(bundleContext);
+				} catch (Exception e) {
+					e.printStackTrace();	// Never
+				}
 			}
 
 		return classFinder;

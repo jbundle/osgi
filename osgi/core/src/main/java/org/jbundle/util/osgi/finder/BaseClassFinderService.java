@@ -519,9 +519,5 @@ public abstract class BaseClassFinderService extends Object
     {
     	return false;	// Override this
     }
-    
-    public void setBundleContext(BundleContext context)
-    {
-    	this.bundleContext = context;
-    }
+
 }

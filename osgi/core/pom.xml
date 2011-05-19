@@ -11,7 +11,7 @@
   </parent>
 
   <artifactId>org.jbundle.util.osgi</artifactId>
-  <name>jbundle-util-osgi - osgi core code</name>
+  <name>jbundle-util-osgi - base bundle retrieval</name>
   <packaging>bundle</packaging>
 
  <build>
@@ -28,7 +28,7 @@
             <Import-Package>
                 *;resolution:=optional,
             <!-- Note: These are some of the possible classes that will be created by the ClassService
-              Remove them only after your have converted them to services -->
+              Remove them only after you have converted them to services -->
             <!--	org.jbundle.base.db.jdbc;resolution:=optional,       Class.createInstance() looks up bundle in obr -->
              <!--    org.jbundle.main.schedule.app;resolution:=optional, Trx message listener creates JobSchedulerApp -->
              <!--     org.jbundle.main.msg.process;resolution:=optional,    Process runner task creates MessageTimeoutProcess -->
