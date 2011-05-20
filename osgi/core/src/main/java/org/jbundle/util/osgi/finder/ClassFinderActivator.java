@@ -50,7 +50,7 @@ public final class ClassFinderActivator extends BaseBundleService
     }
     
     /**
-     * Find this class's class access registered class access service in the current workspace.
+     * Find this class's class access service in the current workspace.
      * @param waitForStart TODO
      * @param className
      * @return
@@ -58,15 +58,8 @@ public final class ClassFinderActivator extends BaseBundleService
     public static ClassFinder getClassFinder(Object context, boolean waitForStart)
     {
     	if ((bundleContext == null) && (context != null))
-    	{	// This bundle was never started, so start it!
+    	{	// This bundle was never started, that's okay. Use this bundle context
     		bundleContext = (BundleContext)context;
-    		try {
-    			String dependentBaseBundleClassName = ClassFinderActivator.class.getName();
-    			bundleContext.addServiceListener(new BundleServiceDependentListener(null, bundleContext), /*"(&" +*/ "(objectClass=" + dependentBaseBundleClassName + ")");	// This will call startupThisService once the service is up
-    	    	new BundleStarter(null, bundleContext, dependentBaseBundleClassName).start();
-    		} catch (InvalidSyntaxException e) {
-    			e.printStackTrace();
-    		}
     	}
     	if ((classFinder == null) && (bundleContext != null))
     	{
@@ -88,7 +81,7 @@ public final class ClassFinderActivator extends BaseBundleService
 			if (waitForStart)
 			{	// Start up the 'no persistent storage' service.
 				classFinder = new NoClassFinderService();
-				try {	// Note: this does not start the service, it only registers it as a service.
+				try {	// Note: this does not start the service, but it does registers it as a service.
 					((NoClassFinderService)classFinder).start(bundleContext);
 				} catch (Exception e) {
 					e.printStackTrace();	// Never
@@ -150,11 +143,11 @@ public final class ClassFinderActivator extends BaseBundleService
 			e.printStackTrace();
 		}
 
-		// Wait a minute for the ClassService to come up while the activator starts this service
+		// Wait a 30 seconds for the ClassService to come up while the activator starts this service
 		synchronized (thread)
 		{
 			try {
-				thread.wait(60000);
+				thread.wait(30000);
 			} catch (InterruptedException ex) {
 				ex.printStackTrace();
 			}
