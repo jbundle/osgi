@@ -7,23 +7,30 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.SimpleTimeZone;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -78,7 +85,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	private static final long serialVersionUID = 1L;
 
     public static final String JNLP_MIME_TYPE = "application/x-java-jnlp-file";
-    public final static String URL_ENCODING = "UTF-8";
+    public final static String OUTPUT_ENCODING = "UTF-8";
 
     // Servlet params
     public static final String MAIN_CLASS = "mainClass";
@@ -87,6 +94,13 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public static final String TEMPLATE = "template";
     
     BundleContext context = null;
+
+    enum Changes {
+        UNKNOWN,
+        NONE,
+        PARTIAL,
+        ALL
+    };
 
     /**
      * Constructor.
@@ -137,9 +151,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public void makeJnlp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
 		ServletContext context = getServletContext();
-
 		response.setContentType(JNLP_MIME_TYPE);
-		PrintWriter writer = response.getWriter();
 		
 	    try {
 			IBindingFactory jc = BindingDirectory.getFactory(Jnlp.class);
@@ -155,25 +167,97 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 				InputStream inStream = url.openStream();
 				
 				IUnmarshallingContext unmarshaller = jc.createUnmarshallingContext();
-				jnlp = (Jnlp)unmarshaller.unmarshalDocument(inStream, URL_ENCODING);
+				jnlp = (Jnlp)unmarshaller.unmarshalDocument(inStream, OUTPUT_ENCODING);
 			}
-	
-			setupJnlp(jnlp, request);
-	
-			IMarshallingContext marshaller = jc.createMarshallingContext();
-			marshaller.setIndent(4);
-			marshaller.marshalDocument(jnlp, URL_ENCODING, null, writer);
+			
+			boolean forceScanBundle = !getJnlpFile(request).exists();
+			Changes bundleChanged = setupJnlp(jnlp, request, forceScanBundle);
+            if (bundleChanged == Changes.UNKNOWN)
+            {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);   // Return a 'file not found' error
+                return;
+            }
+			if (!forceScanBundle)
+			    if (bundleChanged == Changes.PARTIAL)
+			        setupJnlp(jnlp, request, true);  // Need to rescan everything
+            if (bundleChanged == Changes.NONE)
+            {   // Note: It may seem better to listen for bundle changes, but actually webstart uses the cached jnlp file
+                if (checkCache(request, response, getJnlpFile(request)))
+                    return;   // Returned the cached jnlp or a cache up-to-date response
+            }
+            // If bundleChanged == Changes.ALL need to return the new jnlp
+			
+            IMarshallingContext marshaller = jc.createMarshallingContext();
+            marshaller.setIndent(4);
+
+            File cacheFile = getJnlpFile(request);
+			Writer fileWriter = new FileWriter(cacheFile);
+            marshaller.marshalDocument(jnlp, OUTPUT_ENCODING, null, fileWriter);   // Cache jnlp
+            fileWriter.close();
+            Date lastModified = new Date(cacheFile.lastModified());
+            response.addHeader(LAST_MODIFIED, getHttpDate(lastModified));
+            
+            PrintWriter writer = response.getWriter();
+            marshaller.marshalDocument(jnlp, OUTPUT_ENCODING, null, writer);
 		} catch (JiBXException e) {
 			e.printStackTrace();
 		}
 	}
-    
+    /**
+     * Return http response that the cache is up-to-date.
+     * @param request
+     * @param response
+     * @return
+     * @throws IOException
+     */
+    public boolean checkCache(HttpServletRequest request, HttpServletResponse response, File file) throws IOException
+    {
+        String requestIfModifiedSince = request.getHeader(IF_MODIFIED_SINCE);
+        Date lastModified = new Date(file.lastModified());
+        try {
+            if(requestIfModifiedSince!=null){
+                Date requestDate = getDateFromHttpDate(requestIfModifiedSince);
+                if (file != null)
+                    if (!requestDate.before(lastModified))
+                    {   // Not modified since last time
+                        response.setHeader(LAST_MODIFIED, request.getHeader(IF_MODIFIED_SINCE));
+                        response.sendError(HttpServletResponse.SC_NOT_MODIFIED);
+                        return true;    // Success - use your cached copy
+                    }
+            }
+        } catch (ParseException e) {
+            // Fall through
+        }
+        // If they want it again, send them my cached copy
+        if ((file == null) || (!file.exists()))
+            return false;   // Error - cache doesn't exist
+        response.addHeader(LAST_MODIFIED, getHttpDate(lastModified));
+        
+        InputStream inStream = new FileInputStream(file);
+        OutputStream writer = response.getOutputStream();
+        copyStream(inStream, writer);
+        inStream.close();
+        writer.close();
+        return true;    // Success - I returned the cached copy
+    }
+    /**
+     * Get the jnlp cache file name.
+     * @param request
+     * @return
+     */
+    protected File getJnlpFile(HttpServletRequest request)
+    {
+        String query = getCodebase(request) + '/' + getHref(request) + '?' + request.getQueryString();
+        String hash = Integer.toString(query.hashCode()).replace('-', 'a') + ".jnlp";
+        return context.getDataFile(hash);
+    }
     /**
      * Populate the Jnlp xml.
      * @param jnlp
      * @param request
+     * @param forceScanBundle Scan the bundle for package names even if the cache is current
      */
-    protected void setupJnlp(Jnlp jnlp, HttpServletRequest request)
+    protected Changes setupJnlp(Jnlp jnlp, HttpServletRequest request, boolean forceScanBundle)
     {
     	Set<Bundle> bundles = new HashSet<Bundle>();	// Bundle list
 
@@ -191,15 +275,17 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 				
 		setJ2se(jnlp, bundle, request);
 		
-		addBundle(jnlp, bundle, Main.TRUE);
+		Changes bundleChanged = Changes.UNKNOWN;
+		bundleChanged = addBundle(jnlp, bundle, Main.TRUE, forceScanBundle, bundleChanged);
 		isNewBundle(bundle, bundles);	// Add only once
 		
-		addDependentBundles(jnlp, bundle, bundles);
-		
+		bundleChanged = addDependentBundles(jnlp, bundle, bundles, forceScanBundle, bundleChanged);
+		    
 		if (request.getParameter(MAIN_CLASS) != null)
 			setApplicationDesc(jnlp, mainClass);
 		else
 			setAppletDesc(jnlp, mainClass);
+		return bundleChanged;
     }
     
     /**
@@ -397,15 +483,19 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	 * @param jnlp
 	 * @param bundle
 	 * @param main
+	 * @param forceScanBundle Scan the bundle for package names even if the cache is current
+	 * @return true if the bundle has changed from last time
 	 */
-	public void addBundle(Jnlp jnlp, Bundle bundle, Main main)
+	public Changes addBundle(Jnlp jnlp, Bundle bundle, Main main, boolean forceScanBundle, Changes bundleChanged)
 	{
 		String name = getBundleProperty(bundle, Constants.BUNDLE_SYMBOLICNAME);
 		String version = getBundleProperty(bundle, Constants.BUNDLE_VERSION);
 		String activationPolicy = getBundleProperty(bundle, Constants.BUNDLE_ACTIVATIONPOLICY);
 		Download download = Constants.ACTIVATION_LAZY.equalsIgnoreCase(activationPolicy) ? Download.LAZY : Download.EAGER;
 		String filename = name + '-' + version + ".jar";
-		String[] packages = moveBundleToJar(bundle, filename);
+		String[] packages = moveBundleToJar(bundle, filename, forceScanBundle);
+		if (packages == null) // No changes on this bundle
+	        return (bundleChanged == Changes.NONE || bundleChanged == Changes.UNKNOWN) ? Changes.NONE : Changes.PARTIAL;
 		if (main == null)
 			main = Main.FALSE;
 		Jar jar = addJar(jnlp, filename, name, main, download);
@@ -413,6 +503,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 		{
 			addPackage(jnlp, jar, packageName, Recursive.FALSE);
 		}
+        return (bundleChanged == Changes.ALL || bundleChanged == Changes.UNKNOWN) ? Changes.ALL : Changes.PARTIAL;
 	}
 	
 	/**
@@ -420,8 +511,10 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	 * @param jnlp
 	 * @param bundle
 	 * @param bundles
+	 * @param forceScanBundle Scan the bundle for package names even if the cache is current
+     * @return true if the bundle has changed from last time
 	 */
-	public void addDependentBundles(Jnlp jnlp, Bundle bundle, Set<Bundle> bundles)
+	public Changes addDependentBundles(Jnlp jnlp, Bundle bundle, Set<Bundle> bundles, boolean forceScanBundle, Changes bundleChanged)
 	{
 		String[] packages = parseHeader(getBundleProperty(bundle, Constants.IMPORT_PACKAGE));
 		for (String packageName : packages)
@@ -432,10 +525,11 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 			Bundle subBundle = findBundle(packageName, version);
 			if (isNewBundle(subBundle, bundles))
 			{
-				addBundle(jnlp, subBundle, Main.FALSE);
-				addDependentBundles(jnlp, subBundle, bundles);	// Recursive
+				bundleChanged = addBundle(jnlp, subBundle, Main.FALSE, forceScanBundle, bundleChanged);
+				bundleChanged = addDependentBundles(jnlp, subBundle, bundles, forceScanBundle, bundleChanged);	// Recursive
 			}
 		}
+		return bundleChanged;
 	}
 	
 	/**
@@ -456,47 +550,62 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	 * Note: I followed the same logic as in the java jar tool.
 	 * @param bundle
 	 * @param filename
-	 * @return
+	 * @param forceScanBundle Scan the bundle for package names even if the cache is current
+	 * @return All the package names in the bundle or null if I am using the cached jar.
 	 */
-	public String[] moveBundleToJar(Bundle bundle, String filename)
+	public static int ONE_SEC_IN_MS = 1000;
+	public String[] moveBundleToJar(Bundle bundle, String filename, boolean forceScanBundle)
 	{
-		Set<String> packages = new HashSet<String>();
+        File fileOut = context.getDataFile(filename);
+        boolean createNewJar = true;
+        if (fileOut.exists())
+            if (bundle.getLastModified() <= (fileOut.lastModified() + ONE_SEC_IN_MS))   // File sys is usually accurate to sec 
+            {
+                createNewJar = false;
+                if (!forceScanBundle)
+                    return null;    // Use cached jar file
+            }
+        
+        Set<String> packages = new HashSet<String>();
 		try {
 			Manifest manifest = null;
 			String path = MANIFEST_PATH;
 			URL url = bundle.getEntry(path);
-			InputStream in = null;
-			if (url != null)
+			JarOutputStream zos = null;
+			if (createNewJar)
 			{
-				try {
-					in = url.openStream();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+    			InputStream in = null;
+    			if (url != null)
+    			{
+    				try {
+    					in = url.openStream();
+    				} catch (Exception e) {
+    					e.printStackTrace();
+    				}
+    			}
+    			if (in != null)
+    			{
+                    manifest = new Manifest(new BufferedInputStream(in));
+                } else {
+                    manifest = new Manifest();
+                }
+    			
+    			FileOutputStream out = new FileOutputStream(fileOut);
+    			
+    	        zos = new JarOutputStream(out);
+    	        if (manifest != null) {
+    	            JarEntry e = new JarEntry(MANIFEST_DIR);
+    	            e.setTime(System.currentTimeMillis());
+    	            e.setSize(0);
+    	            e.setCrc(0);
+    	            zos.putNextEntry(e);
+    	            e = new JarEntry(MANIFEST_NAME);
+    	            e.setTime(System.currentTimeMillis());
+    	            zos.putNextEntry(e);
+    	            manifest.write(zos);
+    	            zos.closeEntry();
+    	        }
 			}
-			if (in != null)
-			{
-                manifest = new Manifest(new BufferedInputStream(in));
-            } else {
-                manifest = new Manifest();
-            }
-			
-			File fileOut = context.getDataFile(filename);
-			FileOutputStream out = new FileOutputStream(fileOut);
-			
-	        JarOutputStream zos = new JarOutputStream(out);
-	        if (manifest != null) {
-	            JarEntry e = new JarEntry(MANIFEST_DIR);
-	            e.setTime(System.currentTimeMillis());
-	            e.setSize(0);
-	            e.setCrc(0);
-	            zos.putNextEntry(e);
-	            e = new JarEntry(MANIFEST_NAME);
-	            e.setTime(System.currentTimeMillis());
-	            zos.putNextEntry(e);
-	            manifest.write(zos);
-	            zos.closeEntry();
-	        }
 			String paths = "/";
 			String filePattern = "*";
 			@SuppressWarnings("unchecked")
@@ -512,27 +621,31 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	            continue;
     	        if ((name.equalsIgnoreCase(MANIFEST_DIR)) || (name.equalsIgnoreCase(MANIFEST_PATH)))
             		continue;
-    	        boolean isDir = name.endsWith("/");
-    	        long size = isDir ? 0 : -1; // ***????****  file.length();
-    	        JarEntry e = new JarEntry(name);
-//?    	        e.setTime(file.lastModified());
-    	        if (size == 0) {
-    	            e.setMethod(JarEntry.STORED);
-    	            e.setSize(0);
-    	            e.setCrc(0);
+    	        if (createNewJar)
+    	        {
+        	        boolean isDir = name.endsWith("/");
+        	        long size = isDir ? 0 : -1; // ***????****  file.length();
+        	        JarEntry e = new JarEntry(name);
+        	        e.setTime(fileOut.lastModified()); //???
+        	        if (size == 0) {
+        	            e.setMethod(JarEntry.STORED);
+        	            e.setSize(0);
+        	            e.setCrc(0);
+        	        }
+        	        zos.putNextEntry(e);
+        	        if (!isDir) {
+        		        InputStream inStream = url.openStream();
+        		        copyStream(inStream, zos);
+        	            inStream.close();
+        	        }
+        	        zos.closeEntry();
     	        }
-    	        zos.putNextEntry(e);
-    	        if (!isDir) {
-    		        InputStream inStream = url.openStream();
-    		        copyStream(inStream, zos);
-    	            inStream.close();
-    	        }
-    	        zos.closeEntry();
     	        
     	        if (!(name.toUpperCase().startsWith(MANIFEST_DIR)))
     	        		packages.add(getPackageFromName(name));
 			}
-	        zos.close();
+			if (zos != null)
+			    zos.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -683,14 +796,11 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 
     	File file = context.getDataFile(path);
     	if ((file == null) || (!file.exists()))
+    	{  // Don't return a 404, try to read the file using JnlpDownloadServlet
+//            response.sendError(HttpServletResponse.SC_NOT_FOUND);   // Return a 'file not found' error
     		return false;
-    	InputStream inStream = new FileInputStream(file);
-
-    	ServletOutputStream outStream = response.getOutputStream();
-
-    	copyStream(inStream, outStream);
-    	
-        return true;
+    	}
+    	return this.checkCache(request, response, file);
     }
 
 	/**
@@ -789,4 +899,20 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	return value;
     }
     
+    private static SimpleDateFormat httpDateFormat = null;
+    static {
+        httpDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+        httpDateFormat.setCalendar(Calendar.getInstance(new SimpleTimeZone(0, "GMT")));
+    }
+     
+    public synchronized static String getHttpDate(Date date){
+    return httpDateFormat.format(date);
+    }
+     
+    public synchronized static Date getDateFromHttpDate(String date) throws ParseException{
+    return httpDateFormat.parse(date);
+    }
+    public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+    public static final String LAST_MODIFIED = "Last-Modified";
+     
 }
