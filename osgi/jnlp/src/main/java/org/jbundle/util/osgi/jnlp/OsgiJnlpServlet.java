@@ -151,7 +151,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
     	boolean fileFound = false;
-    	if ((request.getParameter(MAIN_CLASS) != null) || (request.getParameter(APPLET_CLASS) != null))
+    	if (isJnlp(request))
     		makeJnlp(request, response);
     	else
     	    fileFound = getJarFile(request, response);
@@ -159,6 +159,20 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	    fileFound = getResourceFile(request, response);
         if (!fileFound)
     		super.doGet(request, response);
+    }
+    
+    /**
+     * Is the a url for jnlp?
+     * @param request
+     * @return
+     */
+    public boolean isJnlp(HttpServletRequest request)
+    {
+        if ((request.getParameter(MAIN_CLASS) != null) || (request.getParameter(APPLET_CLASS) != null))
+            if (!request.getRequestURI().toUpperCase().endsWith(".HTML"))
+                if (!request.getRequestURI().toUpperCase().endsWith(".HTM"))
+                    return true;
+        return false;
     }
     
     /**
