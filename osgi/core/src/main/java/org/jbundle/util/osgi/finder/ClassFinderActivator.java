@@ -55,6 +55,16 @@ public final class ClassFinderActivator extends BaseBundleService
      * @param className
      * @return
      */
+    public static void setClassFinder(ClassFinder classFinder)
+    {
+        ClassFinderActivator.classFinder = classFinder;
+    }
+    /**
+     * Find this class's class access service in the current workspace.
+     * @param waitForStart TODO
+     * @param className
+     * @return
+     */
     public static ClassFinder getClassFinder(Object context, boolean waitForStart)
     {
     	if ((bundleContext == null) && (context != null))
@@ -143,11 +153,11 @@ public final class ClassFinderActivator extends BaseBundleService
 			e.printStackTrace();
 		}
 
-		// Wait a 30 seconds for the ClassService to come up while the activator starts this service
+		// Wait a 15 seconds for the ClassService to come up while the activator starts this service
 		synchronized (thread)
 		{
 			try {
-				thread.wait(30000);
+				thread.wait(15000);
 			} catch (InterruptedException ex) {
 				ex.printStackTrace();
 			}

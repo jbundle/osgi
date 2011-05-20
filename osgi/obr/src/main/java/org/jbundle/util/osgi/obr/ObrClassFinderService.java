@@ -11,7 +11,6 @@ import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
 import org.jbundle.util.osgi.finder.BaseClassFinderService;
 import org.jbundle.util.osgi.finder.ClassFinderActivator;
-import org.jbundle.util.osgi.finder.ClassFinderListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -30,8 +29,6 @@ import org.osgi.framework.Version;
 public class ObrClassFinderService extends BaseClassFinderService
 	implements BundleActivator
 {
-	private ClassFinderActivator cachedClassFinderUtility = null;
-	
     protected RepositoryAdmin repositoryAdmin = null;
 
     /**
@@ -149,7 +146,7 @@ public class ObrClassFinderService extends BaseClassFinderService
         repositoryAdmin = null;
         waitingForRepositoryAdmin = false;
         waitingForClassService = false;
-        cachedClassFinderUtility = null;
+        ClassFinderActivator.setClassFinder(null);
     }
     /**
      * Convenience method to start the class finder utility service.
@@ -160,10 +157,7 @@ public class ObrClassFinderService extends BaseClassFinderService
      */
     public boolean startClassFinderActivator(BundleContext context)
     {
-    	if (cachedClassFinderUtility != null)
-    		return true;	// Never
-    	cachedClassFinderUtility = findClassFinderActivator(false);	// See if someone else started it up
-    	if (cachedClassFinderUtility != null)
+    	if (ClassFinderActivator.getClassFinder(context, false) == this)
     		return true;	// Already up!
         // If the repository is not up, but the bundle is deployed, this will find it
         Resource resource = (Resource)this.deployThisResource(ClassFinderActivator.class.getName(), false, false);  // Get the bundle info from the repos
@@ -182,92 +176,10 @@ public class ObrClassFinderService extends BaseClassFinderService
                     e.printStackTrace();
                 }
             }
-            cachedClassFinderUtility = getClassFinderActivator();	// This will wait until it is active to return
-            return (cachedClassFinderUtility != null);	// Success
+            ClassFinderActivator.setClassFinder(this);
+            return true;	// Success
         }
         return false;	// Error! Where is my bundle?
-    }
-    /**
-     * Get the class service.
-     * This call should activate this bundle and start the ClassService.
-     * @return
-     */
-    public ClassFinderActivator getClassFinderActivator()
-    {
-        if (cachedClassFinderUtility != null)
-            return cachedClassFinderUtility;
-
-        // First time or not running, try to find the class service
-        cachedClassFinderUtility = findClassFinderActivator(true);
-        
-        return cachedClassFinderUtility;
-    }
-    /**
-     * Get the class service.
-     * @param waitForStart TODO
-     * @return The class service or null if it doesn't exist.
-     */
-    public ClassFinderActivator findClassFinderActivator(boolean waitForStart)
-    {
-        if (bundleContext == null)
-        {
-            System.out.println("Error: ClassFinderActivator was never started\n" + 
-                    "Add it as your bundle activator");
-            return null;
-        }
-
-        ClassFinderActivator classFinderUtility = null;
-        
-        try {
-            ServiceReference[] ref = bundleContext.getServiceReferences(ClassFinderActivator.class.getName(), null);
-        
-            if ((ref != null) && (ref.length > 0))
-                classFinderUtility =  (ClassFinderActivator)bundleContext.getService(ref[0]);
-        } catch (InvalidSyntaxException e) {
-            e.printStackTrace();
-        }
-
-        if (classFinderUtility == null)
-            if (waitForStart)
-                if (waitingForClassService == false)
-        {
-            waitingForClassService = true;
-            // TODO Minor synchronization issue here
-            Thread thread = Thread.currentThread();
-            ClassFinderListener classFinderListener = null;
-            try {
-                bundleContext.addServiceListener(classFinderListener = new ClassFinderListener(thread, bundleContext), "(" + Constants.OBJECTCLASS + "=" + ClassFinderActivator.class.getName() + ")");
-            } catch (InvalidSyntaxException e) {
-                e.printStackTrace();
-            }
-
-            // Wait a minute for the ClassService to come up while the activator starts this service
-            synchronized (thread)
-            {
-                try {
-                    thread.wait(60000);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            bundleContext.removeServiceListener(classFinderListener);
-            waitingForClassService = false;
-            
-            try {
-                ServiceReference[] ref = bundleContext.getServiceReferences(ClassFinderActivator.class.getName(), null);
-            
-                if ((ref != null) && (ref.length > 0))
-                    classFinderUtility =  (ClassFinderActivator)bundleContext.getService(ref[0]);
-            } catch (InvalidSyntaxException e) {
-                e.printStackTrace();
-            }
-
-            if (classFinderUtility == null)
-                System.out.println("The ClassService never started - \n" +
-                    "Include the bootstrap code in your bundle and make sure it is listed as an activator!");
-        }
-
-        return classFinderUtility;
     }
     /**
      * Find this resource in the repository, then deploy and optionally start it.
