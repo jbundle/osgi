@@ -105,6 +105,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public static final String JAVA_VERSION = "javaVersion";
     public static final String INITIAL_HEAP_SIZE = "initialHeapSize";
     public static final String MAX_HEAP_SIZE = "maxHeapSize";
+    public static final String WIDTH = "width";
+    public static final String HEIGHT = "height";
 
     // Deploy param
     public static final String CONTEXT_PATH = "jbundle.jnlp.contextpath";
@@ -265,7 +267,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      */
     protected File getJnlpFile(HttpServletRequest request)
     {
-        String query = getCodebase(request) + '/' + getHref(request) + '?' + request.getQueryString();
+        String query = getCodebase(request) + getHref(request) + '?' + request.getQueryString();
         String hash = Integer.toString(query.hashCode()).replace('-', 'a') + ".jnlp";
         return context.getDataFile(hash);
     }
@@ -302,7 +304,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 		if (request.getParameter(MAIN_CLASS) != null)
 			setApplicationDesc(jnlp, mainClass);
 		else
-			setAppletDesc(jnlp, mainClass);
+			setAppletDesc(jnlp, mainClass, bundle, request);
 		return bundleChanged;
     }
     
@@ -763,12 +765,24 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      * @param jnlp
      * @param mainClass
      */
-    public void setAppletDesc(Jnlp jnlp, String mainClass)
+    public void setAppletDesc(Jnlp jnlp, String mainClass, Bundle bundle, HttpServletRequest request)
     {
+        String name = null;
+        if (getRequestParam(request, TITLE, null) != null)
+            name = getRequestParam(request, TITLE, null);
+        else if (getBundleProperty(bundle, Constants.BUNDLE_NAME) != null)
+            name = getBundleProperty(bundle, Constants.BUNDLE_NAME);
+        else if (getBundleProperty(bundle, Constants.BUNDLE_SYMBOLICNAME) != null)
+            name = getBundleProperty(bundle, Constants.BUNDLE_SYMBOLICNAME);
+        else
+            name = "Jnlp Application";
     	if (jnlp.getAppletDesc() == null)
     		jnlp.setAppletDesc(new AppletDesc());
     	AppletDesc appletDesc = jnlp.getAppletDesc();
     	appletDesc.setMainClass(mainClass);
+    	appletDesc.setName(name);
+    	appletDesc.setWidth((request.getParameter(WIDTH) != null) ? request.getParameter(WIDTH) : "350");
+    	appletDesc.setHeight((request.getParameter(HEIGHT) != null) ? request.getParameter(HEIGHT) : "600");
     }
     
     /**
@@ -809,8 +823,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	String path = request.getPathInfo();
     	if (path == null)
     		return false;
-    	if (path.startsWith("/"))	// Always
-    		path = path.substring(1);
+    	path = path.substring(path.lastIndexOf("/") + 1);  // Jars are placed at the root of the cache directory
 
     	File file = context.getDataFile(path);
     	if ((file == null) || (!file.exists()))

@@ -1,0 +1,21 @@
+<html>
+
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>jbundle applet</title>
+</head>
+
+<body>
+<script src="http://java.com/js/deployJava.js"></script>
+
+<center><h2>jbundle applet</h2></center><br />
+
+<script> 
+var attributes = { code:'${biorhythm.mainClass}.class', width:'100%', height:300, codebase:'../classes', archive:'${biorhythm.base.artifactId}-${project.version}.jar', name:'bio'} ; 
+var parameters = {jnlp_href: './applet?appletClass=org.jbundle.util.biorhythm.Biorhythm', draggable:'true'} ; 
+deployJava.runApplet(attributes, parameters, '1.6'); 
+</script>
+
+</body>
+
+</html>
