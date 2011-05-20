@@ -20,10 +20,9 @@ public interface ClassService
     * Get the Osgi class service.
     * NOTE: Don't import this package as the ClassService class may not be available until this service is started.
     * @param context TODO
-    * @param waitForStart TODO
-    * @return
+ * @return
     */
-   public ClassFinder getClassFinder(Object context, boolean waitForStart);
+   public ClassFinder getClassFinder(Object context);
    /**
     * Create this object given the class name.
     * @param className

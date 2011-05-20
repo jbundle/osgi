@@ -157,7 +157,7 @@ public class ObrClassFinderService extends BaseClassFinderService
      */
     public boolean startClassFinderActivator(BundleContext context)
     {
-    	if (ClassFinderActivator.getClassFinder(context, false) == this)
+    	if (ClassFinderActivator.getClassFinder(context, 0) == this)
     		return true;	// Already up!
         // If the repository is not up, but the bundle is deployed, this will find it
         Resource resource = (Resource)this.deployThisResource(ClassFinderActivator.class.getName(), false, false);  // Get the bundle info from the repos

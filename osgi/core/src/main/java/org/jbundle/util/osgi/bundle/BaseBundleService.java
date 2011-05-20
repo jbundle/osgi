@@ -155,7 +155,7 @@ public class BaseBundleService extends Object
      */
     public boolean checkDependentServicesAndStartup(BundleContext bundleContext, String dependentBaseBundleClassName)
     {
-    	BaseBundleService bundleService = (BaseBundleService)ClassFinderActivator.getClassFinder(bundleContext, true).getClassBundleService(null, dependentBaseBundleClassName);
+    	BaseBundleService bundleService = (BaseBundleService)ClassFinderActivator.getClassFinder(bundleContext, -1).getClassBundleService(null, dependentBaseBundleClassName);
     	if (bundleService != null)
     		return this.startupThisService(bundleService);	// TODO - Synchronization issue
     	// Service has not started, so I need to start it and then listen

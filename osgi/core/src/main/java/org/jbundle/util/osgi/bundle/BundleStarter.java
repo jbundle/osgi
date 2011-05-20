@@ -23,7 +23,7 @@ public class BundleStarter extends Thread
 	}
 	public void run()
 	{
-		BaseClassFinderService classFinder = (BaseClassFinderService)ClassFinderActivator.getClassFinder(bundleContext, true);
+		BaseClassFinderService classFinder = (BaseClassFinderService)ClassFinderActivator.getClassFinder(bundleContext, -1);
 		classFinder.startBaseBundle(bundleContext, dependentBaseBundleClassName);
 	}
 }

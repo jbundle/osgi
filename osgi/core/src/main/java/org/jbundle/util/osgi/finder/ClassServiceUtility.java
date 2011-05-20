@@ -34,13 +34,13 @@ implements ClassService
      * @return
      */
     public static boolean classServiceAvailable = true;
-    public org.jbundle.util.osgi.ClassFinder getClassFinder(Object context, boolean waitForStart)
+    public org.jbundle.util.osgi.ClassFinder getClassFinder(Object context)
     {
         if (!classServiceAvailable)
             return null;
         try {
             Class.forName("org.osgi.framework.BundleActivator");	// This tests to see if osgi exists
-            return (org.jbundle.util.osgi.ClassFinder)org.jbundle.util.osgi.finder.ClassFinderActivator.getClassFinder(context, waitForStart);
+            return (org.jbundle.util.osgi.ClassFinder)org.jbundle.util.osgi.finder.ClassFinderActivator.getClassFinder(context, -1);
         } catch (ClassNotFoundException ex) {
             classServiceAvailable = false;	// Osgi is not installed, no need to keep trying
             return null;
@@ -73,8 +73,8 @@ implements ClassService
         try {
             clazz = Class.forName(className);
         } catch (ClassNotFoundException e) {
-            if (this.getClassFinder(null, true) != null)
-                clazz = this.getClassFinder(null, true).findClass(className);	// Try to find this class in the obr repos
+            if (this.getClassFinder(null) != null)
+                clazz = this.getClassFinder(null).findClass(className);	// Try to find this class in the obr repos
             if (clazz == null)
                 if (bErrorIfNotFound)
                     throw new RuntimeException(e.getMessage());
@@ -115,8 +115,8 @@ implements ClassService
 
         if (url == null)
         {
-            if (this.getClassFinder(null, true) != null)
-                url = this.getClassFinder(null, true).findResourceURL(filepath);	// Try to find this class in the obr repos
+            if (this.getClassFinder(null) != null)
+                url = this.getClassFinder(null).findResourceURL(filepath);	// Try to find this class in the obr repos
         }
 
         if (url == null)
@@ -154,8 +154,8 @@ implements ClassService
         if (resourceBundle == null)
         {
             try {
-                if (this.getClassFinder(null, true) != null)
-                    resourceBundle = this.getClassFinder(null, true).findResourceBundle(className, locale);	// Try to find this class in the obr repos
+                if (this.getClassFinder(null) != null)
+                    resourceBundle = this.getClassFinder(null).findResourceBundle(className, locale);	// Try to find this class in the obr repos
             } catch (MissingResourceException e) {
                 ex = e;
             }
@@ -182,14 +182,14 @@ implements ClassService
         try {
             object = this.convertStringToObject(string);
         } catch (ClassNotFoundException e) {
-            if (this.getClassFinder(null, true) != null)
+            if (this.getClassFinder(null) != null)
             {
                 String className = null;
                 int startClass = e.getMessage().indexOf('\'') + 1;
                 int endClass = e.getMessage().indexOf('\'', startClass);
                 if (endClass != -1)
                     className = e.getMessage().substring(startClass, endClass);
-                object = this.getClassFinder(null, true).findConvertStringToObject(className, string);	// Try to find this class in the obr repos
+                object = this.getClassFinder(null).findConvertStringToObject(className, string);	// Try to find this class in the obr repos
             }
             if (object == null)
                 if (bErrorIfNotFound)
@@ -253,7 +253,7 @@ implements ClassService
      */
     public void shutdownService(Object service)
     {
-        if (this.getClassFinder(null, true) != null)
-            this.getClassFinder(null, true).shutdownService(service);   // Shutdown the bundle for this service
+        if (this.getClassFinder(null) != null)
+            this.getClassFinder(null).shutdownService(service);   // Shutdown the bundle for this service
     }
 }

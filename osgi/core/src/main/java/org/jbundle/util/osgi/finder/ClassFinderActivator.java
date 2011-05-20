@@ -61,16 +61,19 @@ public final class ClassFinderActivator extends BaseBundleService
     }
     /**
      * Find this class's class access service in the current workspace.
-     * @param waitForStart TODO
+     * @param secsToWait TODO
      * @param className
      * @return
      */
-    public static ClassFinder getClassFinder(Object context, boolean waitForStart)
+    public static ClassFinder getClassFinder(Object context, int secsToWait)
     {
     	if ((bundleContext == null) && (context != null))
     	{	// This bundle was never started, that's okay. Use this bundle context
     		bundleContext = (BundleContext)context;
     	}
+    	else if ((classFinder == null) && (secsToWait == -1))
+    	    secsToWait = 0;    // If I was properly started, then use No until obr service starts
+    	
     	if ((classFinder == null) && (bundleContext != null))
     	{
 			try {
@@ -83,20 +86,19 @@ public final class ClassFinderActivator extends BaseBundleService
 			}
     	}
 		if (classFinder == null)
-			if (waitForStart)
+			if (secsToWait != 0)
 				if (bundleContext != null)
-					classFinder = (ClassFinder)ClassFinderActivator.waitForBundleStartup(bundleContext, ClassFinder.class.getName());
+					classFinder = (ClassFinder)ClassFinderActivator.waitForBundleStartup(bundleContext, ClassFinder.class.getName(), secsToWait);
 
 		if (classFinder == null)
-			if (waitForStart)
-			{	// Start up the 'no persistent storage' service.
-				classFinder = new NoClassFinderService();
-				try {	// Note: this does not start the service, but it does registers it as a service.
-					((NoClassFinderService)classFinder).start(bundleContext);
-				} catch (Exception e) {
-					e.printStackTrace();	// Never
-				}
+		{	// Start up the 'no persistent storage' service.
+			classFinder = new NoClassFinderService();
+			try {	// Note: this does not start the service, but it does registers it as a service.
+				((NoClassFinderService)classFinder).start(bundleContext);
+			} catch (Exception e) {
+				e.printStackTrace();	// Never
 			}
+		}
 
 		return classFinder;
     }
@@ -140,7 +142,7 @@ public final class ClassFinderActivator extends BaseBundleService
      * @return
      */
     static boolean waitingForClassFinder = false;
-    public static BundleActivator waitForBundleStartup(BundleContext context, String bundleClassName)
+    public static BundleActivator waitForBundleStartup(BundleContext context, String bundleClassName, int secsToWait)
     {
     	BundleActivator bundleActivator = null;
 		waitingForClassFinder = true;
@@ -157,7 +159,7 @@ public final class ClassFinderActivator extends BaseBundleService
 		synchronized (thread)
 		{
 			try {
-				thread.wait(15000);
+				thread.wait((secsToWait == -1) ? 15000 : secsToWait * 1000);
 			} catch (InterruptedException ex) {
 				ex.printStackTrace();
 			}
