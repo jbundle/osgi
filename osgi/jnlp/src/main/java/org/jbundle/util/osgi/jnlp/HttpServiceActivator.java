@@ -40,9 +40,6 @@ public class HttpServiceActivator extends BaseBundleService
      */
     public boolean startupThisService(BundleService bundleService)
     {
-        //EnvironmentActivator environmentActivator = (EnvironmentActivator)bundleService;
-        //Environment env = environmentActivator.getEnvironment();
-
         httpServiceTracker = new HttpServiceTracker(context);
         httpServiceTracker.open();
         

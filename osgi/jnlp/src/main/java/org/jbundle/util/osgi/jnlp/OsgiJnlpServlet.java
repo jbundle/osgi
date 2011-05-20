@@ -93,6 +93,22 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public static final String VERSION = "version";
     public static final String TEMPLATE = "template";
     
+    // Optional params
+    public static final String TITLE = "title";
+    public static final String VENDOR = "vendor";
+    public static final String HOME_PAGE = "homePage";
+    public static final String DESCRIPTION = "description";
+    public static final String ICON = "icon";
+    public static final String ONLINE = "online";
+    public static final String DESKTOP = "desktop";
+    public static final String MENU = "menu";
+    public static final String JAVA_VERSION = "javaVersion";
+    public static final String INITIAL_HEAP_SIZE = "initialHeapSize";
+    public static final String MAX_HEAP_SIZE = "maxHeapSize";
+
+    // Deploy param
+    public static final String CONTEXT_PATH = "jbundle.jnlp.contextpath";
+    
     BundleContext context = null;
 
     enum Changes {
@@ -132,12 +148,14 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-    	boolean jarFound = false;
+    	boolean fileFound = false;
     	if ((request.getParameter(MAIN_CLASS) != null) || (request.getParameter(APPLET_CLASS) != null))
     		makeJnlp(request, response);
     	else
-    		jarFound = getJarFile(request, response);
-    	if (!jarFound)
+    	    fileFound = getJarFile(request, response);
+    	if (!fileFound)
+    	    fileFound = getResourceFile(request, response);
+        if (!fileFound)
     		super.doGet(request, response);
     }
     
@@ -352,8 +370,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	Information information = informationList.get(0);
     	
     	Title title = new Title();
-    	if (getRequestParam(request, "title", null) != null)
-    		title.setTitle(getRequestParam(request, "title", null));
+    	if (getRequestParam(request, TITLE, null) != null)
+    		title.setTitle(getRequestParam(request, TITLE, null));
     	else if (getBundleProperty(bundle, Constants.BUNDLE_NAME) != null)
     		title.setTitle(getBundleProperty(bundle, Constants.BUNDLE_NAME));
     	else if (getBundleProperty(bundle, Constants.BUNDLE_SYMBOLICNAME) != null)
@@ -363,8 +381,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	information.setTitle(title);
     	
     	Vendor vendor = new Vendor();
-    	if (getRequestParam(request, "vendor", null) != null)
-        	vendor.setVendor(getRequestParam(request, "vendor", null));
+    	if (getRequestParam(request, VENDOR, null) != null)
+        	vendor.setVendor(getRequestParam(request, VENDOR, null));
     	else if (getBundleProperty(bundle, Constants.BUNDLE_VENDOR) != null)
     		vendor.setVendor(getBundleProperty(bundle, Constants.BUNDLE_VENDOR));
     	else
@@ -372,8 +390,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	information.setVendor(vendor);
     	
     	Homepage homepage = new Homepage();
-    	if (getRequestParam(request, "homePage", null) != null)
-    		homepage.setHref(getRequestParam(request, "homePage", null));
+    	if (getRequestParam(request, HOME_PAGE, null) != null)
+    		homepage.setHref(getRequestParam(request, HOME_PAGE, null));
     	else if (getBundleProperty(bundle, Constants.BUNDLE_DOCURL) != null)
     		homepage.setHref(getBundleProperty(bundle, Constants.BUNDLE_DOCURL));
     	else
@@ -386,8 +404,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	{
 	    	Description description = new Description();
 	    	description.setKind(Kind.ONELINE);
-	    	if (getRequestParam(request, "description", null) != null)
-	    		description.setString(getRequestParam(request, "description", null));
+	    	if (getRequestParam(request, DESCRIPTION, null) != null)
+	    		description.setString(getRequestParam(request, DESCRIPTION, null));
 	    	else if (getBundleProperty(bundle, Constants.BUNDLE_DESCRIPTION) != null)
 	    		description.setString(getBundleProperty(bundle, Constants.BUNDLE_DESCRIPTION));
 	    	else
@@ -400,7 +418,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	if (information.getIconList().size() == 0)
     	{
 	    	Icon icon = new Icon();
-	    	icon.setHref(getRequestParam(request, "icon", "images/icons/jbundle32.jpg"));
+	    	icon.setHref(getRequestParam(request, ICON, "images/icons/jbundle32.jpg"));
 	    	information.getIconList().add(icon);
     	}
     	
@@ -408,17 +426,17 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	information.setOfflineAllowed(offlineAllowed);
     	
     	Shortcut shortcut = new Shortcut();
-    	if (Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter("online")))
+    	if (Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(ONLINE)))
     		shortcut.setOnline(Online.TRUE);
     	else
     		shortcut.setOnline(Online.FALSE);	// Default
     	information.setShortcut(shortcut);
-    	if (Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter("desktop")))
+    	if (Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(DESKTOP)))
     	{
     		Desktop desktop = new Desktop();
     		shortcut.setDesktop(desktop);
     	}
-    	String menuItem = getRequestParam(request, "menu", null);
+    	String menuItem = getRequestParam(request, MENU, null);
     	if (menuItem != null)
     	{
 	    	Menu menu = new Menu();
@@ -436,9 +454,9 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 		Choice choice = getResource(jnlp, true);	// Clear the entries and create a new one
 		Java java = new Java();
 		choice.setJava(java);
-		java.setVersion(getRequestParam(request, "javaVersion", "1.6+"));
-		java.setInitialHeapSize(getRequestParam(request, "initialHeapSize", "128m"));
-		java.setMaxHeapSize(getRequestParam(request, "maxHeapSize", "256m"));
+		java.setVersion(getRequestParam(request, JAVA_VERSION, "1.6+"));
+		java.setInitialHeapSize(getRequestParam(request, INITIAL_HEAP_SIZE, "128m"));
+		java.setMaxHeapSize(getRequestParam(request, MAX_HEAP_SIZE, "256m"));
 	}
     
     /**
@@ -544,6 +562,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	}
 	public static final String MANIFEST_DIR = "META-INF/";
 	public static final String MANIFEST_PATH = MANIFEST_DIR + "MANIFEST.MF";
+    public static int ONE_SEC_IN_MS = 1000;
 	
 	/**
 	 * Create a jar for this bundle and move all the classes to the new jar.
@@ -553,7 +572,6 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	 * @param forceScanBundle Scan the bundle for package names even if the cache is current
 	 * @return All the package names in the bundle or null if I am using the cached jar.
 	 */
-	public static int ONE_SEC_IN_MS = 1000;
 	public String[] moveBundleToJar(Bundle bundle, String filename, boolean forceScanBundle)
 	{
         File fileOut = context.getDataFile(filename);
@@ -801,6 +819,38 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     		return false;
     	}
     	return this.checkCache(request, response, file);
+    }
+
+    /**
+     * See if this is a resource.
+     * @param request
+     * @param response
+     * @return
+     * @throws IOException
+     */
+    public boolean getResourceFile(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
+        String path = request.getPathInfo();
+        if (path == null)
+            return false;
+        if (!path.startsWith("/"))
+            path = "/" + path;  // Must start from root
+        
+        URL url = this.getClass().getResource(path);
+        if (url == null)
+            return false;   // Not found
+        InputStream inStream = null;
+        try {
+            inStream = url.openStream();
+        } catch (Exception e) {
+            return false;   // Not found
+        }
+
+        // Todo may want to add cache info (using bundle lastModified).
+        OutputStream writer = response.getOutputStream();
+        copyStream(inStream, writer);
+        writer.close();
+        return true;
     }
 
 	/**

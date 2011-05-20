@@ -40,11 +40,13 @@ public class HttpServiceTracker extends ServiceTracker{
         
         try {
         	HttpContext httpContext = null;	// new MyHttpContext(context.getBundle());
-        	String fullPath = "/jnlp";
+        	String contextPath = context.getProperty(OsgiJnlpServlet.CONTEXT_PATH);
+        	if (contextPath == null)
+        	    contextPath = "/jnlp";
         	Servlet servlet = new OsgiJnlpServlet(context);
             Dictionary<String,String> dictionary = new Hashtable<String,String>();
 	        httpContext = new JnlpHttpContext(context.getBundle());
-	        httpService.registerServlet(fullPath, servlet, dictionary, httpContext);
+	        httpService.registerServlet(contextPath, servlet, dictionary, httpContext);
         } catch (Exception e) {
             e.printStackTrace();
         }
