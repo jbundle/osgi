@@ -17,7 +17,7 @@
      <section name="OSGi to Web Start usage">
 <p>
 Using the OSGi to Web Start servlet is easy. The only required parameter is the main class name.
-All of the other information that Web Start needs come from OSGi.
+All of the other information that Web Start needs come from the OSGi bundles.
 </p>
 <p>
 <ul>
@@ -30,7 +30,11 @@ All of the other information that Web Start needs come from OSGi.
 <subsection name="Servlet parameters">
 <p>
 Here are the url parameter that you supply so the OSGi to Web Start Servlet can create the
-correct JNLP and jar files for your web application or applet:
+correct JNLP and jar files for your web application or applet.<br/>
+Your url should look something like this:<br/>
+<code>
+<a href="http://www.jbundle.org/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://www.jbundle.org/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
+</code>
 <source>
  <b>Main params:</b>
 mainClass - The java class with the main method

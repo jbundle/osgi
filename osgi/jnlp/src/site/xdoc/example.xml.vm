@@ -20,15 +20,14 @@
 Here's a quick example of the OSGi to JNLP servlet.
 </p>
 <p>
-Let's start with a simple OSGi program that has three dependent OSGi modules. You can easily
-replace this application with one of your own.
+Let's start with a simple OSGi program that has three dependent OSGi modules.
 </p>
 <p>
 Step 1: Download and install an <a href="www.osgi.org">OSGi</a> Framework Distribution.<br/>
 We'll use the <a href="http://felix.apache.org">Apache Felix</a> OSGi implementation for our example.
 </p>
 <p>
-Step 2: Start your OSGi implementation. Install the OSGi to Web Start Servlet and your application.<br/>
+Step 2: Start your OSGi implementation and install the OSGi bundles.<br/>
 <style type="text/css">
 span.response {color:blue}
 span.comment {color:blue; font-style:italic}
@@ -38,8 +37,8 @@ cd felix<br/>
 java -jar bin/felix.jar<br/>
 <span class="response">g!</span> deploy -s 'Apache Felix Http Jetty'<span class="comment">(Start a web server)</span><br/>
 <span class="response">g!</span> repos add ${project.organization.url}/${OBRRepositoryIndex} <span class="comment">(Adding the jbundle obr index simplifies installing bundles)</span><br/>
-<span class="response">g!</span> deploy -s '${project.name}' <span class="comment">(Start the OSGi to JNLP servlet)</span><br/>
-<span class="response">g!</span> deploy 'jbundle-util-biorhythm' <span class="comment">(Deploy the target OSGi project and its dependencies)</span><br/>
+<span class="response">g!</span> deploy -s '${project.name}' <span class="comment">(Install and start the OSGi to JNLP servlet)</span><br/>
+<span class="response">g!</span> deploy 'jbundle-util-biorhythm' <span class="comment">(Install our OSGi project and its dependencies)</span><br/>
 </source>
 </p>
 <p>
@@ -51,7 +50,8 @@ You should see a screen like this:<br/>
 <img src="./images/screen.jpg"/>
 </p>
 <p>
-Voilà!
+<i>Voilà!</i><br/>
+Now try this with one of your own applications.
 </p>
     </section>
 

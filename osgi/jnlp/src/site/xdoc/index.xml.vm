@@ -16,11 +16,11 @@
 
      <section name="Description">
 
-  <p>The jbundle <strong>OSGi to Web Start Servlet</strong> automatically allows your OSGi
+  <p>The <a href="http://www.jbundle.org">jbundle.org</a> <strong>OSGi to Web Start Servlet</strong> automatically allows your OSGi
   applications to run as Web Start applets or applications.</p>
 
 <p>
-It's a pain to set up Web Start to run java applets in a web browser. You have to specify the
+It's a pain to set up Web Start to run java in a web browser. You have to specify the
 correct package to module mappings in a JNLP file to make everything work.
 </p>
 <p>
@@ -28,7 +28,7 @@ Wouldn't it be nice if Web Start were as easy to set up as OSGi. <i>Well now it 
 converter will automatically create JNLP and jar files from OSGi dependencies.
 </p>
 <p>
-All you have to do is specify java the main class. For example:<br/>
+All you have to do is specify java the main class in your url. For example:<br/>
 <code>
 <a href="http://www.jbundle.org/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://www.jbundle.org/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
 </code>
@@ -38,7 +38,7 @@ updates the cached jnlp and java jar files when the OSGi bundles are updated.
 </p>
 
     </section>
-      <section name="Developers Notes">
+      <section name="Usage Information">
 <p>
 <ul>
 <li><a href="example.html">Example</a> (Under 2 minutes).</li>
@@ -48,9 +48,9 @@ updates the cached jnlp and java jar files when the OSGi bundles are updated.
 
 <subsection name="OSGi packaging">
 <p>
-The <strong>jbundle OSGi to JNLP servlet</strong> is an <a href="http://www.osgi.org">OSGi</a> bundle.
+The <strong>jbundle OSGi to Web Start servlet</strong> is an <a href="http://www.osgi.org">OSGi</a> bundle.
 To use it in your OSGi project, just install and start this bundle in your OSGi environment.
-Remember to start a web server such as tomcat or jetty.
+Remember to start a web server too.
 </p>
 <p>
 <code>
