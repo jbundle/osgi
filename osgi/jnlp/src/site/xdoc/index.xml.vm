@@ -1,0 +1,86 @@
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+  <properties>
+    <title>OSGi to JNLP Web Start Servlet</title>
+    <author email="don@donandann.com">Don Corley</author>
+  </properties>
+
+  <!-- Optional HEAD element, which is copied as is into the XHTML <head> element -->
+  <!-- head>
+    <meta content=""/>
+  </head -->
+
+  <body>
+
+     <section name="Description">
+
+  <p>The jbundle <strong>OSGi to JNLP Web Start Servlet</strong> makes automatically allows your OSGi
+  applications to run as Web Start applets or applications.</p>
+
+<p>
+It's a pain to set up Web Start to run java applets in a web browser. We have to specify the
+package to module mappings in a JNLP file to make everything work.
+</p>
+<p>
+Wouldn't it be nice if Web Start were as easy to set up as OSGi. Well now it is. The OSGi to JNLP
+converter will automatically create JNLP and jar files from OSGi dependencies.
+</p>
+<p>
+All you have to do is specify java the main class. For example:<br/>
+<code>
+http://www.jbundle.org/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm<br/>
+</code>
+is all you would need to type to launch the OSGi Biorhythm program from a web browser.
+This servlet takes care of all the Web Start configuration automatically. It even automatically
+updates the cached jnlp and java jar files when the OSGi bundles are updated.
+</p>
+
+    </section>
+      <section name="Developers Notes">
+<p>
+ <a href="example.html">Usage example (Under 2 minutes).</a></p>
+
+      <subsection name="OSGi packaging">
+<p>
+The <strong>jbundle OSGi to JNLP servlet</strong> is an <a href="http://www.osgi.org">OSGi</a> bundle.
+To use it in your OSGi project, just install and start this bundle in your OSGi environment.
+Remember to start a web server such as tomcat or jetty.
+</p>
+<p>
+<code>
+OBR Repository index:<br/>
+${project.organization.url}/${OBRRepositoryIndex}<br/>
+Manifest import:<br/>
+Import-Package: ${project.artifactId};resolution:=optional;version=${project.version}
+</code>
+</p>
+      </subsection>
+
+      <subsection name="Maven Integration">
+<p>
+The <strong>jbundle OSGi to JNLP servlet</strong> is a standard <a href="http://maven.apache.org/">Maven</a> artifact. Here is its dependency information:
+</p>
+<p>
+<code>
+&lt;dependency&gt;<br/>
+&#160;&#160;    	&lt;groupId&gt;${project.groupId}&lt;/groupId&gt;<br/>
+&#160;&#160;    	&lt;artifactId&gt;${project.artifactId}&lt;/artifactId&gt;<br/>
+&#160;&#160;    	&lt;version&gt;${project.version}&lt;/version&gt;<br/>
+    &lt;/dependency&gt;<br/>
+</code>
+</p>
+
+<p>
+<a href="http://www.sourceforge.net/projects/jcalendarbutton" >
+To download this project, go to our project page at:
+<br/>
+<img src="http://sourceforge.net/sflogo.php?group_id=239200&amp;type=3" width="88" height="31" alt="SourceForge" align="bottom" /></a>
+</p>
+      </subsection>
+    </section>
+
+  </body>
+
+</document>
