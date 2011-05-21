@@ -91,6 +91,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public static final String MAIN_CLASS = "mainClass";
     public static final String APPLET_CLASS = "appletClass";
     public static final String VERSION = "version";
+    public static final String OTHER_PACKAGES = "otherPackages";
     public static final String TEMPLATE = "template";
     
     // Optional params
@@ -313,8 +314,11 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 		bundleChanged = addBundle(jnlp, bundle, Main.TRUE, forceScanBundle, bundleChanged);
 		isNewBundle(bundle, bundles);	// Add only once
 		
-		bundleChanged = addDependentBundles(jnlp, bundle, bundles, forceScanBundle, bundleChanged);
-		    
+		bundleChanged = addDependentBundles(jnlp, getBundleProperty(bundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged);
+		
+		if (request.getAttribute(OTHER_PACKAGES) != null)
+		    bundleChanged = addDependentBundles(jnlp, request.getAttribute(OTHER_PACKAGES).toString(), bundles, forceScanBundle, bundleChanged);
+        
 		if (request.getParameter(MAIN_CLASS) != null)
 			setApplicationDesc(jnlp, mainClass);
 		else
@@ -548,9 +552,9 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	 * @param forceScanBundle Scan the bundle for package names even if the cache is current
      * @return true if the bundle has changed from last time
 	 */
-	public Changes addDependentBundles(Jnlp jnlp, Bundle bundle, Set<Bundle> bundles, boolean forceScanBundle, Changes bundleChanged)
+	public Changes addDependentBundles(Jnlp jnlp, String importPackage, Set<Bundle> bundles, boolean forceScanBundle, Changes bundleChanged)
 	{
-		String[] packages = parseHeader(getBundleProperty(bundle, Constants.IMPORT_PACKAGE));
+		String[] packages = parseHeader(importPackage);
 		for (String packageName : packages)
 		{
 			String properties[] = parseImport(packageName);
@@ -560,7 +564,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 			if (isNewBundle(subBundle, bundles))
 			{
 				bundleChanged = addBundle(jnlp, subBundle, Main.FALSE, forceScanBundle, bundleChanged);
-				bundleChanged = addDependentBundles(jnlp, subBundle, bundles, forceScanBundle, bundleChanged);	// Recursive
+				bundleChanged = addDependentBundles(jnlp, getBundleProperty(subBundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged);	// Recursive
 			}
 		}
 		return bundleChanged;
