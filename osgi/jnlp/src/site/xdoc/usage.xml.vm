@@ -1,0 +1,100 @@
+﻿<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+  <properties>
+    <title>OSGi to JNLP Web Start Servlet</title>
+    <author email="don@donandann.com">Don Corley</author>
+  </properties>
+
+  <!-- Optional HEAD element, which is copied as is into the XHTML <head> element -->
+<!-- head>
+<meta />
+</head  -->
+
+  <body>
+
+     <section name="OSGi to Web Start usage">
+<p>
+Using the OSGi to Web Start servlet is easy. The only required parameter is the main class name.
+All of the other information that Web Start needs come from OSGi.
+</p>
+<p>
+<ul>
+<li><a href="#Servlet parameters">Servlet parameters</a></li>
+<li><a href="#Web Start Applet">Creating a Web Start Applet</a></li>
+<li><a href="#Advanced usage">Advanced usage</a></li>
+</ul>
+</p>
+
+<subsection name="Servlet parameters">
+<p>
+Here are the url parameter that you supply so the OSGi to Web Start Servlet can create the
+correct JNLP and jar files for your web application or applet:
+<source>
+ <b>Main params:</b>
+mainClass - The java class with the main method
+appletClass - The main applet class
+version - The bundle version to deploy
+otherPackages - Comma separated list of other packages to include
+template - Path name to a starting jnlp file
+    
+ <b>Optional params - Default to values in OSGi headers</b>
+title - The Web Start Title
+vendor - Vendor
+homePage - Home page
+description - Application description
+icon - Icon path
+online - Set to 'true' if application must run online
+desktop -  Set to 'true' to include application on user's desktop
+menu - Setting this value will include the application in the system's menu
+javaVersion - Required java version (defaults to 1.6+)
+initialHeapSize - Initial heap size
+maxHeapSize - Maximum heap size
+width - Applet width
+height - Applet height
+
+ <b>Deploy param:</b>
+jbundle.jnlp.contextpath - The url path to deploy the servlet (defaults to '/jnlp')
+
+</source>
+</p>
+</subsection>
+<subsection name="Web Start Applet">
+<p>
+The OSGi to Web Start Servlet can also create a Web Start Applet. Just supply the main class
+name in the appletClass parameter rather than the mainClass parameter.
+</p>
+<p>
+Typically you would use the java.com Web Start javascript code to start your applet.
+Here is an html snippet:
+<source>
+&lt;script src="http://java.com/js/deployJava.js"&gt;&lt;/script&gt;
+
+&lt;script&gt; 
+var attributes = {width: '350', height: '500', name: 'My Applet'} ; 
+var parameters = {jnlp_href: '/jnlp/applet?appletClass=org.jbundle.util.biorhythm.Biorhythm', draggable:'true'} ; 
+deployJava.runApplet(attributes, parameters, '1.6'); 
+&lt;/source&gt;
+</source>
+</p>
+</subsection>
+<subsection name="Advanced usage">
+<p>
+If you really want to make you life easy, use the automatic OSGi bundle retrieval system.
+This code automatically finds, deploys, installs, and starts any bundles that are required
+for a JNLP servlet.
+</p>
+<p>
+All you have to do is start the ${project.groupId}.obr module and add all your
+obr indexes to your OSGi implementation. Any required bundles are added automagically!
+</p>
+<p>
+Note: I'm working on a P2 implementation for equinox users.
+</p>
+</subsection>
+    </section>
+
+  </body>
+
+</document>

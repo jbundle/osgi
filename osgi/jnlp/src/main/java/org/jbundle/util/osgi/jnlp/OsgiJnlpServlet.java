@@ -316,8 +316,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 		
 		bundleChanged = addDependentBundles(jnlp, getBundleProperty(bundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged);
 		
-		if (request.getAttribute(OTHER_PACKAGES) != null)
-		    bundleChanged = addDependentBundles(jnlp, request.getAttribute(OTHER_PACKAGES).toString(), bundles, forceScanBundle, bundleChanged);
+		if (request.getParameter(OTHER_PACKAGES) != null)
+		    bundleChanged = addDependentBundles(jnlp, request.getParameter(OTHER_PACKAGES).toString(), bundles, forceScanBundle, bundleChanged);
         
 		if (request.getParameter(MAIN_CLASS) != null)
 			setApplicationDesc(jnlp, mainClass);
@@ -475,8 +475,10 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 		Java java = new Java();
 		choice.setJava(java);
 		java.setVersion(getRequestParam(request, JAVA_VERSION, "1.6+"));
-		java.setInitialHeapSize(getRequestParam(request, INITIAL_HEAP_SIZE, "128m"));
-		java.setMaxHeapSize(getRequestParam(request, MAX_HEAP_SIZE, "256m"));
+		if (request.getParameter(INITIAL_HEAP_SIZE) != null)
+		    java.setInitialHeapSize(getRequestParam(request, INITIAL_HEAP_SIZE, null));
+        if (request.getParameter(MAX_HEAP_SIZE) != null)
+            java.setMaxHeapSize(getRequestParam(request, MAX_HEAP_SIZE, null));
 	}
     
     /**

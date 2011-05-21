@@ -33,6 +33,7 @@ under the License.
 
     <menu name="Developer Notes">
       <item name="Example" href="example.html"/>
+      <item name="Usage" href="usage.html"/>
     </menu>
 
     <menu name="JBundle Projects">

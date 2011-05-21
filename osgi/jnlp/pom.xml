@@ -11,8 +11,8 @@
 
   <artifactId>org.jbundle.util.osgi.jnlp</artifactId>
 
-	<name>jbundle-util-osgi-jnlp - osgi to jnlp servlet</name>
-	<description>osgi to jnlp servlet</description>
+	<name>jbundle-util-osgi-jnlp - osgi to web start servlet</name>
+	<description>osgi to web start servlet</description>
 
 	<packaging>bundle</packaging>
 

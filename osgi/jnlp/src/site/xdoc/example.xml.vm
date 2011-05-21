@@ -24,31 +24,34 @@ Let's start with a simple OSGi program that has three dependent OSGi modules. Yo
 replace this application with one of your own.
 </p>
 <p>
-Step 1: <a href="http://felix.apache.org/site/downloads.cgi">Download and install an OSGi Framework Distribution.</a><br/>
+Step 1: Download and install an <a href="www.osgi.org">OSGi</a> Framework Distribution.<br/>
 We'll use the <a href="http://felix.apache.org">Apache Felix</a> OSGi implementation for our example.
 </p>
 <p>
-Step 2: Start your OSGi implementation.<br/>
-<code>
+Step 2: Start your OSGi implementation. Install the OSGi to Web Start Servlet and your application.<br/>
 <style type="text/css">
 span.response {color:blue}
 span.comment {color:blue; font-style:italic}
 </style>
+<source>
 cd felix<br/>
 java -jar bin/felix.jar<br/>
 <span class="response">g!</span> deploy -s 'Apache Felix Http Jetty'<span class="comment">(Start a web server)</span><br/>
 <span class="response">g!</span> repos add ${project.organization.url}/${OBRRepositoryIndex} <span class="comment">(Adding the jbundle obr index simplifies installing bundles)</span><br/>
 <span class="response">g!</span> deploy -s '${project.name}' <span class="comment">(Start the OSGi to JNLP servlet)</span><br/>
 <span class="response">g!</span> deploy 'jbundle-util-biorhythm' <span class="comment">(Deploy the target OSGi project and its dependencies)</span><br/>
-</code>
+</source>
 </p>
 <p>
 Step 3: Start your Web Browser and try the OSGi to Web Start Servlet. Type in this url:<br/>
-<code>
+<source>
 <a href="http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
-</code>
+</source>
 You should see a screen like this:<br/>
 <img src="./images/screen.jpg"/>
+</p>
+<p>
+Voilà!
 </p>
     </section>
 
