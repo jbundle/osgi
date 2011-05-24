@@ -33,7 +33,7 @@ Here are the url parameter that you supply so the OSGi to Web Start Servlet can 
 correct JNLP and jar files for your web application or applet.<br/>
 Your url should look something like this:<br/>
 <code>
-<a href="http://www.jbundle.org/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://www.jbundle.org/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
+<a href="http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
 </code>
 <source>
  <b>Main params:</b>
@@ -81,6 +81,11 @@ var parameters = {jnlp_href: '/jnlp/applet?appletClass=org.jbundle.util.biorhyth
 deployJava.runApplet(attributes, parameters, '1.6'); 
 &lt;/source&gt;
 </source>
+There is also a built-in web page for displaying your applets. It is located at <code>docs/applet.html</code>.
+All parameters are automatically passed to the web start servlet. Your url should look something like this:<br/>
+<code>
+<a href="http://localhost:8080/jnlp/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm">http://localhost:8080/jnlp/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm</a>
+</code>
 </p>
 </subsection>
 <subsection name="Advanced usage">
