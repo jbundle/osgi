@@ -110,6 +110,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public static final String HEIGHT = "height";
     public static final String INCLUDE = "include";
     public static final String EXCLUDE = "exclude";
+    public static final String CODEBASE = "codebase";
 
     public static final String INCLUDE_DEFAULT = "org\\.jbundle\\..*|biz\\.source_code\\..*";//null;
     public static final String EXCLUDE_DEFAULT = null;//"org\\.osgi\\..*";
@@ -317,15 +318,16 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 		
         String regexInclude = getRequestParam(request, INCLUDE, INCLUDE_DEFAULT);
         String regexExclude = getRequestParam(request, EXCLUDE, EXCLUDE_DEFAULT);
+        String pathToJars = getPathToJars(request);
 
 		Changes bundleChanged = Changes.UNKNOWN;
-		bundleChanged = addBundle(jnlp, bundle, Main.TRUE, forceScanBundle, bundleChanged);
+		bundleChanged = addBundle(jnlp, bundle, Main.TRUE, forceScanBundle, bundleChanged, pathToJars);
 		isNewBundle(bundle, bundles);	// Add only once
 		
-		bundleChanged = addDependentBundles(jnlp, getBundleProperty(bundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude);
+		bundleChanged = addDependentBundles(jnlp, getBundleProperty(bundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude, pathToJars);
 		
 		if (request.getParameter(OTHER_PACKAGES) != null)
-		    bundleChanged = addDependentBundles(jnlp, request.getParameter(OTHER_PACKAGES).toString(), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude);
+		    bundleChanged = addDependentBundles(jnlp, request.getParameter(OTHER_PACKAGES).toString(), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude, pathToJars);
         
 		if (request.getParameter(MAIN_CLASS) != null)
 			setApplicationDesc(jnlp, mainClass);
@@ -345,7 +347,11 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
         String respath = request.getRequestURI();
         if (respath == null)
         	respath = "";
-        int idx = respath.lastIndexOf('/'); //
+        String codebaseParam = request.getParameter(CODEBASE);
+        int idx = respath.lastIndexOf('/');
+        if (codebaseParam != null)
+            if (respath.indexOf(codebaseParam) != -1)
+                idx = respath.indexOf(codebaseParam) + codebaseParam.length() - 1;
         String codebase = respath.substring(0, idx + 1); // Include /
         codebase = urlprefix + request.getContextPath() + codebase;
         return codebase;
@@ -361,10 +367,33 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
         String respath = request.getRequestURI();
         if (respath == null)
         	respath = "";
-        int idx = respath.lastIndexOf('/'); //
+        String codebaseParam = request.getParameter(CODEBASE);
+        int idx = respath.lastIndexOf('/');
+        if (codebaseParam != null)
+            if (respath.indexOf(codebaseParam) != -1)
+                idx = respath.indexOf(codebaseParam) + codebaseParam.length() - 1;
         String href = respath.substring(idx + 1);    // Exclude /
         href = href + '?' + request.getQueryString();
         return href;
+    }
+    /**
+     * Get the path to the jar files (root of context path if codebase specified).
+     * @param request
+     * @return
+     */
+    private String getPathToJars(HttpServletRequest request)
+    {
+        String codebaseParam = request.getParameter(CODEBASE);
+        if ((codebaseParam == null) || (codebaseParam.length() == 0))
+                return "";
+        String pathToJars = request.getRequestURI();
+        String path = request.getPathInfo();
+        if (pathToJars.endsWith(path))
+            pathToJars = pathToJars.substring(0, pathToJars.length() - path.length() + 1);  // Keep the trailing '/'
+        int idx = pathToJars.indexOf(codebaseParam);
+        if (idx != -1)
+            pathToJars = pathToJars.substring(idx + 1);
+        return pathToJars;
     }
     /**
      *  This code is heavily inspired by the stuff in HttpUtils.getRequestURL
@@ -534,7 +563,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	 * @param forceScanBundle Scan the bundle for package names even if the cache is current
 	 * @return true if the bundle has changed from last time
 	 */
-	public Changes addBundle(Jnlp jnlp, Bundle bundle, Main main, boolean forceScanBundle, Changes bundleChanged)
+	public Changes addBundle(Jnlp jnlp, Bundle bundle, Main main, boolean forceScanBundle, Changes bundleChanged, String pathToJars)
 	{
 		String name = getBundleProperty(bundle, Constants.BUNDLE_SYMBOLICNAME);
 		String version = getBundleProperty(bundle, Constants.BUNDLE_VERSION);
@@ -546,6 +575,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	        return (bundleChanged == Changes.NONE || bundleChanged == Changes.UNKNOWN) ? Changes.NONE : Changes.PARTIAL;
 		if (main == null)
 			main = Main.FALSE;
+		if (pathToJars != null)
+		    filename = pathToJars + filename;
 		Jar jar = addJar(jnlp, filename, name, main, download);
 		for (String packageName : packages)
 		{
@@ -562,7 +593,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	 * @param forceScanBundle Scan the bundle for package names even if the cache is current
      * @return true if the bundle has changed from last time
 	 */
-	public Changes addDependentBundles(Jnlp jnlp, String importPackage, Set<Bundle> bundles, boolean forceScanBundle, Changes bundleChanged, String regexInclude, String regexExclude)
+	public Changes addDependentBundles(Jnlp jnlp, String importPackage, Set<Bundle> bundles, boolean forceScanBundle, Changes bundleChanged, String regexInclude, String regexExclude, String pathToJars)
 	{
 		String[] packages = parseHeader(importPackage, regexInclude, regexExclude);
 		for (String packageName : packages)
@@ -573,8 +604,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 			Bundle subBundle = findBundle(packageName, version);
 			if (isNewBundle(subBundle, bundles))
 			{
-				bundleChanged = addBundle(jnlp, subBundle, Main.FALSE, forceScanBundle, bundleChanged);
-				bundleChanged = addDependentBundles(jnlp, getBundleProperty(subBundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude);	// Recursive
+				bundleChanged = addBundle(jnlp, subBundle, Main.FALSE, forceScanBundle, bundleChanged, pathToJars);
+				bundleChanged = addDependentBundles(jnlp, getBundleProperty(subBundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude, pathToJars);	// Recursive
 			}
 		}
 		return bundleChanged;
@@ -738,7 +769,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	 * @param download
 	 * @return
 	 */
-    public Jar addJar(Jnlp jnlp, String href,String part, Main main, Download download)
+    public Jar addJar(Jnlp jnlp, String href, String part, Main main, Download download)
     {
     	if (main == null)
     		main = Main.FALSE;
