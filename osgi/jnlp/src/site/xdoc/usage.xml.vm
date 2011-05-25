@@ -30,7 +30,8 @@ All of the other information that Web Start needs come from the OSGi bundles.
 <subsection name="Servlet parameters">
 <p>
 Here are the url parameter that you supply so the OSGi to Web Start Servlet can create the
-correct JNLP and jar files for your web application or applet.<br/>
+correct JNLP and jar files for your web application or applet. Any unknown params are passed
+down to the application or applet.<br/>
 Your url should look something like this:<br/>
 <code>
 <a href="http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
@@ -59,6 +60,7 @@ width - Applet width
 height - Applet height
 include - A regular expression specifying with packages to include
 exclude - A regular expression specifying with packages to exclude
+codebase - The codebase of the application (defaults to contextPath/)
 
  <b>Deploy param:</b>
 jbundle.jnlp.contextpath - The url path to deploy the servlet (defaults to '/jnlp')

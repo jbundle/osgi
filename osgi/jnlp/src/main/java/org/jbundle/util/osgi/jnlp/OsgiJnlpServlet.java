@@ -47,6 +47,7 @@ import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.JiBXException;
 import org.jibx.schema.net.java.jnlp_6_0.AppletDesc;
 import org.jibx.schema.net.java.jnlp_6_0.ApplicationDesc;
+import org.jibx.schema.net.java.jnlp_6_0.Argument;
 import org.jibx.schema.net.java.jnlp_6_0.Description;
 import org.jibx.schema.net.java.jnlp_6_0.Description.Kind;
 import org.jibx.schema.net.java.jnlp_6_0.Desktop;
@@ -60,6 +61,7 @@ import org.jibx.schema.net.java.jnlp_6_0.Java;
 import org.jibx.schema.net.java.jnlp_6_0.Jnlp;
 import org.jibx.schema.net.java.jnlp_6_0.Menu;
 import org.jibx.schema.net.java.jnlp_6_0.OfflineAllowed;
+import org.jibx.schema.net.java.jnlp_6_0.Param;
 import org.jibx.schema.net.java.jnlp_6_0.Resources;
 import org.jibx.schema.net.java.jnlp_6_0.Resources.Choice;
 import org.jibx.schema.net.java.jnlp_6_0.Security;
@@ -330,7 +332,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 		    bundleChanged = addDependentBundles(jnlp, request.getParameter(OTHER_PACKAGES).toString(), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude, pathToJars);
         
 		if (request.getParameter(MAIN_CLASS) != null)
-			setApplicationDesc(jnlp, mainClass);
+			setApplicationDesc(jnlp, mainClass, request);
 		else
 			setAppletDesc(jnlp, mainClass, bundle, request);
 		return bundleChanged;
@@ -811,12 +813,28 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      * @param jnlp
      * @param mainClass
      */
-    public void setApplicationDesc(Jnlp jnlp, String mainClass)
+    public void setApplicationDesc(Jnlp jnlp, String mainClass, HttpServletRequest request)
     {
     	if (jnlp.getApplicationDesc() == null)
     		jnlp.setApplicationDesc(new ApplicationDesc());
     	ApplicationDesc applicationDesc = jnlp.getApplicationDesc();
     	applicationDesc.setMainClass(mainClass);
+    	
+    	List<Argument> arguments = applicationDesc.getArgumentList();
+    	if (arguments == null)
+    	    applicationDesc.setArgumentList(arguments = new ArrayList<Argument>());
+    	@SuppressWarnings("unchecked")
+        Enumeration<String> names = request.getParameterNames();
+    	while (names.hasMoreElements())
+    	{
+    	    String name = names.nextElement();
+    	    String value = request.getParameter(name);
+    	    if (value != null)
+    	        name = name + "=" + value;
+        	Argument argument = new Argument();
+        	argument.setArgument(name);
+        	arguments.add(argument);
+    	}
     }
     
     /**
@@ -826,22 +844,54 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      */
     public void setAppletDesc(Jnlp jnlp, String mainClass, Bundle bundle, HttpServletRequest request)
     {
-        String name = null;
+        String appletName = null;
         if (getRequestParam(request, TITLE, null) != null)
-            name = getRequestParam(request, TITLE, null);
+            appletName = getRequestParam(request, TITLE, null);
         else if (getBundleProperty(bundle, Constants.BUNDLE_NAME) != null)
-            name = getBundleProperty(bundle, Constants.BUNDLE_NAME);
+            appletName = getBundleProperty(bundle, Constants.BUNDLE_NAME);
         else if (getBundleProperty(bundle, Constants.BUNDLE_SYMBOLICNAME) != null)
-            name = getBundleProperty(bundle, Constants.BUNDLE_SYMBOLICNAME);
+            appletName = getBundleProperty(bundle, Constants.BUNDLE_SYMBOLICNAME);
         else
-            name = "Jnlp Application";
+            appletName = "Jnlp Application";
     	if (jnlp.getAppletDesc() == null)
     		jnlp.setAppletDesc(new AppletDesc());
     	AppletDesc appletDesc = jnlp.getAppletDesc();
     	appletDesc.setMainClass(mainClass);
-    	appletDesc.setName(name);
+    	appletDesc.setName(appletName);
     	appletDesc.setWidth((request.getParameter(WIDTH) != null) ? request.getParameter(WIDTH) : "350");
     	appletDesc.setHeight((request.getParameter(HEIGHT) != null) ? request.getParameter(HEIGHT) : "600");
+        
+        List<Param> params = appletDesc.getParamList();
+        if (params == null)
+            appletDesc.setParamList(params = new ArrayList<Param>());
+        @SuppressWarnings("unchecked")
+        Enumeration<String> names = request.getParameterNames();
+        while (names.hasMoreElements())
+        {
+            String name = names.nextElement();
+            if (isServletParam(name))
+                continue;
+            String value = request.getParameter(name);
+            Param argument = new Param();
+            argument.setName(name);
+            if (value != null)
+                argument.setValue(value);
+            params.add(argument);
+        }
+    }
+
+    /**
+     * Is this a servlet param (that I should not pass to the applications)?
+     * @param name
+     * @return
+     */
+    private boolean isServletParam(String name)
+    {
+        if (name == null)
+            return false;
+        if (name.startsWith("org.jbundle"))
+            return true;
+        return false;
     }
     
     /**
