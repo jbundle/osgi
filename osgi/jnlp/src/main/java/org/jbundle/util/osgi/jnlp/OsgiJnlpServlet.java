@@ -108,6 +108,11 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public static final String MAX_HEAP_SIZE = "maxHeapSize";
     public static final String WIDTH = "width";
     public static final String HEIGHT = "height";
+    public static final String INCLUDE = "include";
+    public static final String EXCLUDE = "exclude";
+
+    public static final String INCLUDE_DEFAULT = "org\\.jbundle\\..*|biz\\.source_code\\..*";//null;
+    public static final String EXCLUDE_DEFAULT = null;//"org\\.osgi\\..*";
 
     // Deploy param
     public static final String CONTEXT_PATH = "jbundle.jnlp.contextpath";
@@ -310,14 +315,17 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 				
 		setJ2se(jnlp, bundle, request);
 		
+        String regexInclude = getRequestParam(request, INCLUDE, INCLUDE_DEFAULT);
+        String regexExclude = getRequestParam(request, EXCLUDE, EXCLUDE_DEFAULT);
+
 		Changes bundleChanged = Changes.UNKNOWN;
 		bundleChanged = addBundle(jnlp, bundle, Main.TRUE, forceScanBundle, bundleChanged);
 		isNewBundle(bundle, bundles);	// Add only once
 		
-		bundleChanged = addDependentBundles(jnlp, getBundleProperty(bundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged);
+		bundleChanged = addDependentBundles(jnlp, getBundleProperty(bundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude);
 		
 		if (request.getParameter(OTHER_PACKAGES) != null)
-		    bundleChanged = addDependentBundles(jnlp, request.getParameter(OTHER_PACKAGES).toString(), bundles, forceScanBundle, bundleChanged);
+		    bundleChanged = addDependentBundles(jnlp, request.getParameter(OTHER_PACKAGES).toString(), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude);
         
 		if (request.getParameter(MAIN_CLASS) != null)
 			setApplicationDesc(jnlp, mainClass);
@@ -554,9 +562,9 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	 * @param forceScanBundle Scan the bundle for package names even if the cache is current
      * @return true if the bundle has changed from last time
 	 */
-	public Changes addDependentBundles(Jnlp jnlp, String importPackage, Set<Bundle> bundles, boolean forceScanBundle, Changes bundleChanged)
+	public Changes addDependentBundles(Jnlp jnlp, String importPackage, Set<Bundle> bundles, boolean forceScanBundle, Changes bundleChanged, String regexInclude, String regexExclude)
 	{
-		String[] packages = parseHeader(importPackage);
+		String[] packages = parseHeader(importPackage, regexInclude, regexExclude);
 		for (String packageName : packages)
 		{
 			String properties[] = parseImport(packageName);
@@ -566,7 +574,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 			if (isNewBundle(subBundle, bundles))
 			{
 				bundleChanged = addBundle(jnlp, subBundle, Main.FALSE, forceScanBundle, bundleChanged);
-				bundleChanged = addDependentBundles(jnlp, getBundleProperty(subBundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged);	// Recursive
+				bundleChanged = addDependentBundles(jnlp, getBundleProperty(subBundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude);	// Recursive
 			}
 		}
 		return bundleChanged;
@@ -939,9 +947,9 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      * @param value
      * @return
      */
-    static public String[] parseHeader(String value) {
+    static public String[] parseHeader(String value, String regexInclude, String regexExclude) {
 
-    	if (value == null)
+        if (value == null)
     		return EMPTY_ARRAY;
     	String[] properties = value.split(",");
     	for (int i = 0; i < properties.length; i++)
@@ -956,6 +964,12 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 	    			properties[j] = "";
     			}
     		}
+    		if (regexExclude != null)
+    		    if (properties[i].matches(regexExclude))
+    		        properties[i] = "";
+            if (regexInclude != null)
+                if (!properties[i].matches(regexInclude))
+                    properties[i] = "";
     	}
     	return properties;
     }

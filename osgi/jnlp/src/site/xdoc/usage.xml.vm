@@ -57,6 +57,8 @@ initialHeapSize - Initial heap size
 maxHeapSize - Maximum heap size
 width - Applet width
 height - Applet height
+include - A regular expression specifying with packages to include
+exclude - A regular expression specifying with packages to exclude
 
  <b>Deploy param:</b>
 jbundle.jnlp.contextpath - The url path to deploy the servlet (defaults to '/jnlp')
