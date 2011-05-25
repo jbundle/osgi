@@ -89,8 +89,9 @@ deployJava.runApplet(attributes, parameters, '1.6');
 There is also a built-in web page for displaying your applets. It is located at <code>docs/applet.html</code>.
 All parameters are automatically passed to the web start servlet. Your url should look something like this:<br/>
 <code>
-<a href="http://localhost:8080/jnlp/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm">http://localhost:8080/jnlp/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm</a>
+<a href="http://localhost:8080/jnlp/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm&amp;language=es">http://localhost:8080/jnlp/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm&amp;language=es</a>
 </code>
+This example also shows how to pass a parameter (language=es) to an application or applet.
 </p>
 </subsection>
 
