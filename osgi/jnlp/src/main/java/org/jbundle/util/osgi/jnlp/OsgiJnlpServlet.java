@@ -116,7 +116,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public static final String CODEBASE = "codebase";
 
     public static final String INCLUDE_DEFAULT = null;  // "org\\.jbundle\\..*|biz\\.source_code\\..*|com\\.tourapp\\..*";
-    public static final String EXCLUDE_DEFAULT = null;  // "org\\.osgi\\..*";
+    public static final String EXCLUDE_DEFAULT = "org\\.osgi\\..*";
 
     // Deploy param
     public static final String CONTEXT_PATH = PARAM_PREFIX + "contextpath";
