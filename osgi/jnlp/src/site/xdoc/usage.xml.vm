@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
   <properties>
-    <title>OSGi to JNLP Web Start Servlet</title>
+    <title>OSGi to JNLP Web Start Web Bundle</title>
     <author email="don@donandann.com">Don Corley</author>
   </properties>
 
@@ -16,20 +16,20 @@
 
 <section name="OSGi to Web Start usage">
 <p>
-Using the OSGi to Web Start servlet is easy. The only required parameter is the main class name.
+Using the OSGi to Web Start Web Bundle is easy. The only required parameter is the main class name.
 All of the other information that Web Start needs come from the OSGi bundles.
 </p>
 <p>
 <ul>
-<li><a href="#Servlet parameters">Servlet parameters</a></li>
+<li><a href="#Web Bundle parameters">Web Bundle parameters</a></li>
 <li><a href="#Web Start Applet">Creating a Web Start Applet</a></li>
 <li><a href="#Advanced usage">Advanced usage</a></li>
 </ul>
 </p>
 
-<subsection name="Servlet parameters">
+<subsection name="Web Bundle parameters">
 <p>
-Here are the url parameter that you supply so the OSGi to Web Start Servlet can create the
+Here are the url parameter that you supply so the OSGi to Web Start Web Bundle can create the
 correct JNLP and jar files for your web application or applet. Any unknown params are passed
 down to the application or applet.<br/>
 Your url should look something like this:<br/>
@@ -67,7 +67,7 @@ Note: All parameters (including these system params) are passed to the applet/ap
 If you don't want these params passed to your application, prefix them with 'org.jbundle.util.osgi.jnlp.'.
 
  <b>Deploy param:</b>
-org.jbundle.util.osgi.jnlp.contextpath - The url path to deploy the servlet (defaults to '/jnlp')
+org.jbundle.util.osgi.jnlp.contextpath - The url path to deploy the web bundle (defaults to '/jnlp')
 
 </source>
 </p>
@@ -75,7 +75,7 @@ org.jbundle.util.osgi.jnlp.contextpath - The url path to deploy the servlet (def
 
 <subsection name="Web Start Applet">
 <p>
-The OSGi to Web Start Servlet can also create a Web Start Applet. Just supply the main class
+The OSGi to Web Start Web Bundle can also create a Web Start Applet. Just supply the main class
 name in the appletClass parameter rather than the mainClass parameter.
 </p>
 <p>
@@ -91,7 +91,7 @@ deployJava.runApplet(attributes, parameters, '1.6');
 &lt;/script&gt;
 </source>
 There is also a built-in web page for displaying your applets. It is located at <code>docs/applet.html</code>.
-All parameters are automatically passed to the web start servlet. Your url should look something like this:<br/>
+All parameters are automatically passed to the web start web bundle. Your url should look something like this:<br/>
 <code>
 <a href="http://localhost:8080/jnlp/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm&amp;language=es">http://localhost:8080/jnlp/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm&amp;language=es</a>
 </code>
@@ -103,14 +103,14 @@ This example also shows how to pass a parameter (language=es) to an application 
 <p>
 If you really want to make your life easy, use the automatic OSGi bundle retrieval system.
 This code automatically finds, deploys, installs, and starts any bundles that are required
-for a JNLP servlet.
+for a JNLP Web Bundle.
 </p>
 <p>
 All you have to do is start the ${project.groupId}.obr module and add all your
 obr indexes to your OSGi implementation. Any required bundles are added automagically!
 </p>
 <p>
-This servlet can be used to launch a very complicated jnlp project. For Example:<br/>
+This web bundle can be used to launch a very complicated jnlp project. For Example:<br/>
 <code>
 <a href="http://localhost:8080/jnlp/docs?mainClass=org.jbundle.Main&amp;codebase=/&amp;connectionType=Proxy&amp;include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;otherPackages=org.jbundle.base.db.client,org.jbundle.base.db.proxy,com.tourapp.tour.booking.db">
          http://localhost:8080/jnlp/docs?mainClass=org.jbundle.Main&amp;codebase=/&amp;connectionType=Proxy&amp;include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;otherPackages=org.jbundle.base.db.client,org.jbundle.base.db.proxy,com.tourapp.tour.booking.db

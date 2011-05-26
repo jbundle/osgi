@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
   <properties>
-    <title>OSGi to JNLP Web Start Servlet</title>
+    <title>OSGi to JNLP Web Start Web Bundle</title>
     <author email="don@donandann.com">Don Corley</author>
   </properties>
 
@@ -17,7 +17,7 @@
      <section name="Quick Start Example">
 
 <p>
-Here's a quick example of the OSGi to JNLP servlet.
+Here's a quick example of the OSGi to JNLP Web Bundle.
 </p>
 <p>
 Let's start with a simple OSGi program that has three dependent OSGi modules.
@@ -37,12 +37,12 @@ cd felix<br/>
 java -jar bin/felix.jar<br/>
 <span class="response">g!</span> deploy -s 'Apache Felix Http Jetty'<span class="comment">(Start a web server)</span><br/>
 <span class="response">g!</span> repos add ${project.organization.url}/${OBRRepositoryIndex} <span class="comment">(Adding the jbundle obr index simplifies installing bundles)</span><br/>
-<span class="response">g!</span> deploy -s '${project.name}' <span class="comment">(Install and start the OSGi to JNLP servlet)</span><br/>
+<span class="response">g!</span> deploy -s '${project.name}' <span class="comment">(Install and start the OSGi to JNLP Web Bundle)</span><br/>
 <span class="response">g!</span> deploy 'jbundle-util-biorhythm' <span class="comment">(Install our OSGi project and its dependencies)</span><br/>
 </source>
 </p>
 <p>
-Step 3: Start your Web Browser and try the OSGi to Web Start Servlet. Type in this url:<br/>
+Step 3: Start your Web Browser and try the OSGi to Web Start Web Bundle. Type in this url:<br/>
 <source>
 <a href="http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
 </source>

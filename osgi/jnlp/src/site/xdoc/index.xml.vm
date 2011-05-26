@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
   <properties>
-    <title>OSGi to JNLP Web Start Servlet</title>
+    <title>OSGi to JNLP Web Start Web Bundle</title>
     <author email="don@donandann.com">Don Corley</author>
   </properties>
 
@@ -16,7 +16,7 @@
 
      <section name="Description">
 
-  <p>The <a href="http://www.jbundle.org">jbundle.org</a> <strong>OSGi to Web Start Servlet</strong> automatically allows your OSGi
+  <p>The <a href="http://www.jbundle.org">jbundle.org</a> <strong>OSGi to Web Start Web Bundle</strong> automatically allows your OSGi
   applications to run as Web Start applets or applications.</p>
 
 <p>
@@ -33,7 +33,7 @@ All you have to do is specify java the main class in your url. For example:<br/>
 <a href="http://www.jbundle.org/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://www.jbundle.org/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
 </code>
 is all you would need to type to launch the OSGi Biorhythm program from a web browser.
-The OSGi to Web Start servlet takes care of all the Web Start configuration. It even automatically
+The OSGi to Web Start Web Bundle takes care of all the Web Start configuration. It even automatically
 updates the cached jnlp and java jar files when the OSGi bundles are updated.
 </p>
 
@@ -42,13 +42,13 @@ updates the cached jnlp and java jar files when the OSGi bundles are updated.
 <p>
 <ul>
 <li><a href="example.html">Example</a> (Under 2 minutes).</li>
-<li><a href="usage.html">Servlet Usage information.</a> (API and servlet parameters)</li>
+<li><a href="usage.html">Web Bundle Usage information.</a> (API and servlet parameters)</li>
 </ul>
 </p>
 
 <subsection name="OSGi packaging">
 <p>
-The <strong>jbundle OSGi to Web Start servlet</strong> is an <a href="http://www.osgi.org">OSGi</a> bundle.
+The <strong>jbundle OSGi to Web Start Web Bundle</strong> is an <a href="http://www.osgi.org">OSGi</a> bundle.
 To use it in your OSGi project, just install and start this bundle in your OSGi environment.
 Remember to start a web server too.
 </p>
@@ -63,7 +63,7 @@ Import-Package: ${project.artifactId};resolution:=optional;version=${project.ver
 
 <subsection name="Maven Integration">
 <p>
-The <strong>jbundle OSGi to JNLP servlet</strong> is a standard <a href="http://maven.apache.org/">Maven</a> artifact. Here is its dependency information:
+The <strong>jbundle OSGi to JNLP Web Bundle</strong> is a standard <a href="http://maven.apache.org/">Maven</a> artifact. Here is its dependency information:
 </p>
 <p>
 <source>
