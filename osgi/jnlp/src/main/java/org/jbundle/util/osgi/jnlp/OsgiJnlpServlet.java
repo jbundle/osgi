@@ -89,6 +89,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public static final String JNLP_MIME_TYPE = "application/x-java-jnlp-file";
     public final static String OUTPUT_ENCODING = "UTF-8";
 
+    public static final String PARAM_PREFIX = "org.jbundle.util.osgi.jnlp.";
     // Servlet params
     public static final String MAIN_CLASS = "mainClass";
     public static final String APPLET_CLASS = "appletClass";
@@ -114,11 +115,11 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public static final String EXCLUDE = "exclude";
     public static final String CODEBASE = "codebase";
 
-    public static final String INCLUDE_DEFAULT = "org\\.jbundle\\..*|biz\\.source_code\\..*";//null;
-    public static final String EXCLUDE_DEFAULT = null;//"org\\.osgi\\..*";
+    public static final String INCLUDE_DEFAULT = null;  // "org\\.jbundle\\..*|biz\\.source_code\\..*|com\\.tourapp\\..*";
+    public static final String EXCLUDE_DEFAULT = null;  // "org\\.osgi\\..*";
 
     // Deploy param
-    public static final String CONTEXT_PATH = "jbundle.jnlp.contextpath";
+    public static final String CONTEXT_PATH = PARAM_PREFIX + "contextpath";
     
     BundleContext context = null;
 
@@ -177,7 +178,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      */
     public boolean isJnlp(HttpServletRequest request)
     {
-        if ((request.getParameter(MAIN_CLASS) != null) || (request.getParameter(APPLET_CLASS) != null))
+        if ((getRequestParam(request, MAIN_CLASS, null) != null) || (getRequestParam(request, APPLET_CLASS, null) != null))
             if (!request.getRequestURI().toUpperCase().endsWith(".HTML"))
                 if (!request.getRequestURI().toUpperCase().endsWith(".HTM"))
                     return true;
@@ -201,7 +202,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 
 			Jnlp jnlp = null;
 			
-			String template = request.getParameter(TEMPLATE);
+			String template = getRequestParam(request, TEMPLATE, null);
 			if (template == null)
 				jnlp = new Jnlp();
 			else
@@ -304,8 +305,10 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     {
     	Set<Bundle> bundles = new HashSet<Bundle>();	// Bundle list
 
-		String mainClass = (request.getParameter(MAIN_CLASS) != null) ? request.getParameter(MAIN_CLASS) : request.getParameter(APPLET_CLASS);
-		String version = request.getParameter(VERSION);
+		String mainClass = getRequestParam(request, MAIN_CLASS, null);
+		if (mainClass == null)
+		    mainClass = getRequestParam(request, APPLET_CLASS, null);
+		String version = getRequestParam(request, VERSION, null);
 		String packageName = ClassFinderActivator.getPackageName(mainClass, false);
 		Bundle bundle = findBundle(packageName, version);
 
@@ -328,10 +331,10 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 		
 		bundleChanged = addDependentBundles(jnlp, getBundleProperty(bundle, Constants.IMPORT_PACKAGE), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude, pathToJars);
 		
-		if (request.getParameter(OTHER_PACKAGES) != null)
-		    bundleChanged = addDependentBundles(jnlp, request.getParameter(OTHER_PACKAGES).toString(), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude, pathToJars);
+		if (getRequestParam(request, OTHER_PACKAGES, null) != null)
+		    bundleChanged = addDependentBundles(jnlp, getRequestParam(request, OTHER_PACKAGES, null).toString(), bundles, forceScanBundle, bundleChanged, regexInclude, regexExclude, pathToJars);
         
-		if (request.getParameter(MAIN_CLASS) != null)
+		if (getRequestParam(request, MAIN_CLASS, null) != null)
 			setApplicationDesc(jnlp, mainClass, request);
 		else
 			setAppletDesc(jnlp, mainClass, bundle, request);
@@ -349,7 +352,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
         String respath = request.getRequestURI();
         if (respath == null)
         	respath = "";
-        String codebaseParam = request.getParameter(CODEBASE);
+        String codebaseParam = getRequestParam(request, CODEBASE, null);
         int idx = respath.lastIndexOf('/');
         if (codebaseParam != null)
             if (respath.indexOf(codebaseParam) != -1)
@@ -369,7 +372,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
         String respath = request.getRequestURI();
         if (respath == null)
         	respath = "";
-        String codebaseParam = request.getParameter(CODEBASE);
+        String codebaseParam = getRequestParam(request, CODEBASE, null);
         int idx = respath.lastIndexOf('/');
         if (codebaseParam != null)
             if (respath.indexOf(codebaseParam) != -1)
@@ -385,7 +388,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      */
     private String getPathToJars(HttpServletRequest request)
     {
-        String codebaseParam = request.getParameter(CODEBASE);
+        String codebaseParam = getRequestParam(request, CODEBASE, null);
         if ((codebaseParam == null) || (codebaseParam.length() == 0))
                 return "";
         String pathToJars = request.getRequestURI();
@@ -477,7 +480,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	if (information.getIconList().size() == 0)
     	{
 	    	Icon icon = new Icon();
-	    	icon.setHref(getRequestParam(request, ICON, "images/icons/jbundle32.jpg"));
+	    	icon.setHref(getRequestParam(request, ICON, getPathToJars(request) + "images/icons/jbundle32.jpg"));
 	    	information.getIconList().add(icon);
     	}
     	
@@ -485,12 +488,12 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	information.setOfflineAllowed(offlineAllowed);
     	
     	Shortcut shortcut = new Shortcut();
-    	if (Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(ONLINE)))
+    	if (Boolean.TRUE.toString().equalsIgnoreCase(getRequestParam(request, ONLINE, null)))
     		shortcut.setOnline(Online.TRUE);
     	else
     		shortcut.setOnline(Online.FALSE);	// Default
     	information.setShortcut(shortcut);
-    	if (Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter(DESKTOP)))
+    	if (Boolean.TRUE.toString().equalsIgnoreCase(getRequestParam(request, DESKTOP, null)))
     	{
     		Desktop desktop = new Desktop();
     		shortcut.setDesktop(desktop);
@@ -514,9 +517,9 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 		Java java = new Java();
 		choice.setJava(java);
 		java.setVersion(getRequestParam(request, JAVA_VERSION, "1.6+"));
-		if (request.getParameter(INITIAL_HEAP_SIZE) != null)
+		if (getRequestParam(request, INITIAL_HEAP_SIZE, null) != null)
 		    java.setInitialHeapSize(getRequestParam(request, INITIAL_HEAP_SIZE, null));
-        if (request.getParameter(MAX_HEAP_SIZE) != null)
+        if (getRequestParam(request, MAX_HEAP_SIZE, null) != null)
             java.setMaxHeapSize(getRequestParam(request, MAX_HEAP_SIZE, null));
 	}
     
@@ -828,6 +831,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	while (names.hasMoreElements())
     	{
     	    String name = names.nextElement();
+            if (isServletParam(name))
+                continue;
     	    String value = request.getParameter(name);
     	    if (value != null)
     	        name = name + "=" + value;
@@ -858,8 +863,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	AppletDesc appletDesc = jnlp.getAppletDesc();
     	appletDesc.setMainClass(mainClass);
     	appletDesc.setName(appletName);
-    	appletDesc.setWidth((request.getParameter(WIDTH) != null) ? request.getParameter(WIDTH) : "350");
-    	appletDesc.setHeight((request.getParameter(HEIGHT) != null) ? request.getParameter(HEIGHT) : "600");
+    	appletDesc.setWidth(getRequestParam(request, WIDTH, "350"));
+    	appletDesc.setHeight(getRequestParam(request, HEIGHT, "600"));
         
         List<Param> params = appletDesc.getParamList();
         if (params == null)
@@ -889,7 +894,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     {
         if (name == null)
             return false;
-        if (name.startsWith("org.jbundle"))
+        if (name.startsWith(PARAM_PREFIX))
             return true;
         return false;
     }
@@ -1071,9 +1076,13 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 
     public static String getRequestParam(HttpServletRequest request, String param, String defaultValue)
     {
-    	String value = request.getParameter(param);
+    	String value = request.getParameter(PARAM_PREFIX + param);
     	if (value == null)
-    		return defaultValue;
+    	{
+    	    value = request.getParameter(param);
+            if (value == null)
+                return defaultValue;
+    	}
     	return value;
     }
     

@@ -10,11 +10,11 @@
   </parent>
 
   <groupId>org.jbundle.util</groupId>
-  <artifactId>jbundle-util-util-reactor</artifactId>
+  <artifactId>jbundle-util-reactor</artifactId>
   <version>0.7.7-SNAPSHOT</version>
 
   <packaging>pom</packaging>
-  <name>jbundle-util-util-reactor - Standalone utilities parent</name>
+  <name>jbundle-util-reactor - Standalone utilities parent</name>
 
   <modules>
     <module>apprunner</module>

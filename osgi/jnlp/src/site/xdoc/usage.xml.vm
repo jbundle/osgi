@@ -41,7 +41,8 @@ Your url should look something like this:<br/>
 mainClass - The java class with the main method
 appletClass - The main applet class
 version - The bundle version to deploy
-otherPackages - Comma separated list of other packages to include
+otherPackages - Comma separated list of other packages to include (if you use &lt;DynamicImport-Package&gt;)
+(Note: All packages in the target bundle will be included)
 template - Path name to a starting jnlp file
     
  <b>Optional params - Default to values in OSGi headers</b>
@@ -62,8 +63,11 @@ include - A regular expression specifying with packages to include
 exclude - A regular expression specifying with packages to exclude
 codebase - The codebase of the application (defaults to contextPath/)
 
+Note: All parameters (including these system params) are passed to the applet/application.
+If you don't want these params passed to your application, prefix them with 'org.jbundle.util.osgi.jnlp.'.
+
  <b>Deploy param:</b>
-jbundle.jnlp.contextpath - The url path to deploy the servlet (defaults to '/jnlp')
+org.jbundle.util.osgi.jnlp.contextpath - The url path to deploy the servlet (defaults to '/jnlp')
 
 </source>
 </p>
@@ -105,7 +109,16 @@ for a JNLP servlet.
 All you have to do is start the ${project.groupId}.obr module and add all your
 obr indexes to your OSGi implementation. Any required bundles are added automagically!
 </p>
+<p>
+This servlet can be used to launch a very complicated jnlp project. For Example:<br/>
+<code>
+<a href="http://localhost:8080/jnlp/docs?mainClass=org.jbundle.Main&amp;codebase=/&amp;connectionType=Proxy&amp;include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;otherPackages=org.jbundle.base.db.client,org.jbundle.base.db.proxy,com.tourapp.tour.booking.db">
+         http://localhost:8080/jnlp/docs?mainClass=org.jbundle.Main&amp;codebase=/&amp;connectionType=Proxy&amp;include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;otherPackages=org.jbundle.base.db.client,org.jbundle.base.db.proxy,com.tourapp.tour.booking.db
+</a>
+</code>
+</p>
 </subsection>
+
     </section>
 
   </body>
