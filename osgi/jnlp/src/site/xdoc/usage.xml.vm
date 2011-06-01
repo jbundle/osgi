@@ -115,6 +115,10 @@ This web bundle can be used to launch a very complicated jnlp project. For Examp
 <a href="http://localhost:8080/webstart/docs?mainClass=org.jbundle.Main&amp;codebase=/&amp;connectionType=Proxy&amp;include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;otherPackages=org.jbundle.base.db.client,org.jbundle.base.db.proxy,com.tourapp.tour.booking.db">
          http://localhost:8080/webstart/docs?mainClass=org.jbundle.Main&amp;codebase=/&amp;connectionType=Proxy&amp;include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;otherPackages=org.jbundle.base.db.client,org.jbundle.base.db.proxy,com.tourapp.tour.booking.db
 </a>
+Here is a thin client in an applet using fully qualified parameter names:<br/>
+<a href="http://localhost:8080/webstart/docs/applet.html?org.jbundle.util.osgi.jnlp.appletClass=org.jbundle.thin.Thin&amp;menu=Thin&amp;org.jbundle.util.osgi.jnlp.codebase=/&amp;org.jbundle.util.osgi.jnlp.connectionType=Proxy&amp;org.jbundle.util.osgi.jnlp.include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;org.jbundle.util.osgi.jnlp.otherPackages=org.jbundle.thin.main.db,org.jbundle.res.images.buttons">
+         http://localhost:8080/webstart/docs/applet.html?org.jbundle.util.osgi.jnlp.appletClass=org.jbundle.thin.Thin&amp;menu=Thin&amp;org.jbundle.util.osgi.jnlp.codebase=/&amp;org.jbundle.util.osgi.jnlp.connectionType=Proxy&amp;org.jbundle.util.osgi.jnlp.include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;org.jbundle.util.osgi.jnlp.otherPackages=org.jbundle.thin.main.db,org.jbundle.res.images.buttons
+</a>
 </code>
 </p>
 </subsection>
