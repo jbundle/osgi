@@ -44,7 +44,7 @@ java -jar bin/felix.jar<br/>
 <p>
 Step 3: Start your Web Browser and try the OSGi to Web Start Web Bundle. Type in this url:<br/>
 <source>
-<a href="http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
+<a href="http://localhost:8080/webstart/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://localhost:8080/webstart/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
 </source>
 You should see a screen like this:<br/>
 <img src="./images/screen.jpg"/>

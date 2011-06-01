@@ -34,7 +34,7 @@ correct JNLP and jar files for your web application or applet. Any unknown param
 down to the application or applet.<br/>
 Your url should look something like this:<br/>
 <code>
-<a href="http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://localhost:8080/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
+<a href="http://localhost:8080/webstart/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://localhost:8080/webstart/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
 </code>
 <source>
  <b>Main params:</b>
@@ -67,7 +67,7 @@ Note: All parameters (including these system params) are passed to the applet/ap
 If you don't want these params passed to your application, prefix them with 'org.jbundle.util.osgi.jnlp.'.
 
  <b>Deploy param:</b>
-org.jbundle.util.osgi.jnlp.contextpath - The url path to deploy the web bundle (defaults to '/jnlp')
+org.jbundle.util.osgi.jnlp.contextpath - The url path to deploy the web bundle (defaults to '/webstart')
 
 </source>
 </p>
@@ -86,14 +86,14 @@ Here is an html snippet:
 
 &lt;script&gt; 
 var attributes = {width: '350', height: '500', name: 'My Applet'} ; 
-var parameters = {jnlp_href: '/jnlp/applet?appletClass=org.jbundle.util.biorhythm.Biorhythm', draggable:'true'} ; 
+var parameters = {jnlp_href: '/webstart/applet?appletClass=org.jbundle.util.biorhythm.Biorhythm', draggable:'true'} ; 
 deployJava.runApplet(attributes, parameters, '1.6'); 
 &lt;/script&gt;
 </source>
 There is also a built-in web page for displaying your applets. It is located at <code>docs/applet.html</code>.
 All parameters are automatically passed to the web start web bundle. Your url should look something like this:<br/>
 <code>
-<a href="http://localhost:8080/jnlp/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm&amp;language=es">http://localhost:8080/jnlp/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm&amp;language=es</a>
+<a href="http://localhost:8080/webstart/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm&amp;language=es">http://localhost:8080/webstart/docs/applet.html?appletClass=org.jbundle.util.biorhythm.Biorhythm&amp;language=es</a>
 </code>
 This example also shows how to pass a parameter (language=es) to an application or applet.
 </p>
@@ -112,8 +112,8 @@ obr indexes to your OSGi implementation. Any required bundles are added automagi
 <p>
 This web bundle can be used to launch a very complicated jnlp project. For Example:<br/>
 <code>
-<a href="http://localhost:8080/jnlp/docs?mainClass=org.jbundle.Main&amp;codebase=/&amp;connectionType=Proxy&amp;include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;otherPackages=org.jbundle.base.db.client,org.jbundle.base.db.proxy,com.tourapp.tour.booking.db">
-         http://localhost:8080/jnlp/docs?mainClass=org.jbundle.Main&amp;codebase=/&amp;connectionType=Proxy&amp;include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;otherPackages=org.jbundle.base.db.client,org.jbundle.base.db.proxy,com.tourapp.tour.booking.db
+<a href="http://localhost:8080/webstart/docs?mainClass=org.jbundle.Main&amp;codebase=/&amp;connectionType=Proxy&amp;include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;otherPackages=org.jbundle.base.db.client,org.jbundle.base.db.proxy,com.tourapp.tour.booking.db">
+         http://localhost:8080/webstart/docs?mainClass=org.jbundle.Main&amp;codebase=/&amp;connectionType=Proxy&amp;include=org\.jbundle\..*|biz\.source_code\..*|com\.tourapp\..*&amp;otherPackages=org.jbundle.base.db.client,org.jbundle.base.db.proxy,com.tourapp.tour.booking.db
 </a>
 </code>
 </p>

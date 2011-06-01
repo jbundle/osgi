@@ -30,7 +30,7 @@ converter will automatically create JNLP and jar files from OSGi dependencies.
 <p>
 All you have to do is specify java the main class in your url. For example:<br/>
 <code>
-<a href="http://www.jbundle.org/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://www.jbundle.org/jnlp/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
+<a href="http://www.jbundle.org/webstart/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://www.jbundle.org/webstart/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
 </code>
 is all you would need to type to launch the OSGi Biorhythm program from a web browser.
 The OSGi to Web Start Web Bundle takes care of all the Web Start configuration. It even automatically

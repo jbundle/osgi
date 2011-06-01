@@ -279,7 +279,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
         
         InputStream inStream = new FileInputStream(file);
         OutputStream writer = response.getOutputStream();
-        copyStream(inStream, writer);
+        copyStream(inStream, writer, true); // Ignore errors, as browsers do weird things
         inStream.close();
         writer.close();
         return true;    // Success - I returned the cached copy
@@ -719,7 +719,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
         	        zos.putNextEntry(e);
         	        if (!isDir) {
         		        InputStream inStream = url.openStream();
-        		        copyStream(inStream, zos);
+        		        copyStream(inStream, zos, false);
         	            inStream.close();
         	        }
         	        zos.closeEntry();
@@ -975,7 +975,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 
         // Todo may want to add cache info (using bundle lastModified).
         OutputStream writer = response.getOutputStream();
-        copyStream(inStream, writer);
+        copyStream(inStream, writer, true); // Ignore errors, as browsers do weird things
         writer.close();
         return true;
     }
@@ -1060,7 +1060,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	return properties;
     }
 	static final int BUFFER = 2048;
-    public static void copyStream(InputStream inStream, OutputStream outStream)
+    public static void copyStream(InputStream inStream, OutputStream outStream, boolean ignoreErrors)
     {
     	byte[] data = new byte[BUFFER];
         int count;
@@ -1070,7 +1070,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 				outStream.write(data, 0, count);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+		    if (!ignoreErrors)
+		        e.printStackTrace();
 		}    	
     }
 

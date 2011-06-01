@@ -22,7 +22,7 @@ public class HttpServiceTracker extends ServiceTracker{
 	// Set this param to change root URL
 	public static final String WEB_CONTEXT = "org.jbundle.web.webcontext";
 	
-	String webContextPath = null;
+	String contextPath = null;
 	
 	/**
 	 * Constructor - Listen for HttpService.
@@ -40,9 +40,9 @@ public class HttpServiceTracker extends ServiceTracker{
         
         try {
         	HttpContext httpContext = null;	// new MyHttpContext(context.getBundle());
-        	String contextPath = context.getProperty(OsgiJnlpServlet.CONTEXT_PATH);
+        	contextPath = context.getProperty(OsgiJnlpServlet.CONTEXT_PATH);
         	if (contextPath == null)
-        	    contextPath = "/jnlp";
+        	    contextPath = "/webstart";
         	Servlet servlet = new OsgiJnlpServlet(context);
             Dictionary<String,String> dictionary = new Hashtable<String,String>();
 	        httpContext = new JnlpHttpContext(context.getBundle());
@@ -59,8 +59,7 @@ public class HttpServiceTracker extends ServiceTracker{
      */
     public void removedService(ServiceReference reference, Object service) {
         HttpService httpService = (HttpService) service;
-        String fullPath = "/jnlp";
-        httpService.unregister(fullPath);
+        httpService.unregister(contextPath);
         super.removedService(reference, service);
     }
     
