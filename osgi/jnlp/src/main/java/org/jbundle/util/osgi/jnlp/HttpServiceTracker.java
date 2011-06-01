@@ -24,7 +24,9 @@ public class HttpServiceTracker extends ServiceTracker{
 	
 	String contextPath = null;
 	
-	/**
+	OsgiJnlpServlet servlet = null; // new MyHttpContext(context.getBundle());
+
+    /**
 	 * Constructor - Listen for HttpService.
 	 * @param context
 	 */
@@ -39,13 +41,12 @@ public class HttpServiceTracker extends ServiceTracker{
         HttpService httpService = (HttpService) context.getService(reference);
         
         try {
-        	HttpContext httpContext = null;	// new MyHttpContext(context.getBundle());
         	contextPath = context.getProperty(OsgiJnlpServlet.CONTEXT_PATH);
         	if (contextPath == null)
         	    contextPath = "/webstart";
-        	Servlet servlet = new OsgiJnlpServlet(context);
+        	servlet = new OsgiJnlpServlet(context);
             Dictionary<String,String> dictionary = new Hashtable<String,String>();
-	        httpContext = new JnlpHttpContext(context.getBundle());
+            JnlpHttpContext httpContext = new JnlpHttpContext(context.getBundle());
 	        httpService.registerServlet(contextPath, servlet, dictionary, httpContext);
         } catch (Exception e) {
             e.printStackTrace();
@@ -58,8 +59,9 @@ public class HttpServiceTracker extends ServiceTracker{
      * Http Service is down, remove my servlets.
      */
     public void removedService(ServiceReference reference, Object service) {
-        HttpService httpService = (HttpService) service;
-        httpService.unregister(contextPath);
+        if (servlet != null)
+            servlet.free();
+        ((HttpService)service).unregister(contextPath);
         super.removedService(reference, service);
     }
     

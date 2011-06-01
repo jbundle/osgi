@@ -73,6 +73,8 @@ import org.jibx.schema.net.java.jnlp_6_0._Package;
 import org.jibx.schema.net.java.jnlp_6_0._Package.Recursive;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 
 /**
@@ -122,6 +124,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     public static final String CONTEXT_PATH = PARAM_PREFIX + "contextpath";
     
     BundleContext context = null;
+    
+    Date lastBundleChange = null;
 
     enum Changes {
         UNKNOWN,
@@ -153,8 +157,34 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
      */
     public void init(BundleContext context) {
     	this.context = context;
+    	
+    	listener = new BundleChangeListener(this);
+    	context.addBundleListener(listener);
     }
     
+    BundleChangeListener listener = null;
+    public class BundleChangeListener implements BundleListener
+    {
+        OsgiJnlpServlet servlet = null;
+        public BundleChangeListener(OsgiJnlpServlet servlet)
+        {
+            this.servlet = servlet;
+        }
+        @Override
+        public void bundleChanged(BundleEvent event) {
+            if (event.getType() == BundleEvent.UPDATED)
+                servlet.lastBundleChange = new Date();   // Probably a better way to do this
+        }
+    }    
+    /**
+     * Free my resources.
+     */
+    public void free()
+    {
+        if (context != null)
+            if (listener != null)
+                context.removeBundleListener(listener);
+    }
     /**
      * Main entry point for a web get request.
      */
@@ -172,7 +202,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     }
     
     /**
-     * Is the a url for jnlp?
+     * Is this a url for jnlp?
      * @param request
      * @return
      */
@@ -214,7 +244,11 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 				jnlp = (Jnlp)unmarshaller.unmarshalDocument(inStream, OUTPUT_ENCODING);
 			}
 			
-			boolean forceScanBundle = !getJnlpFile(request).exists();
+			File jnlpFile = getJnlpFile(request);
+			boolean forceScanBundle = !jnlpFile.exists();
+			if (!forceScanBundle)
+			    if (checkBundleChanges(request, response, jnlpFile))
+			        return;   // Returned the cached jnlp or a cache up-to-date response
 			Changes bundleChanged = setupJnlp(jnlp, request, forceScanBundle);
             if (bundleChanged == Changes.UNKNOWN)
             {
@@ -226,7 +260,7 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
 			        setupJnlp(jnlp, request, true);  // Need to rescan everything
             if (bundleChanged == Changes.NONE)
             {   // Note: It may seem better to listen for bundle changes, but actually webstart uses the cached jnlp file
-                if (checkCache(request, response, getJnlpFile(request)))
+                if (checkCache(request, response, jnlpFile))
                     return;   // Returned the cached jnlp or a cache up-to-date response
             }
             // If bundleChanged == Changes.ALL need to return the new jnlp
@@ -234,19 +268,34 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
             IMarshallingContext marshaller = jc.createMarshallingContext();
             marshaller.setIndent(4);
 
-            File cacheFile = getJnlpFile(request);
-			Writer fileWriter = new FileWriter(cacheFile);
+			Writer fileWriter = new FileWriter(jnlpFile);
             marshaller.marshalDocument(jnlp, OUTPUT_ENCODING, null, fileWriter);   // Cache jnlp
             fileWriter.close();
-            Date lastModified = new Date(cacheFile.lastModified());
+            Date lastModified = new Date(jnlpFile.lastModified());
             response.addHeader(LAST_MODIFIED, getHttpDate(lastModified));
             
             PrintWriter writer = response.getWriter();
             marshaller.marshalDocument(jnlp, OUTPUT_ENCODING, null, writer);
+            lastBundleChange = lastModified;     // Use this cached file until bundles change
 		} catch (JiBXException e) {
 			e.printStackTrace();
 		}
 	}
+    /**
+     * If there have not been any bundle changes, return the cached jnlp file.
+     * @param request
+     * @param response
+     * @return
+     * @throws IOException
+     */
+    public boolean checkBundleChanges(HttpServletRequest request, HttpServletResponse response, File file) throws IOException
+    {
+        Date lastModified = new Date(file.lastModified());
+        if ((lastBundleChange == null)
+            || (lastBundleChange.after(lastModified)))
+                return false;
+        return checkCache(request, response, file);
+    }
     /**
      * Return http response that the cache is up-to-date.
      * @param request
