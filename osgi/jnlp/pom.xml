@@ -44,7 +44,7 @@
 	    <dependency>
 		    <groupId>org.jibx.schema.net.java</groupId>
 		    <artifactId>org.jibx.schema.net.java.jnlp_6_0</artifactId>
-		    <version>1.0.0-SNAPSHOT</version>
+		    <version>1.0.0</version>
 	    </dependency>
 
 		<dependency>
