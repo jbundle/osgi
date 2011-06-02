@@ -19,12 +19,11 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class HttpServiceTracker extends ServiceTracker{
 
-	// Set this param to change root URL
-	public static final String WEB_CONTEXT = "org.jbundle.web.webcontext";
-	
+    public static final String DEFAULT_CONTEXT_PATH = "/webstart";
+    
 	String contextPath = null;
 	
-	OsgiJnlpServlet servlet = null; // new MyHttpContext(context.getBundle());
+	OsgiJnlpServlet servlet = null;
 
     /**
 	 * Constructor - Listen for HttpService.
@@ -43,7 +42,7 @@ public class HttpServiceTracker extends ServiceTracker{
         try {
         	contextPath = context.getProperty(OsgiJnlpServlet.CONTEXT_PATH);
         	if (contextPath == null)
-        	    contextPath = "/webstart";
+        	    contextPath = DEFAULT_CONTEXT_PATH;
         	servlet = new OsgiJnlpServlet(context);
             Dictionary<String,String> dictionary = new Hashtable<String,String>();
             JnlpHttpContext httpContext = new JnlpHttpContext(context.getBundle());
@@ -59,9 +58,9 @@ public class HttpServiceTracker extends ServiceTracker{
      * Http Service is down, remove my servlets.
      */
     public void removedService(ServiceReference reference, Object service) {
+        ((HttpService)service).unregister(contextPath);
         if (servlet != null)
             servlet.free();
-        ((HttpService)service).unregister(contextPath);
         super.removedService(reference, service);
     }
     

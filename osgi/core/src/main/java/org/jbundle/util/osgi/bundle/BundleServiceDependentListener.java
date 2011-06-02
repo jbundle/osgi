@@ -41,7 +41,7 @@ public class BundleServiceDependentListener implements ServiceListener
 //x            	if (service instanceof BaseBundleService)
 //x            		bundleService = (BaseBundleService)service;
 //x            context.removeServiceListener(this);	// Don't need this anymore
-            bundleService.startupThisService((BundleService)service);
+            bundleService.startupThisService((BundleService)service, context);
         }
         if (event.getType() == ServiceEvent.UNREGISTERING)
         {

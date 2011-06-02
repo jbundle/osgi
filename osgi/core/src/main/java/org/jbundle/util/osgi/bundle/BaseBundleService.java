@@ -157,7 +157,7 @@ public class BaseBundleService extends Object
     {
     	BaseBundleService bundleService = (BaseBundleService)ClassFinderActivator.getClassFinder(bundleContext, -1).getClassBundleService(null, dependentBaseBundleClassName);
     	if (bundleService != null)
-    		return this.startupThisService(bundleService);	// TODO - Synchronization issue
+    		return this.startupThisService(bundleService, bundleContext);	// TODO - Synchronization issue
     	// Service has not started, so I need to start it and then listen
 		try {
 			bundleContext.addServiceListener(new BundleServiceDependentListener(this, bundleContext), /*"(&" +*/ "(objectClass=" + dependentBaseBundleClassName + ")");	// This will call startupThisService once the service is up
@@ -170,9 +170,10 @@ public class BaseBundleService extends Object
     /**
      * Start this service.
      * Override this to do all the startup.
+     * @param context TODO
      * @return true if successful.
      */
-    public boolean startupThisService(BundleService bundleService)
+    public boolean startupThisService(BundleService bundleService, BundleContext context)
     {
     	return true;
     }
