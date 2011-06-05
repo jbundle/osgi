@@ -1,1 +1,0 @@
-The documentation for JCalendar button is located <a href="http://jcalendarbutton.sourceforge.net/netbeans.html">here</a>.
