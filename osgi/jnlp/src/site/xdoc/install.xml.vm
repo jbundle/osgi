@@ -1,0 +1,58 @@
+﻿<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+  <properties>
+    <title>OSGi to JNLP Web Start Web Bundle</title>
+    <author email="don@donandann.com">Don Corley</author>
+  </properties>
+
+  <!-- Optional HEAD element, which is copied as is into the XHTML <head> element -->
+<!-- head>
+<meta />
+</head  -->
+
+  <body>
+
+<section name="OSGi to Web Start usage">
+<p>
+Using the OSGi to Web Start Web Bundle is easy. The only required parameter is the main class name.
+All of the other information that Web Start needs come from the OSGi bundles.
+</p>
+<p>
+<ul>
+<li><a href="#Web Bundle parameters">Web Bundle parameters</a></li>
+<li><a href="#Web Start Applet">Creating a Web Start Applet</a></li>
+<li><a href="#Advanced usage">Advanced usage</a></li>
+</ul>
+</p>
+
+<subsection name="Web Bundle parameters">
+<p>
+
+osgi&gt; provaddrepo file:/home/don/workspace/workspace/jbundle/util/util/osgi/pkg/p2/target/repository
+ 
+osgi&gt; provliu file:/home/don/workspace/workspace/jbundle/util/util/osgi/pkg/p2/target/repository
+...
+ 
+osgi&gt; provinstall 
+
+
+</p>
+</subsection>
+
+<subsection name="Web Start Applet">
+<p>
+</p>
+</subsection>
+
+<subsection name="Advanced usage">
+<p>
+</p>
+</subsection>
+
+    </section>
+
+  </body>
+
+</document>

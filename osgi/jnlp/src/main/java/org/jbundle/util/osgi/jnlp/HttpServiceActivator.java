@@ -4,6 +4,7 @@ import org.jbundle.util.osgi.BundleService;
 import org.jbundle.util.osgi.bundle.BaseBundleService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -63,8 +64,12 @@ public class HttpServiceActivator extends BaseBundleService
     {
         if (context == null)
             return;
-        LogService logging = (LogService)context.getServiceReference(LogService.class.getName());
-        if (logging != null)
-            logging.log(level, message);
+        ServiceReference reference = context.getServiceReference(LogService.class.getName());
+        if (reference != null)
+        {
+            LogService logging = (LogService)context.getService(reference);
+            if (logging != null)
+                logging.log(level, message);
+        }
     }
 }
