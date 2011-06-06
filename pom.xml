@@ -16,10 +16,6 @@
 
   <packaging>pom</packaging>
   <name>jbundle-util-osgi-reactor</name>
-  
-  <properties>
-    <jbundle.workspace>${user.home}/workspace/workspace</jbundle.workspace>
-  </properties>
 
   <scm>
     <url>https://github.com/jbundle/osgi-webstart</url>
