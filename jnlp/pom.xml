@@ -6,7 +6,7 @@
   <parent>
     <artifactId>jbundle-util-osgi-reactor</artifactId>
     <groupId>org.jbundle.util.osgi</groupId>
-    <version>0.7.7-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.jbundle.util.osgi.jnlp</artifactId>
@@ -48,9 +48,9 @@
 	    </dependency>
 
 		<dependency>
-			<groupId>org.jbundle.util.osgi</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>org.jbundle.util.osgi</artifactId>
-			<version>0.7.7-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
