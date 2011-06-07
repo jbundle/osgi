@@ -36,7 +36,8 @@ span.comment {color:blue; font-style:italic}
 cd felix<br/>
 java -jar bin/felix.jar<br/>
 <span class="response">g!</span> deploy -s 'Apache Felix Http Jetty'<span class="comment">(Start a web server)</span><br/>
-<span class="response">g!</span> repos add ${project.organization.url}/${OBRRepositoryIndex} <span class="comment">(Adding the jbundle obr index simplifies installing bundles)</span><br/>
+<span class="response">g!</span> repos add ${project.organization.url}/repository.xml<!-- ${OBRRepositoryIndex} --> <span class="comment">(Adding the jbundle obr index simplifies installing bundles)</span><br/>
+<span class="response">g!</span> repos add http://www.jibx.org/repository.xml<!-- ${OBRRepositoryIndex} --> <span class="comment">(Adding the dependent jibx index)</span><br/>
 <span class="response">g!</span> deploy -s '${project.name}' <span class="comment">(Install and start the OSGi to JNLP Web Bundle)</span><br/>
 <span class="response">g!</span> deploy 'jbundle-util-biorhythm' <span class="comment">(Install our OSGi project and its dependencies)</span><br/>
 </source>

@@ -31,10 +31,9 @@ import java.util.jar.Manifest;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import jnlp.sample.servlet.JnlpDownloadServlet;
 
 import org.jbundle.util.osgi.ClassFinder;
 import org.jbundle.util.osgi.ClassService;
@@ -82,10 +81,12 @@ import org.osgi.framework.Constants;
  * Note: Is it not required that this inherits from JnlpDownloadServlet,
  * I was hoping to using some of the code, but most of the useful stuff is private.
  * I do call JnlpDownloadServlet methods if I don't know what to do with the call.
+ * Note: This is designed to override the JnlpDownloadServlet. I just a little 
+ * apprehensive about the licensing if I wrap the (sun) code in an OSGi wrapper. 
  * @author don
  *
  */
-public class OsgiJnlpServlet extends JnlpDownloadServlet {
+public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
 	private static final long serialVersionUID = 1L;
 
     public static final String JNLP_MIME_TYPE = "application/x-java-jnlp-file";
@@ -197,8 +198,8 @@ public class OsgiJnlpServlet extends JnlpDownloadServlet {
     	    fileFound = getJarFile(request, response);
     	if (!fileFound)
     	    fileFound = getResourceFile(request, response);
-        if (!fileFound)
-    		super.doGet(request, response);
+//        if (!fileFound)   // See JnlpDownloadServlet note
+//    		super.doGet(request, response);
     }
     
     /**

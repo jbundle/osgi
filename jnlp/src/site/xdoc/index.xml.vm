@@ -54,7 +54,7 @@ Remember to start a web server too.
 </p>
 <p>
 <code>
-OBR Repository index: ${project.organization.url}/${OBRRepositoryIndex}<br/>
+OBR Repository index: ${project.organization.url}/repository.xml<!-- ${OBRRepositoryIndex} --><br/>
 Manifest import:<br/>
 Import-Package: ${project.artifactId};resolution:=optional;version=${project.version}
 </code>
