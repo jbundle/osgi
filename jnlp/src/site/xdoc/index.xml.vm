@@ -28,7 +28,7 @@ Wouldn't it be nice if Web Start were as easy to set up as OSGi. <i>Well now it 
 converter will automatically create JNLP and jar files from OSGi dependencies.
 </p>
 <p>
-All you have to do is specify java the main class in your url. For example:<br/>
+All you have to do is specify the main java class in your url. For example:<br/>
 <code>
 <a href="http://www.jbundle.org/webstart/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm">http://www.jbundle.org/webstart/biorhythm?mainClass=org.jbundle.util.biorhythm.Biorhythm</a><br/>
 </code>
@@ -43,6 +43,7 @@ updates the cached jnlp and java jar files when the OSGi bundles are updated.
 <ul>
 <li><a href="example.html">Example</a> (Under 2 minutes).</li>
 <li><a href="usage.html">Web Bundle Usage information.</a> (API and servlet parameters)</li>
+<li><a href="install.html">Installation.</a></li>
 </ul>
 </p>
 

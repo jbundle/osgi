@@ -34,6 +34,7 @@ under the License.
     <menu name="Usage Information">
       <item name="Example" href="example.html"/>
       <item name="Usage" href="usage.html"/>
+      <item name="Installation" href="install.html"/>
     </menu>
 
     <menu name="JBundle Projects">

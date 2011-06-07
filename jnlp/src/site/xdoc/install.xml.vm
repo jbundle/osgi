@@ -16,38 +16,56 @@
 
 <section name="OSGi to Web Start usage">
 <p>
-Using the OSGi to Web Start Web Bundle is easy. The only required parameter is the main class name.
-All of the other information that Web Start needs come from the OSGi bundles.
+Installing the OSGi to Web Start Web Bundle is pretty easy. This bundle has only a
+few dependencies.<br/>
+Here are the instructions for several provisioning systems:
 </p>
 <p>
 <ul>
-<li><a href="#Web Bundle parameters">Web Bundle parameters</a></li>
-<li><a href="#Web Start Applet">Creating a Web Start Applet</a></li>
-<li><a href="#Advanced usage">Advanced usage</a></li>
+<li><a href="#Apache Felix OBR">Apache Felix OBR</a></li>
+<li><a href="#Apache Karaf">Apache Karaf</a></li>
+<li><a href="#Eclipse P2">Eclipse P2</a></li>
 </ul>
 </p>
 
-<subsection name="Web Bundle parameters">
+<subsection name="Apache Felix OBR">
 <p>
-
-osgi&gt; provaddrepo file:/home/don/workspace/workspace/jbundle/util/util/osgi/pkg/p2/target/repository
- 
-osgi&gt; provliu file:/home/don/workspace/workspace/jbundle/util/util/osgi/pkg/p2/target/repository
-...
- 
-osgi&gt; provinstall 
-
-
+There is an obr repository index for jbundle artifacts. Just type these commands in apache felix:
+<style type="text/css">
+span.response {color:blue}
+span.comment {color:blue; font-style:italic}
+</style>
+<source>
+<span class="response">g!</span> repos add ${project.organization.url}/repository.xml<!-- ${OBRRepositoryIndex} --> <span class="comment">(Adding the jbundle obr index simplifies installing bundles)</span><br/>
+<span class="response">g!</span> repos add http://www.jibx.org/repository.xml<!-- ${OBRRepositoryIndex} --> <span class="comment">(Adding the dependent jibx index)</span><br/>
+<span class="response">g!</span> deploy -s '${project.name}' <span class="comment">(Install and start the OSGi to JNLP Web Bundle)</span><br/>
+</source>
 </p>
 </subsection>
 
-<subsection name="Web Start Applet">
+<subsection name="Apache Karaf">
 <p>
+<source>
+Of course, you can just install obr artifacts by typing:
+features:install obr
+Then, just add the repositories using the karaf
+provaddrepo and provinstall commands.
+
+or you can install from the karaf features file:
+features:install war
+features:addUrl mvn:${project.groupId}/${project.groupId}.pkg.karaf/${project.version}/xml/features
+features:install ${project.groupId}.jnlp
+start [bundle no]
+</source>
 </p>
 </subsection>
 
-<subsection name="Advanced usage">
+<subsection name="Eclipse P2">
 <p>
+<source>
+You can create an eclipse update (P2) repository using the maven project under pkg/p2 in the source repository.
+After building your repository, just install it in an OSGi web server running under equinox.
+</source>
 </p>
 </subsection>
 
