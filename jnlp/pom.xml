@@ -5,7 +5,7 @@
   <parent>
     <artifactId>jbundle-util-osgi-reactor</artifactId>
     <groupId>org.jbundle.util.osgi</groupId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.1</version>
   </parent>
 
   <artifactId>org.jbundle.util.osgi.jnlp</artifactId>
