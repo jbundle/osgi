@@ -13,7 +13,7 @@
 	<name>jbundle osgi p2 repository</name>
 
 	<properties>	<!-- Eclipse friendly version -->
-		<jbundleOsgiVersion>1.1.0.SNAPSHOT</jbundleOsgiVersion>
+		<jbundleOsgiVersion>1.1.2.SNAPSHOT</jbundleOsgiVersion>
 	</properties>
 
 	<build>
