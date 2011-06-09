@@ -27,7 +27,5 @@
     <module>core</module>
     <module>obr</module>
     <module>p2</module>
-    <module>jnlp</module>
-    <module>pkg</module>
   </modules>
 </project>
