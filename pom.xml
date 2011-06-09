@@ -18,9 +18,9 @@
   <name>jbundle-util-osgi-reactor</name>
 
   <scm>
-    <url>https://github.com/jbundle/osgi-webstart</url>
-    <connection>scm:git:git://github.com/jbundle/osgi-webstart.git</connection>
-    <developerConnection>scm:git:git@github.com:jbundle/osgi-webstart.git</developerConnection>
+    <url>https://github.com/jbundle/osgi</url>
+    <connection>scm:git:git://github.com/jbundle/osgi.git</connection>
+    <developerConnection>scm:git:git@github.com:jbundle/osgi.git</developerConnection>
   </scm>
 
   <modules>
