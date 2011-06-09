@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +32,6 @@ import java.util.jar.Manifest;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,6 +39,7 @@ import org.jbundle.util.osgi.ClassFinder;
 import org.jbundle.util.osgi.ClassService;
 import org.jbundle.util.osgi.finder.ClassFinderActivator;
 import org.jbundle.util.osgi.finder.ClassServiceUtility;
+import org.jbundle.util.webapp.osgi.BaseOsgiServlet;
 import org.jibx.runtime.BindingDirectory;
 import org.jibx.runtime.IBindingFactory;
 import org.jibx.runtime.IMarshallingContext;
@@ -75,6 +76,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
+import org.osgi.service.http.HttpContext;
 
 /**
  * OSGi to Jnlp translation Servlet.
@@ -86,13 +88,12 @@ import org.osgi.framework.Constants;
  * @author don
  *
  */
-public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
+public class OsgiJnlpServlet extends BaseOsgiServlet/*JnlpDownloadServlet*/ {
 	private static final long serialVersionUID = 1L;
 
     public static final String JNLP_MIME_TYPE = "application/x-java-jnlp-file";
     public final static String OUTPUT_ENCODING = "UTF-8";
 
-    public static final String PARAM_PREFIX = "org.jbundle.util.osgi.jnlp.";
     // Servlet params
     public static final String MAIN_CLASS = "mainClass";
     public static final String APPLET_CLASS = "appletClass";
@@ -122,9 +123,7 @@ public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
     public static final String EXCLUDE_DEFAULT = "org\\.osgi\\..*";
 
     // Deploy param
-    public static final String CONTEXT_PATH = PARAM_PREFIX + "contextpath";
-    
-    BundleContext context = null;
+    public static final String SERVICE_PID = "org.jbundle.util.osgi.jnlp";
     
     Date lastBundleChange = null;
 
@@ -157,7 +156,7 @@ public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
      * @param context
      */
     public void init(BundleContext context) {
-    	this.context = context;
+    	super.init(context);
     	
     	listener = new BundleChangeListener(this);
     	context.addBundleListener(listener);
@@ -182,9 +181,10 @@ public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
      */
     public void free()
     {
-        if (context != null)
+        if (getBundleContext() != null)
             if (listener != null)
-                context.removeBundleListener(listener);
+                getBundleContext().removeBundleListener(listener);
+        super.free();
     }
     /**
      * Main entry point for a web get request.
@@ -343,7 +343,7 @@ public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
     {
         String query = getCodebase(request) + getHref(request) + '?' + request.getQueryString();
         String hash = Integer.toString(query.hashCode()).replace('-', 'a') + ".jnlp";
-        return context.getDataFile(hash);
+        return getBundleContext().getDataFile(hash);
     }
     /**
      * Populate the Jnlp xml.
@@ -584,15 +584,15 @@ public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
 		ClassService classService = ClassServiceUtility.getClassService();
 		if (classService == null)
 			return null;	// Never
-		ClassFinder classFinder = classService.getClassFinder(context);
+		ClassFinder classFinder = classService.getClassFinder(getBundleContext());
 		if (classFinder == null)
 			return null;
-		Bundle bundle = classFinder.findBundle(null, context, packageName, version);
+		Bundle bundle = classFinder.findBundle(null, getBundleContext(), packageName, version);
 		if (bundle == null)
 		{
 	        Object resource = classFinder.deployThisResource(packageName + ".ClassName", false, false);    // Deploy, but do not start the bundle
 	        if (resource != null)
-	        	bundle = classFinder.findBundle(resource, context, packageName, version);
+	        	bundle = classFinder.findBundle(resource, getBundleContext(), packageName, version);
 		}
 		return bundle;
 	}
@@ -690,7 +690,7 @@ public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
 	 */
 	public String[] moveBundleToJar(Bundle bundle, String filename, boolean forceScanBundle)
 	{
-        File fileOut = context.getDataFile(filename);
+        File fileOut = getBundleContext().getDataFile(filename);
         boolean createNewJar = true;
         if (fileOut.exists())
             if (bundle.getLastModified() <= (fileOut.lastModified() + ONE_SEC_IN_MS))   // File sys is usually accurate to sec 
@@ -944,7 +944,7 @@ public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
     {
         if (name == null)
             return false;
-        if (name.startsWith(PARAM_PREFIX))
+        if (name.startsWith(SERVICE_PID))
             return true;
         return false;
     }
@@ -989,7 +989,7 @@ public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
     		return false;
     	path = path.substring(path.lastIndexOf("/") + 1);  // Jars are placed at the root of the cache directory
 
-    	File file = context.getDataFile(path);
+    	File file = getBundleContext().getDataFile(path);
     	if ((file == null) || (!file.exists()))
     	{  // Don't return a 404, try to read the file using JnlpDownloadServlet
 //            response.sendError(HttpServletResponse.SC_NOT_FOUND);   // Return a 'file not found' error
@@ -1127,7 +1127,7 @@ public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
 
     public static String getRequestParam(HttpServletRequest request, String param, String defaultValue)
     {
-    	String value = request.getParameter(PARAM_PREFIX + param);
+    	String value = request.getParameter(SERVICE_PID + param);
     	if (value == null)
     	{
     	    value = request.getParameter(param);
@@ -1153,4 +1153,29 @@ public class OsgiJnlpServlet extends HttpServlet/*JnlpDownloadServlet*/ {
     public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
     public static final String LAST_MODIFIED = "Last-Modified";
      
+    /**
+     * Get the properties for this OSGi service.
+     * @return The properties.
+     */
+    public Dictionary<String,String> getDictionary()
+    {
+        return null;
+    }
+    /**
+     * Get the Servlet context for this servlet.
+     * Override if different from default context.
+     * @return The httpcontext.
+     */
+    public HttpContext getHttpContext()
+    {
+        return new JnlpHttpContext(getBundleContext().getBundle());
+    }
+    /**
+     * Convenience method.
+     * Note: You will have to cast the class or override this in your actual OSGi servlet.
+     */
+    public BundleContext getBundleContext()
+    {
+        return (BundleContext)super.getBundleContext();
+    }
 }
