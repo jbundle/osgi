@@ -16,7 +16,7 @@
   <name>jbundle-util-osgi-pkg-reactor</name>
 
   <modules>
-    <module>p2</module>
+    <!-- module>p2</module -->
     <module>karaf</module>
   </modules>
 </project>

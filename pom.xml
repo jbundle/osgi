@@ -7,7 +7,7 @@
     <artifactId>jbundle-parent</artifactId>
     <groupId>org.jbundle.config</groupId>
     <version>1.0.4-SNAPSHOT</version>
-    <relativePath>../jbundle-parent</relativePath>
+    <relativePath>../../jbundle-parent</relativePath>
   </parent>
 
   <groupId>org.jbundle.util.osgi</groupId>
