@@ -11,6 +11,9 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.jbundle.util.osgi.ClassService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
 
 
 /**
@@ -255,5 +258,24 @@ implements ClassService
     {
         if (this.getClassFinder(null) != null)
             this.getClassFinder(null).shutdownService(service);   // Shutdown the bundle for this service
+    }
+
+    /**
+     * Log this message.
+     * @param context
+     * @param level
+     * @param message
+     */
+    public static void log(BundleContext context, int level, String message)
+    {
+        if (context == null)
+            return;
+        ServiceReference reference = context.getServiceReference(LogService.class.getName());
+        if (reference != null)
+        {
+            LogService logging = (LogService)context.getService(reference);
+            if (logging != null)
+                logging.log(level, message);
+        }
     }
 }

@@ -4,13 +4,12 @@ import java.io.File;
 
 import org.jbundle.util.osgi.ClassFinder;
 import org.jbundle.util.osgi.bundle.BaseBundleService;
-import org.jbundle.util.osgi.bundle.BundleServiceDependentListener;
-import org.jbundle.util.osgi.bundle.BundleStarter;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
 
 /**
  * OsgiClassService - Service to find and load bundle classes and resources.
@@ -177,7 +176,7 @@ public final class ClassFinderActivator extends BaseBundleService
 		}
 
 		if (bundleActivator == null)
-			System.out.println("The " + bundleClassName + " never started - make sure you start it!");
+	        ClassServiceUtility.log(context, LogService.LOG_INFO, "The " + bundleClassName + " never started - make sure you start it!");
 		
 		return bundleActivator;
     }

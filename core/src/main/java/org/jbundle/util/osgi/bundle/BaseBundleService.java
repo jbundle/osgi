@@ -11,12 +11,14 @@ import java.util.Hashtable;
 import org.jbundle.util.osgi.BundleService;
 import org.jbundle.util.osgi.ClassService;
 import org.jbundle.util.osgi.finder.ClassFinderActivator;
+import org.jbundle.util.osgi.finder.ClassServiceUtility;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.log.LogService;
 
 
 /**
@@ -41,7 +43,7 @@ public class BaseBundleService extends Object
      * Bundle starting up.
      */
     public void start(BundleContext context) throws Exception {
-        System.out.println("Starting a BundleService bundle");
+        ClassServiceUtility.log(context, LogService.LOG_INFO, "Starting a BaseBundleService bundle");
         
         this.context = context;
         
@@ -66,7 +68,7 @@ public class BaseBundleService extends Object
      * Bundle stopping.
      */
     public void stop(BundleContext context) throws Exception {
-        System.out.println("Stopping BaseBundleService bundle");
+        ClassServiceUtility.log(context, LogService.LOG_INFO, "Stopping a BaseBundleService bundle");
 //        Automatically unregistered.
         this.context = null;
     }

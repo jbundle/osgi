@@ -11,6 +11,7 @@ import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
 import org.jbundle.util.osgi.finder.BaseClassFinderService;
 import org.jbundle.util.osgi.finder.ClassFinderActivator;
+import org.jbundle.util.osgi.finder.ClassServiceUtility;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -19,6 +20,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
+import org.osgi.service.log.LogService;
 
 /**
  * ClassServiceImpl - Find bundles (and classes) in the obr repository.
@@ -132,7 +134,7 @@ public class ObrClassFinderService extends BaseClassFinderService
     {
         waitingForRepositoryAdmin = false;
 
-        System.out.println("ObrClassFinderImpl is up");
+        ClassServiceUtility.log(context, LogService.LOG_INFO, "ObrClassFinderImpl is up");
 
         this.startClassFinderActivator(context);    // Now that I have the repo, start the ClassService
     }
@@ -140,7 +142,7 @@ public class ObrClassFinderService extends BaseClassFinderService
      * Bundle shutting down.
      */
     public void stop(BundleContext context) throws Exception {
-        System.out.println("Stopping ObrClassFinderImpl");
+        ClassServiceUtility.log(context, LogService.LOG_INFO, "Stopping ObrClassFinderImpl");
 
         super.stop(context);
         repositoryAdmin = null;
@@ -242,7 +244,7 @@ public class ObrClassFinderService extends BaseClassFinderService
         } else {
             Reason[] reqs = resolver.getUnsatisfiedRequirements();
             for (int i = 0; i < reqs.length; i++) {
-                System.out.println("Unable to resolve: " + reqs[i]);
+                ClassServiceUtility.log(bundleContext, LogService.LOG_ERROR, "Unable to resolve: " + reqs[i]);
             }
         }
     }

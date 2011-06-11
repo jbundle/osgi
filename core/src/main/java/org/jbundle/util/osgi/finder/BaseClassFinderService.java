@@ -24,6 +24,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
+import org.osgi.service.log.LogService;
 
 /**
  * OsgiClassService - Service to find and load bundle classes and resources.
@@ -54,7 +55,7 @@ public abstract class BaseClassFinderService extends Object
      */
     public void start(BundleContext context) throws Exception
     {
-        System.out.println("Starting and registering the (repository) " + this.getClass().getName() + " ClassService ");
+        ClassServiceUtility.log(context, LogService.LOG_INFO, "Starting and registering the (repository) " + this.getClass().getName() + " ClassService ");
         
         bundleContext = context;
 
@@ -64,7 +65,7 @@ public abstract class BaseClassFinderService extends Object
      * Bundle shutting down.
      */
     public void stop(BundleContext context) throws Exception {
-        System.out.println("Stopping the " + this.getClass().getName() + " ClassService bundle");
+        ClassServiceUtility.log(context, LogService.LOG_INFO, "Stopping the " + this.getClass().getName() + " ClassService bundle");
         // I'm unregistered automatically
 
         bundleContext = null;
