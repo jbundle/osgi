@@ -176,14 +176,18 @@ implements ClassService
      * @param string The string to convert.
      * @return The java object.
      */
-    public Object convertStringToObject(String string, boolean bErrorIfNotFound) throws RuntimeException
+    public Object convertStringToObject(String string) throws ClassNotFoundException
     {
-        if (string == null)
+        if ((string == null) || (string.length() == 0))
             return null;
 
         Object object  = null;
         try {
-            object = this.convertStringToObject(string);
+            InputStream reader = new ByteArrayInputStream(string.getBytes(OBJECT_ENCODING));//Constants.STRING_ENCODING));
+            ObjectInputStream inStream = new ObjectInputStream(reader);
+            object = inStream.readObject();
+            reader.close();
+            inStream.close();
         } catch (ClassNotFoundException e) {
             if (this.getClassFinder(null) != null)
             {
@@ -195,35 +199,12 @@ implements ClassService
                 object = this.getClassFinder(null).findConvertStringToObject(className, string);	// Try to find this class in the obr repos
             }
             if (object == null)
-                if (bErrorIfNotFound)
-                    throw new RuntimeException(e.getMessage());
+                throw e;
+        } catch (IOException e) {
+            e.printStackTrace();    // Never
         }
 
         return object;
-    }
-    /**
-     * Convert this encoded string back to a Java Object.
-     * TODO This is expensive, I need to synchronize and use a static writer.
-     * @param string The string to convert.
-     * @return The java object.
-     * @throws ClassNotFoundException 
-     */
-    private Object convertStringToObject(String string)
-        throws ClassNotFoundException
-    {
-        if ((string == null) || (string.length() == 0))
-            return null;
-        try {
-            InputStream reader = new ByteArrayInputStream(string.getBytes(OBJECT_ENCODING));//Constants.STRING_ENCODING));
-            ObjectInputStream inStream = new ObjectInputStream(reader);
-            Object obj = inStream.readObject();
-            reader.close();
-            inStream.close();
-            return obj;
-        } catch (IOException ex)    {
-            ex.printStackTrace();   // Never
-        }
-        return null;
     }
     /**
      * If class name starts with '.' append base package.

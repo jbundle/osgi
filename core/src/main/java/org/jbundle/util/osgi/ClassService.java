@@ -57,9 +57,10 @@ public interface ClassService
     * Convert this encoded string back to a Java Object.
     * @param string The string to convert.
     * @return The java object.
-    * @throws RuntimeException TODO
+    * @throws RuntimeException Runtime errors
+    * @throws ClassNotFoundException
     */
-   public Object convertStringToObject(String string, boolean bErrorIfNotFound) throws RuntimeException;
+   public Object convertStringToObject(String string) throws ClassNotFoundException;
    /**
     * Shutdown the bundle for this service.
     * @param service The service object
