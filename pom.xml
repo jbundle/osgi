@@ -12,7 +12,7 @@
 
   <groupId>org.jbundle.util.osgi</groupId>
   <artifactId>jbundle-util-osgi-reactor</artifactId>
-  <version>1.1.3-SNAPSHOT</version>
+  <version>1.1.3</version>
 
   <packaging>pom</packaging>
   <name>jbundle-util-osgi-reactor</name>
