@@ -9,6 +9,8 @@ import java.net.URL;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jbundle.util.osgi.ClassService;
 import org.osgi.framework.BundleContext;
@@ -247,16 +249,52 @@ implements ClassService
      * @param level
      * @param message
      */
-    public static void log(BundleContext context, int level, String message)
+    public static boolean log(BundleContext context, int level, String message)
     {
         if (context == null)
-            return;
+            return false;
         ServiceReference reference = context.getServiceReference(LogService.class.getName());
         if (reference != null)
         {
             LogService logging = (LogService)context.getService(reference);
             if (logging != null)
+            {
                 logging.log(level, message);
+                return true;
+            }
         }
+        return false;
+    }
+    
+    /**
+     * TODO - Need to make logging work under OSGi.
+     * @param name
+     * @param resourceBundleName
+     * @return
+     */
+    public Logger getOsgiLogger(String name, String resourceBundleName)
+    {
+    	return new OsgiLogger(name, resourceBundleName);
+    }
+    
+    class OsgiLogger extends Logger
+    {
+
+		protected OsgiLogger(String name, String resourceBundleName) {
+			super(name, resourceBundleName);
+		}
+		
+	    public void log(Level level, String msg) {
+	    	int osgiLevel = LogService.LOG_INFO;
+	    	if (level == Level.INFO)
+	    		osgiLevel = LogService.LOG_INFO;
+	    	if (level == Level.WARNING)
+	    		osgiLevel = LogService.LOG_WARNING;
+	    	if (level == Level.SEVERE)
+	    		osgiLevel = LogService.LOG_ERROR;
+	    	if (level == Level.CONFIG)
+	    		osgiLevel = LogService.LOG_DEBUG;
+	    	ClassServiceUtility.log(null, osgiLevel, msg);
+	    }
     }
 }
