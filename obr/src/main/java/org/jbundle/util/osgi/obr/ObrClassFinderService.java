@@ -1,7 +1,5 @@
 package org.jbundle.util.osgi.obr;
 
-import java.io.File;
-
 import org.apache.felix.bundlerepository.DataModelHelper;
 import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Repository;
@@ -93,8 +91,8 @@ public class ObrClassFinderService extends BaseClassFinderService
         	if (repository.length() > 0)
         		this.addRepository(repositoryAdmin, repository);
 
-        repository = "file:" + System.getProperty("user.home") + File.separator + ".m2" + File.separator  + "full-repository.xml";
-        this.addRepository(repositoryAdmin, repository);        
+        //repository = "file:" + System.getProperty("user.home") + File.separator + ".m2" + File.separator  + "full-repository.xml";
+        //this.addRepository(repositoryAdmin, repository);        
     }
     /**
      * Add this repository to my available repositories.
