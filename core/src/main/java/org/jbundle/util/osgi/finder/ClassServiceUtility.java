@@ -22,7 +22,7 @@ import org.osgi.service.log.LogService;
  * Thin specific static utility methods.
  */
 public class ClassServiceUtility
-implements ClassService
+	implements ClassService
 {
 
     static ClassService classService = null;
@@ -207,6 +207,23 @@ implements ClassService
         }
 
         return object;
+    }
+    /**
+     * Get the bundle classloader for this package.
+     * @param string The class name to find the bundle for.
+     * @return The class loader.
+     * @throws ClassNotFoundException
+     */
+    public ClassLoader getBundleClassLoader(String packageName) throws ClassNotFoundException
+    {
+        if ((packageName == null) || (packageName.length() == 0))
+            return null;
+
+        ClassLoader classLoader  = null;
+        if (this.getClassFinder(null) != null)
+        	classLoader = this.getClassFinder(null).findBundleClassLoader(packageName);	// Try to find this class in the obr repos
+
+        return classLoader;
     }
     /**
      * If class name starts with '.' append base package.

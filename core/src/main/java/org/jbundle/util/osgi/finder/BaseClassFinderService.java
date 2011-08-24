@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URL;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -225,6 +226,63 @@ public abstract class BaseClassFinderService extends Object
             ex.printStackTrace();   // Never
         }
         return null;
+    }
+    /**
+     * Get the bundle classloader for this package.
+     * @param string The class name to find the bundle for.
+     * @return The class loader.
+     * @throws ClassNotFoundException
+     */
+    public ClassLoader findBundleClassLoader(String packageName)
+    {
+    	ClassLoader classLoader = this.getClassLoaderFromBundle(null, packageName);
+
+        if (classLoader == null) {
+            Object resource = this.deployThisResource(packageName + ".FakeClass", true, true);
+            if (resource != null)
+            	classLoader = this.getClassLoaderFromBundle(resource, packageName);
+        }
+
+        return classLoader;    	
+    }
+    /**
+     * Find this class's bundle in the repository
+     * @param className
+     * @return
+     */
+    private ClassLoader getClassLoaderFromBundle(Object resource, String packageName)
+    {
+    	String className = packageName + ".FakeClass";
+    	ClassLoader classLoader = null;
+        if (resource == null)
+        {
+            BundleService classAccess = this.getClassBundleService(null, className);
+            if (classAccess != null)
+            {
+            	classLoader = classAccess.getClass().getClassLoader();
+            }
+        }
+        else
+        {
+        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), null);
+        	if (bundle == null)
+        		return null;
+        	@SuppressWarnings("unchecked")
+			Enumeration<URL> entries = bundle.findEntries(packageName.replace('.', '/'), "*.class", true);
+        	if (entries.hasMoreElements())
+        	{	// This is kind of a hokey way to get the classloader from a bundle - find a class file and load it - but it works.
+        		URL url = entries.nextElement();
+        		String path = url.getFile();
+        		int start = path.startsWith("/") ? 1 : 0;	// Path should always start at the root.
+        		path = path.substring(start, path.lastIndexOf('.')).replace('/', '.');
+        		try {
+					classLoader = bundle.loadClass(path).getClassLoader();
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+        	}
+        }
+        return classLoader;
     }
     /**
      * Find this class's class access registered class access service in the current workspace.

@@ -4,7 +4,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 
-public class ClassFinderListener  implements ServiceListener
+public class ClassFinderListener implements ServiceListener
 {
     BundleContext context = null;
 

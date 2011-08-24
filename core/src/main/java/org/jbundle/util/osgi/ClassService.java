@@ -62,6 +62,13 @@ public interface ClassService
     */
    public Object convertStringToObject(String string) throws ClassNotFoundException;
    /**
+    * Get the bundle classloader for this package.
+    * @param string The class name to find the bundle for.
+    * @return The class loader.
+    * @throws ClassNotFoundException
+    */
+   public ClassLoader getBundleClassLoader(String packageName) throws ClassNotFoundException;
+   /**
     * Shutdown the bundle for this service.
     * @param service The service object
     */

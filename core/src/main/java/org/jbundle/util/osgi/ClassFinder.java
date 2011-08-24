@@ -51,6 +51,14 @@ public interface ClassFinder {
     public Bundle findBundle(Object objResource, BundleContext context, String packageName, String version);
 
     /**
+     * Get the bundle classloader for this package.
+     * @param string The class name to find the bundle for.
+     * @return The class loader.
+     * @throws ClassNotFoundException
+     */
+    public ClassLoader findBundleClassLoader(String packageName);
+
+    /**
      * Find this class's class access registered class access service in the current workspace.
      * @param interfaceName The registered object name
      * @param className The class name (that has the package that the object was registered under)
