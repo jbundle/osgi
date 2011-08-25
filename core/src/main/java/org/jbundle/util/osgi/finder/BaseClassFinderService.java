@@ -36,7 +36,9 @@ import org.osgi.service.log.LogService;
 public abstract class BaseClassFinderService extends Object
 	implements BundleActivator, ClassFinder
 {
-	/**
+    public static final String FAKE_CLASSNAME = ".FakeClass";
+
+    /**
 	 * Good from start to stop.
 	 */
     protected BundleContext bundleContext = null;
@@ -238,7 +240,7 @@ public abstract class BaseClassFinderService extends Object
     	ClassLoader classLoader = this.getClassLoaderFromBundle(null, packageName);
 
         if (classLoader == null) {
-            Object resource = this.deployThisResource(packageName + ".FakeClass", true, true);
+            Object resource = this.deployThisResource(packageName + FAKE_CLASSNAME, true, true);
             if (resource != null)
             	classLoader = this.getClassLoaderFromBundle(resource, packageName);
         }
@@ -252,7 +254,7 @@ public abstract class BaseClassFinderService extends Object
      */
     private ClassLoader getClassLoaderFromBundle(Object resource, String packageName)
     {
-    	String className = packageName + ".FakeClass";
+    	String className = packageName + FAKE_CLASSNAME;
     	ClassLoader classLoader = null;
         if (resource == null)
         {
