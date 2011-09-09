@@ -228,27 +228,43 @@ public class ClassServiceUtility
     /**
      * If class name starts with '.' append base package.
      */
-    public static String getFullClassName(String strClassName) {
-        return ClassServiceUtility.getFullClassName(null, strClassName);
+    public static String getFullClassName(String className) {
+        return ClassServiceUtility.getFullClassName(null, className);
     }
     /**
      * If class name starts with '.' append base package.
      */
-    public static String getFullClassName(String strPackage, String strClass) {
-        if (strPackage != null)
-            if (strPackage.length() > 0) {
-                if (strPackage.charAt(strPackage.length() - 1) != '.')
-                    strPackage = strPackage + '.';
+    public static String getFullClassName(String packageName, String className) {
+    	return ClassServiceUtility.getFullClassName(null, packageName, className);
+    }
+    /**
+     * If class name starts with '.' append base package.
+     */
+    public static String getFullClassName(String domainName, String packageName, String className) {
+        if (packageName != null)
+            if (packageName.length() > 0) {
+                if (packageName.charAt(packageName.length() - 1) != '.')
+                    packageName = packageName + '.';
             }
-        if (strClass != null)
-            if (strClass.length() > 0) {
-                if (strClass.indexOf('.') == -1)
-                    if (strPackage != null)
-                        strClass = strPackage + strClass;
-                if (strClass.charAt(0) == '.')
-                    strClass = ClassService.ROOT_PACKAGE + strClass.substring(1);
+        if (className != null)
+            if (className.length() > 0) {
+                if (className.indexOf('.') == -1)
+                    if (packageName != null)
+                        className = packageName + className;
+                if (className.charAt(0) == '.')
+                {
+                	if (domainName != null)
+                	{
+                		if (domainName.endsWith("."))
+                			className = domainName + className.substring(1);
+                		else
+                			className = domainName + className;
+                	}
+                	else
+                        className = ClassService.ROOT_PACKAGE + className.substring(1);
+                }
             }
-        return strClass;
+        return className;
     }	
     /**
      * Shutdown the bundle for this service.
