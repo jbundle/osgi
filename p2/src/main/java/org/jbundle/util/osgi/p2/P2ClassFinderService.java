@@ -1,3 +1,6 @@
+/*
+ * Copyright © 2011 jbundle.org. All rights reserved.
+ */
 package org.jbundle.util.osgi.p2;
 
 import org.jbundle.util.osgi.finder.BaseClassFinderService;

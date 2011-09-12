@@ -1,3 +1,6 @@
+/*
+ * Copyright © 2011 jbundle.org. All rights reserved.
+ */
 package org.jbundle.util.osgi.obr;
 
 import org.apache.felix.bundlerepository.DataModelHelper;
