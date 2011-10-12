@@ -268,7 +268,7 @@ public class ClassServiceUtility
                 }
             }
         return className;
-    }	
+    }
     /**
      * Shutdown the bundle for this service.
      * @param service The service object

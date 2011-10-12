@@ -38,16 +38,22 @@ public interface ClassFinder {
     /**
      * Convert this encoded string back to a Java Object.
      * TODO This is expensive, I need to synchronize and use a static writer.
-     * @param className TODO
+     * @param className
      * @param string The string to convert.
      * @return The java object.
      */
     public Object findConvertStringToObject(String className, String string);
 
     /**
+     * Find, resolve, and return this bundle.
+     * @param packageName
+     */
+    public Bundle findBundle(String packageName, String version);
+    
+    /**
      * Find the currently installed bundle that exports this package.
      * @param context
-     * @param version TODO
+     * @param version
      * @param resource
      * @return
      */

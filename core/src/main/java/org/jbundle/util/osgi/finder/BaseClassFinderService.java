@@ -77,6 +77,21 @@ public abstract class BaseClassFinderService extends Object
         bundleContext = null;
     }
     /**
+     * Find, resolve, and return this bundle.
+     * @param packageName
+     */
+    public Bundle findBundle(String packageName, String version)
+    {
+        Bundle bundle = this.findBundle(null, bundleContext, packageName, version);
+
+        if (bundle == null) {
+            Object resource = this.deployThisResource(packageName + FAKE_CLASSNAME, true, false);
+            if (resource != null)
+            	bundle = this.findBundle(resource, bundleContext, packageName, version);
+        }
+        return bundle;
+    }
+    /**
      * Find, resolve, and return this class definition.
      * @param className
      * @return The class definition or null if not found.
@@ -274,7 +289,8 @@ public abstract class BaseClassFinderService extends Object
         		return null;
         	@SuppressWarnings("unchecked")
 			Enumeration<URL> entries = bundle.findEntries(packageName.replace('.', '/'), "*.class", true);
-        	if (entries.hasMoreElements())
+        	if (entries != null)
+        		if (entries.hasMoreElements())
         	{	// This is kind of a hokey way to get the classloader from a bundle - find a class file and load it - but it works.
         		URL url = entries.nextElement();
         		String path = url.getFile();
