@@ -76,11 +76,12 @@ public interface ClassFinder {
     public BundleService getClassBundleService(String interfaceName, String className);
     /**
      * Find this resource in the repository, then deploy and optionally start it.
+     * @param version TODO
      * @param className
      * @param options 
      * @return
      */
-    public Object deployThisResource(String className, boolean start, boolean resourceType);
+    public Object deployThisResource(String packageName, String version, boolean start);
     /**
      * Shutdown the bundle for this service.
      * @param service The service object

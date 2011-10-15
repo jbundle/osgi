@@ -163,7 +163,7 @@ public class ObrClassFinderService extends BaseClassFinderService
     	if (ClassFinderActivator.getClassFinder(context, 0) == this)
     		return true;	// Already up!
         // If the repository is not up, but the bundle is deployed, this will find it
-        Resource resource = (Resource)this.deployThisResource(ClassFinderActivator.class.getName(), false, false);  // Get the bundle info from the repos
+        Resource resource = (Resource)this.deployThisResource(ClassFinderActivator.getPackageName(ClassFinderActivator.class.getName(), false), null, false);  // Get the bundle info from the repos
         
         String packageName = ClassFinderActivator.getPackageName(ClassFinderActivator.class.getName(), false);
         Bundle bundle = this.findBundle(resource, context, packageName, null);
@@ -190,7 +190,7 @@ public class ObrClassFinderService extends BaseClassFinderService
      * @param options 
      * @return
      */
-    public Object deployThisResource(String className, boolean start, boolean resourceType)
+    public Object deployThisResource(String packageName, String version, boolean start)
     {
     	int options = 0;
     	if (start)
@@ -198,11 +198,11 @@ public class ObrClassFinderService extends BaseClassFinderService
     	if (repositoryAdmin == null)
     		return null;
         DataModelHelper helper = repositoryAdmin.getHelper();
-        String packageName = ClassFinderActivator.getPackageName(className, resourceType);
         if (this.getResourceFromCache(packageName) != null)
         	return this.getResourceFromCache(packageName);
-        String filter2 = "(package=" + packageName + ")"; // + "(version=xxx)"
-        Requirement requirement = helper.requirement("package", filter2);
+        String filter = "(package=" + packageName + ")";
+        filter = ClassFinderActivator.addVersionFilter(filter, version, false);
+        Requirement requirement = helper.requirement("package", filter);
         Requirement[] requirements = { requirement };// repositoryAdmin
         Resource[] resources = repositoryAdmin.discoverResources(requirements);
         this.deployResources(resources, options);

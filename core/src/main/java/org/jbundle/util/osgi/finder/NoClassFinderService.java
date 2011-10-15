@@ -17,8 +17,7 @@ public class NoClassFinderService extends BaseClassFinderService
 {
 
 	@Override
-	public Object deployThisResource(String className, boolean start,
-			boolean resourceType) {
+	public Object deployThisResource(String packageName, String version, boolean start) {
 		return null;
 	}	
 

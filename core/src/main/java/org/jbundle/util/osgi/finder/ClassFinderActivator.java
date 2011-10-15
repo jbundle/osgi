@@ -12,6 +12,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
 import org.osgi.service.log.LogService;
 
 /**
@@ -182,5 +183,31 @@ public final class ClassFinderActivator extends BaseBundleService
 	        ClassServiceUtility.log(context, LogService.LOG_INFO, "The " + bundleClassName + " never started - make sure you start it!");
 		
 		return bundleActivator;
+    }
+    /**
+     * 
+     * ie., (&(package=org.jibx.runtime)(version>=1.2.0)(!(version>=2.0.0)))
+     * @param version
+     * @param exactMatch
+     * @return
+     */
+    public static String addVersionFilter(String currentFilter, String version, boolean exactMatch)
+    {
+    	StringBuilder sb = new StringBuilder(currentFilter);
+    	if (version != null)
+    		if (version.length() > 0)
+		{
+			sb.insert(0, "(&");
+	    	if ((exactMatch) || (version.indexOf('.') == -1))
+	    		sb.append("(version=" + version + ")");
+	    	else
+	    	{
+	    		Version v = new Version(version);
+	    		sb.append("(version>=").append(v.getMajor()).append('.').append(v.getMinor()).append(".0)");
+	    		sb.append("(!(version>=").append(v.getMajor()+1).append(".0.0))");
+	    	}
+			sb.append(')');
+		}
+    	return sb.toString();
     }
 }

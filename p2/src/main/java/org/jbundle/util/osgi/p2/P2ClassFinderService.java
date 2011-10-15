@@ -21,7 +21,7 @@ public class P2ClassFinderService extends BaseClassFinderService
      * @param options 
      * @return
      */
-    public Object deployThisResource(String className, boolean start, boolean resourceType)
+    public Object deployThisResource(String packageName, String version, boolean start)
     {
         	return null;
     }

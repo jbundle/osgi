@@ -85,7 +85,7 @@ public abstract class BaseClassFinderService extends Object
         Bundle bundle = this.findBundle(null, bundleContext, packageName, version);
 
         if (bundle == null) {
-            Object resource = this.deployThisResource(packageName + FAKE_CLASSNAME, true, false);
+            Object resource = this.deployThisResource(packageName, version, true);
             if (resource != null)
             	bundle = this.findBundle(resource, bundleContext, packageName, version);
         }
@@ -104,7 +104,7 @@ public abstract class BaseClassFinderService extends Object
         Class<?> c = this.getClassFromBundle(null, className);
 
         if (c == null) {
-            Object resource = this.deployThisResource(className, true, false);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, false), null, true);
             if (resource != null)
             {
             	c = this.getClassFromBundle(null, className);	// It is possible that the newly started bundle registered itself
@@ -128,7 +128,7 @@ public abstract class BaseClassFinderService extends Object
         URL url = this.getResourceFromBundle(null, className);
 
         if (url == null) {
-            Object resource = this.deployThisResource(className, true, true);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), null, true);
             if (resource != null)
             	url = this.getResourceFromBundle(resource, className);
         }
@@ -149,7 +149,7 @@ public abstract class BaseClassFinderService extends Object
         ResourceBundle resourceBundle = this.getResourceBundleFromBundle(null, className, locale);
 
         if (resourceBundle == null) {
-            Object resource = this.deployThisResource(className, true, true);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), null, true);
             if (resource != null)
             {
             	resourceBundle = this.getResourceBundleFromBundle(resource, className, locale);
@@ -184,7 +184,7 @@ public abstract class BaseClassFinderService extends Object
     	Object object = this.convertStringToObject(null, className, string);
 
         if (object == null) {
-            Object resource = this.deployThisResource(className, true, false);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, false), null, true);
             if (resource != null)
             {
             	object = this.convertStringToObject(null, className, string);	// It is possible that the newly started bundle registered itself
@@ -258,7 +258,7 @@ public abstract class BaseClassFinderService extends Object
     	ClassLoader classLoader = this.getClassLoaderFromBundle(null, packageName);
 
         if (classLoader == null) {
-            Object resource = this.deployThisResource(packageName + FAKE_CLASSNAME, true, true);
+            Object resource = this.deployThisResource(packageName, null, true);
             if (resource != null)
             	classLoader = this.getClassLoaderFromBundle(resource, packageName);
         }
@@ -441,7 +441,7 @@ public abstract class BaseClassFinderService extends Object
      * @param options 
      * @return
      */
-    public abstract Object deployThisResource(String className, boolean start, boolean resourceType);
+    public abstract Object deployThisResource(String packageName, String version, boolean start);
 
     /**
      * Start up a basebundle service.
@@ -457,7 +457,7 @@ public abstract class BaseClassFinderService extends Object
     	if (bundleService != null)
     		return true;	// Already up!
         // If the repository is not up, but the bundle is deployed, this will find it
-        Object resource = this.deployThisResource(dependentBaseBundleClassName, false, false);  // Get the bundle info from the repos
+        Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), null, false);  // Get the bundle info from the repos
         
         String packageName = ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false);
         Bundle bundle = this.findBundle(resource, context, packageName, null);
@@ -486,7 +486,7 @@ public abstract class BaseClassFinderService extends Object
     {
     	// Lame code
     	String dependentBaseBundleClassName = service.getClass().getName();
-        Object resource = this.deployThisResource(dependentBaseBundleClassName, false, false);  // Get the bundle info from the repos
+        Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), null, false);  // Get the bundle info from the repos
     	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), null);
     	if (bundle != null)
     		if (bundle.getState() == Bundle.ACTIVE)
