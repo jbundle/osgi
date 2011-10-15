@@ -17,32 +17,36 @@ public interface ClassFinder {
      * Find, resolve, and return this class definition.
      * Static convenience method.
      * @param className
+     * @param version TODO
      * @return The class definition or null if not found.
      */
-    public Class<?> findClass(String className);
+    public Class<?> findClass(String className, String version);
     /**
      * Find, resolve, and return this resource's URL.
      * Static convenience method.
      * @param className
+     * @param version TODO
      * @return The class definition or null if not found.
      */
-    public URL findResourceURL(String className);
+    public URL findResourceURL(String className, String version);
     /**
      * Find, resolve, and return this ResourceBundle.
      * Static convenience method.
      * @param className
+     * @param version TODO
      * @return The class definition or null if not found.
      */
-    public ResourceBundle findResourceBundle(String className, Locale locale);
+    public ResourceBundle findResourceBundle(String className, Locale locale, String version);
 
     /**
      * Convert this encoded string back to a Java Object.
      * TODO This is expensive, I need to synchronize and use a static writer.
      * @param className
+     * @param version TODO
      * @param string The string to convert.
      * @return The java object.
      */
-    public Object findConvertStringToObject(String className, String string);
+    public Object findConvertStringToObject(String className, String version, String string);
 
     /**
      * Find, resolve, and return this bundle.
@@ -61,19 +65,21 @@ public interface ClassFinder {
 
     /**
      * Get the bundle classloader for this package.
+     * @param version TODO
      * @param string The class name to find the bundle for.
      * @return The class loader.
      * @throws ClassNotFoundException
      */
-    public ClassLoader findBundleClassLoader(String packageName);
+    public ClassLoader findBundleClassLoader(String packageName, String version);
 
     /**
      * Find this class's class access registered class access service in the current workspace.
      * @param interfaceName The registered object name
      * @param className The class name (that has the package that the object was registered under)
+     * @param version TODO
      * @return
      */
-    public BundleService getClassBundleService(String interfaceName, String className);
+    public BundleService getClassBundleService(String interfaceName, String className, String version);
     /**
      * Find this resource in the repository, then deploy and optionally start it.
      * @param version TODO

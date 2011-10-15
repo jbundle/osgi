@@ -64,14 +64,14 @@ public class ClassServiceUtility
      */
     public Object makeObjectFromClassName(String className)
     {
-        return this.makeObjectFromClassName(className, false);
+        return this.makeObjectFromClassName(className, null, false);
     }
     /**
      * Create this object given the class name.
      * @param className
      * @return
      */
-    public Object makeObjectFromClassName(String className, boolean bErrorIfNotFound) throws RuntimeException
+    public Object makeObjectFromClassName(String className, String version, boolean bErrorIfNotFound) throws RuntimeException
     {
         if (className == null)
             return null;
@@ -82,7 +82,7 @@ public class ClassServiceUtility
             clazz = Class.forName(className);
         } catch (ClassNotFoundException e) {
             if (this.getClassFinder(null) != null)
-                clazz = this.getClassFinder(null).findClass(className);	// Try to find this class in the obr repos
+                clazz = this.getClassFinder(null).findClass(className, version);	// Try to find this class in the obr repos
             if (clazz == null)
                 if (bErrorIfNotFound)
                     throw new RuntimeException(e.getMessage());
@@ -109,7 +109,7 @@ public class ClassServiceUtility
      * @param filepath
      * @return
      */
-    public URL getResourceURL(String filepath, URL urlCodeBase, ClassLoader classLoader) throws RuntimeException
+    public URL getResourceURL(String filepath, URL urlCodeBase, String version, ClassLoader classLoader) throws RuntimeException
     {
         if (filepath == null)
             return null;
@@ -124,7 +124,7 @@ public class ClassServiceUtility
         if (url == null)
         {
             if (this.getClassFinder(null) != null)
-                url = this.getClassFinder(null).findResourceURL(filepath);	// Try to find this class in the obr repos
+                url = this.getClassFinder(null).findResourceURL(filepath, version);	// Try to find this class in the obr repos
         }
 
         if (url == null)
@@ -149,7 +149,7 @@ public class ClassServiceUtility
      * @exception MissingResourceException if no resource bundle for the specified base name can be found
      * @return a resource bundle for the given base name and locale
      */
-    public final ResourceBundle getResourceBundle(String className, Locale locale, ClassLoader classLoader) throws MissingResourceException
+    public final ResourceBundle getResourceBundle(String className, Locale locale, String version, ClassLoader classLoader) throws MissingResourceException
     {
         MissingResourceException ex = null;
         ResourceBundle resourceBundle = null;
@@ -163,7 +163,7 @@ public class ClassServiceUtility
         {
             try {
                 if (this.getClassFinder(null) != null)
-                    resourceBundle = this.getClassFinder(null).findResourceBundle(className, locale);	// Try to find this class in the obr repos
+                    resourceBundle = this.getClassFinder(null).findResourceBundle(className, locale, version);	// Try to find this class in the obr repos
             } catch (MissingResourceException e) {
                 ex = e;
             }
@@ -181,7 +181,7 @@ public class ClassServiceUtility
      * @param string The string to convert.
      * @return The java object.
      */
-    public Object convertStringToObject(String string) throws ClassNotFoundException
+    public Object convertStringToObject(String string, String version) throws ClassNotFoundException
     {
         if ((string == null) || (string.length() == 0))
             return null;
@@ -201,7 +201,7 @@ public class ClassServiceUtility
                 int endClass = e.getMessage().indexOf('\'', startClass);
                 if (endClass != -1)
                     className = e.getMessage().substring(startClass, endClass);
-                object = this.getClassFinder(null).findConvertStringToObject(className, string);	// Try to find this class in the obr repos
+                object = this.getClassFinder(null).findConvertStringToObject(className, version, string);	// Try to find this class in the obr repos
             }
             if (object == null)
                 throw e;
@@ -217,14 +217,14 @@ public class ClassServiceUtility
      * @return The class loader.
      * @throws ClassNotFoundException
      */
-    public ClassLoader getBundleClassLoader(String packageName) throws ClassNotFoundException
+    public ClassLoader getBundleClassLoader(String packageName, String version) throws ClassNotFoundException
     {
         if ((packageName == null) || (packageName.length() == 0))
             return null;
 
         ClassLoader classLoader  = null;
         if (this.getClassFinder(null) != null)
-        	classLoader = this.getClassFinder(null).findBundleClassLoader(packageName);	// Try to find this class in the obr repos
+        	classLoader = this.getClassFinder(null).findBundleClassLoader(packageName, version);	// Try to find this class in the obr repos
 
         return classLoader;
     }

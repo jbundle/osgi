@@ -35,42 +35,47 @@ public interface ClassService
    /**
     * Create this object given the class name.
     * @param className
+ * @param version TODO
     * @return
     * @throws RuntimeException If Error flag is set, return a runtime exception if object can't be created.
     */
-   public Object makeObjectFromClassName(String className, boolean bErrorIfNotFound) throws RuntimeException;
+   public Object makeObjectFromClassName(String className, String version, boolean bErrorIfNotFound) throws RuntimeException;
    /**
     * Create this object given the class name.
     * @param filepath
-    * @return
+ * @param version TODO
+ * @return
     * @throws RuntimeException Not implemented yet
     */
-   public URL getResourceURL(String filepath, URL urlCodeBase, ClassLoader classLoader) throws RuntimeException;
+   public URL getResourceURL(String filepath, URL urlCodeBase, String version, ClassLoader classLoader) throws RuntimeException;
    /**
     * Gets a resource bundle using the specified base name and locale,
  * @param locale the locale for which a resource bundle is desired
+ * @param version TODO
  * @param baseName the base name of the resource bundle, a fully qualified class name
  * @throws MissingResourceException TODO
  * @exception NullPointerException if <code>baseName</code> or <code>locale</code> is <code>null</code>
  * @exception MissingResourceException if no resource bundle for the specified base name can be found
  * @return a resource bundle for the given base name and locale
     */
-   public ResourceBundle getResourceBundle(String className, Locale locale, ClassLoader classLoader) throws MissingResourceException;
+   public ResourceBundle getResourceBundle(String className, Locale locale, String version, ClassLoader classLoader) throws MissingResourceException;
    /**
     * Convert this encoded string back to a Java Object.
     * @param string The string to convert.
+ * @param version TODO
     * @return The java object.
     * @throws RuntimeException Runtime errors
     * @throws ClassNotFoundException
     */
-   public Object convertStringToObject(String string) throws ClassNotFoundException;
+   public Object convertStringToObject(String string, String version) throws ClassNotFoundException;
    /**
     * Get the bundle classloader for this package.
-    * @param string The class name to find the bundle for.
+ * @param version TODO
+ * @param string The class name to find the bundle for.
     * @return The class loader.
     * @throws ClassNotFoundException
     */
-   public ClassLoader getBundleClassLoader(String packageName) throws ClassNotFoundException;
+   public ClassLoader getBundleClassLoader(String packageName, String version) throws ClassNotFoundException;
    /**
     * Shutdown the bundle for this service.
     * @param service The service object
