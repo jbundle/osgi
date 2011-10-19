@@ -198,7 +198,7 @@ public abstract class BaseClassFinderService extends Object
     /**
      * Convert this encoded string back to a Java Object.
      * TODO This is expensive, I need to synchronize and use a static writer.
-     * @param version TODO
+     * @param version version
      * @param string The string to convert.
      * @return The java object.
      */
@@ -268,7 +268,7 @@ public abstract class BaseClassFinderService extends Object
     }
     /**
      * Find this class's bundle in the repository
-     * @param version TODO
+     * @param version version
      * @param className
      * @return
      */
@@ -333,7 +333,7 @@ public abstract class BaseClassFinderService extends Object
     /**
      * Find this class's bundle in the repository
      * @param className
-     * @param version TODO
+     * @param version version
      * @return
      */
     private Class<?> getClassFromBundle(Object resource, String className, String version)
@@ -365,7 +365,7 @@ public abstract class BaseClassFinderService extends Object
     /**
      * makeClassFromBundle
      * @param className
-     * @param version TODO
+     * @param version version
      * 
      * @return
      */
@@ -452,7 +452,7 @@ public abstract class BaseClassFinderService extends Object
      * Start up a basebundle service.
      * Note: You will probably want to call this from a thread and attach a service
      * listener since this may take some time.
-     * @param version TODO
+     * @param version version
      * @param className
      * @return true If I'm up already
      * @return false If I had a problem.
@@ -580,8 +580,8 @@ public abstract class BaseClassFinderService extends Object
                         {
                         	if ((bestVersion == null)
                         		|| ((bestVersion.getMajor() == bundleVersion.getMajor())
-                                	&& (bestVersion.getMinor() == bundleVersion.getMinor())
-                                	&& (bestVersion.getMicro() <= bundleVersion.getMicro())))
+                                	&& (bestVersion.getMinor() <= bundleVersion.getMinor())
+                                	/*&& (bestVersion.getMicro() <= bundleVersion.getMicro())*/))
                         	{
                         		bestBundle = bundle;
                         		bestVersion = bundleVersion;
