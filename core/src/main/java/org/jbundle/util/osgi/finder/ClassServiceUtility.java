@@ -114,17 +114,24 @@ public class ClassServiceUtility
         if (filepath == null)
             return null;
 
+        boolean isResource = true;
+        if (urlCodeBase != null)
+        	if ("file".equalsIgnoreCase(urlCodeBase.getProtocol()))
+        		isResource = false;
         URL url = null;
         try {
-            url = classLoader.getResource(filepath);
+        	if (isResource)
+        		if (classLoader != null)
+        			url = classLoader.getResource(filepath);
         } catch (Exception e) {
             // Keep trying
         }
 
         if (url == null)
         {
-            if (this.getClassFinder(null) != null)
-                url = this.getClassFinder(null).findResourceURL(filepath, version);	// Try to find this class in the obr repos
+        	if (isResource)
+        		if (this.getClassFinder(null) != null)
+        			url = this.getClassFinder(null).findResourceURL(filepath, version);	// Try to find this class in the obr repos
         }
 
         if (url == null)
