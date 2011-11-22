@@ -181,6 +181,16 @@ public class BaseBundleService extends Object
      */
     public boolean startupThisService(BundleService bundleService, BundleContext context)
     {
-    	return true;
+        return true;
+    }
+    /**
+     * Stop this service.
+     * Override this to do all the startup.
+     * @param context TODO
+     * @return true if successful.
+     */
+    public boolean shutdownThisService(BundleService bundleService, BundleContext context)
+    {
+        return true;
     }
 }
