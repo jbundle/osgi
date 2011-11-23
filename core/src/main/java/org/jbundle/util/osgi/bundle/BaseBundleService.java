@@ -155,7 +155,7 @@ public class BaseBundleService extends Object
     }
     /**
      * Make sure the dependent services are up, then call startupService.
-     * @param version TODO
+     * @param version Bundle version
      * @param baseBundleServiceClassName
      * @return false if I'm waiting for the service to startup.
      */
