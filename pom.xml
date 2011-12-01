@@ -6,13 +6,13 @@
   <parent>
     <artifactId>jbundle-parent</artifactId>
     <groupId>org.jbundle.config</groupId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2</version>
     <relativePath>../../jbundle-parent</relativePath>
   </parent>
 
   <groupId>org.jbundle.util.osgi</groupId>
   <artifactId>jbundle-util-osgi-reactor</artifactId>
-  <version>1.4.0-SNAPSHOT</version>
+  <version>1.4.0</version>
 
   <packaging>pom</packaging>
   <name>jbundle-util-osgi-reactor</name>
