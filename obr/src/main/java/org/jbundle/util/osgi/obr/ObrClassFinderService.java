@@ -193,8 +193,8 @@ public class ObrClassFinderService extends BaseClassFinderService
     public Object deployThisResource(String packageName, String version, boolean start)
     {
     	int options = 0;
-    	if (start)
-    		options = Resolver.START;
+    	//?if (start)
+    	//?	options = Resolver.START;
     	if (repositoryAdmin == null)
     		return null;
         DataModelHelper helper = repositoryAdmin.getHelper();
@@ -205,9 +205,20 @@ public class ObrClassFinderService extends BaseClassFinderService
         Requirement requirement = helper.requirement("package", filter);
         Requirement[] requirements = { requirement };// repositoryAdmin
         Resource[] resources = repositoryAdmin.discoverResources(requirements);
-        this.deployResources(resources, options);
         if ((resources != null) && (resources.length > 0))
         {
+            this.deployResources(resources, options);
+            Bundle bundle = this.findBundle(resources[0], bundleContext, packageName, version);
+            if (start)
+                if (bundle != null)
+                    if ((bundle.getState() != Bundle.ACTIVE) && (bundle.getState() != Bundle.STARTING))
+            {
+                try {
+                    bundle.start();
+                } catch (BundleException e) {
+                    e.printStackTrace();
+                }
+            }
         	this.addResourceToCache(packageName, resources[0]);
         	return resources[0];
         }
