@@ -35,7 +35,7 @@ public interface ClassService
    /**
     * Create this object given the class name.
     * @param className
- * @param version TODO
+ * @param version Version range
     * @return
     * @throws RuntimeException If Error flag is set, return a runtime exception if object can't be created.
     */
@@ -43,7 +43,7 @@ public interface ClassService
    /**
     * Create this object given the class name.
     * @param filepath
- * @param version TODO
+ * @param version Version range
  * @return
     * @throws RuntimeException Not implemented yet
     */
@@ -51,7 +51,7 @@ public interface ClassService
    /**
     * Gets a resource bundle using the specified base name and locale,
  * @param locale the locale for which a resource bundle is desired
- * @param version TODO
+ * @param version Version range
  * @param baseName the base name of the resource bundle, a fully qualified class name
  * @throws MissingResourceException TODO
  * @exception NullPointerException if <code>baseName</code> or <code>locale</code> is <code>null</code>
@@ -62,7 +62,7 @@ public interface ClassService
    /**
     * Convert this encoded string back to a Java Object.
     * @param string The string to convert.
- * @param version TODO
+ * @param version Version range
     * @return The java object.
     * @throws RuntimeException Runtime errors
     * @throws ClassNotFoundException
@@ -70,7 +70,7 @@ public interface ClassService
    public Object convertStringToObject(String string, String version) throws ClassNotFoundException;
    /**
     * Get the bundle classloader for this package.
- * @param version TODO
+ * @param version Version range
  * @param string The class name to find the bundle for.
     * @return The class loader.
     * @throws ClassNotFoundException

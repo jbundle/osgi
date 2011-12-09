@@ -16,6 +16,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jbundle.util.osgi.BundleService;
 import org.jbundle.util.osgi.ClassFinder;
@@ -61,7 +63,7 @@ public abstract class BaseClassFinderService extends Object
      */
     public void start(BundleContext context) throws Exception
     {
-        ClassServiceUtility.log(context, LogService.LOG_INFO, "Starting and registering the (repository) " + this.getClass().getName() + " ClassService ");
+        this.log(context, LogService.LOG_INFO, "Starting and registering the (repository) " + this.getClass().getName() + " ClassService ");
         
         bundleContext = context;
 
@@ -71,7 +73,7 @@ public abstract class BaseClassFinderService extends Object
      * Bundle shutting down.
      */
     public void stop(BundleContext context) throws Exception {
-        ClassServiceUtility.log(context, LogService.LOG_INFO, "Stopping the " + this.getClass().getName() + " ClassService bundle");
+        this.log(context, LogService.LOG_INFO, "Stopping the " + this.getClass().getName() + " ClassService bundle");
         // I'm unregistered automatically
 
         bundleContext = null;
@@ -619,4 +621,59 @@ public abstract class BaseClassFinderService extends Object
     	return false;	// Override this
     }
 
+    /**
+     * Log this message.
+     * @param bundleContext
+     * @param level
+     * @param message
+     */
+    public boolean log(Object context, int level, String message)
+    {
+        if (!(context instanceof BundleContext))
+            return false;
+        BundleContext bundleContext = (BundleContext)context;
+        ServiceReference reference = bundleContext.getServiceReference(LogService.class.getName());
+        if (reference != null)
+        {
+            LogService logging = (LogService)bundleContext.getService(reference);
+            if (logging != null)
+            {
+                logging.log(level, message);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * TODO - Need to make logging work under OSGi.
+     * @param name
+     * @param resourceBundleName
+     * @return
+     */
+    public Logger getOsgiLogger(String name, String resourceBundleName)
+    {
+        return new OsgiLogger(name, resourceBundleName);
+    }
+    
+    class OsgiLogger extends Logger
+    {
+
+        protected OsgiLogger(String name, String resourceBundleName) {
+            super(name, resourceBundleName);
+        }
+        
+        public void log(Level level, String message) {
+            int osgiLevel = LogService.LOG_INFO;
+            if (level == Level.INFO)
+                osgiLevel = LogService.LOG_INFO;
+            if (level == Level.WARNING)
+                osgiLevel = LogService.LOG_WARNING;
+            if (level == Level.SEVERE)
+                osgiLevel = LogService.LOG_ERROR;
+            if (level == Level.CONFIG)
+                osgiLevel = LogService.LOG_DEBUG;
+            BaseClassFinderService.this.log(null, osgiLevel, message);
+        }
+    }
 }

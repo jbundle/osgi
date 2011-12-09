@@ -12,17 +12,14 @@ import java.net.URL;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jbundle.util.osgi.ClassService;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.LogService;
 
 
 /**
  * Thin specific static utility methods.
+ * 
+ * WARNING: It is important that this class has no direct connections to org.osgi!
  */
 public class ClassServiceUtility
 	implements ClassService
@@ -42,13 +39,29 @@ public class ClassServiceUtility
      * @return
      */
     public static boolean classServiceAvailable = true;
+    public org.jbundle.util.osgi.ClassFinder classFinder = null;
     public org.jbundle.util.osgi.ClassFinder getClassFinder(Object context)
     {
         if (!classServiceAvailable)
             return null;
         try {
-            Class.forName("org.osgi.framework.BundleActivator");	// This tests to see if osgi exists
-            return (org.jbundle.util.osgi.ClassFinder)org.jbundle.util.osgi.finder.ClassFinderActivator.getClassFinder(context, -1);
+            if (classFinder == null)
+            {
+                Class.forName("org.osgi.framework.BundleActivator");	// This tests to see if osgi exists
+                //classFinder = (org.jbundle.util.osgi.ClassFinder)org.jbundle.util.osgi.finder.ClassFinderActivator.getClassFinder(context, -1);
+                try {   // Use reflection so the smart jvm's don't try to retrieve this class.
+                    Class<?> clazz = Class.forName("org.jbundle.util.osgi.finder.ClassFinderActivator");    // This tests to see if osgi exists
+                    if (clazz != null)
+                    {
+                        java.lang.reflect.Method method = clazz.getMethod("getClassFinder", Object.class, int.class);
+                        if (method != null)
+                            classFinder = (org.jbundle.util.osgi.ClassFinder)method.invoke(null, context, -1);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return classFinder;
         } catch (ClassNotFoundException ex) {
             classServiceAvailable = false;	// Osgi is not installed, no need to keep trying
             return null;
@@ -309,52 +322,11 @@ public class ClassServiceUtility
      * @param level
      * @param message
      */
-    public static boolean log(BundleContext context, int level, String message)
+    public static boolean log(Object context, int level, String message)
     {
-        if (context == null)
-            return false;
-        ServiceReference reference = context.getServiceReference(LogService.class.getName());
-        if (reference != null)
-        {
-            LogService logging = (LogService)context.getService(reference);
-            if (logging != null)
-            {
-                logging.log(level, message);
-                return true;
-            }
-        }
+        if (ClassServiceUtility.getClassService().getClassFinder(null) != null)
+            return ClassServiceUtility.getClassService().getClassFinder(null).log(context, level, message);
+        // TODO Use system logging!
         return false;
-    }
-    
-    /**
-     * TODO - Need to make logging work under OSGi.
-     * @param name
-     * @param resourceBundleName
-     * @return
-     */
-    public Logger getOsgiLogger(String name, String resourceBundleName)
-    {
-    	return new OsgiLogger(name, resourceBundleName);
-    }
-    
-    class OsgiLogger extends Logger
-    {
-
-		protected OsgiLogger(String name, String resourceBundleName) {
-			super(name, resourceBundleName);
-		}
-		
-	    public void log(Level level, String msg) {
-	    	int osgiLevel = LogService.LOG_INFO;
-	    	if (level == Level.INFO)
-	    		osgiLevel = LogService.LOG_INFO;
-	    	if (level == Level.WARNING)
-	    		osgiLevel = LogService.LOG_WARNING;
-	    	if (level == Level.SEVERE)
-	    		osgiLevel = LogService.LOG_ERROR;
-	    	if (level == Level.CONFIG)
-	    		osgiLevel = LogService.LOG_DEBUG;
-	    	ClassServiceUtility.log(null, osgiLevel, msg);
-	    }
     }
 }

@@ -94,4 +94,11 @@ public interface ClassFinder {
      * @param service The service object
      */
     public void shutdownService(Object service);
+    /**
+     * Log this message.
+     * @param bundleContext
+     * @param level
+     * @param message
+     */
+    public boolean log(Object context, int level, String message);
 }
