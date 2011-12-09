@@ -277,6 +277,23 @@ public class ClassServiceUtility
         return className;
     }
     /**
+     * Add this key and value to this (ldap) filter.
+     */
+    public static String addToFilter(String filter, String key, String value)
+    {
+        if (value != null) 
+        {
+            String newFilter = "(" + key + "=" + value + ")";
+            if ((filter == null) || (filter.length() == 0))
+                filter = newFilter;
+            else if ((filter.startsWith("(&")) && (filter.endsWith("")))
+                filter = filter.substring(0, filter.length() - 1) + newFilter + ")";
+            else
+                filter = "(&" + filter + newFilter + ")";
+        }        
+        return filter;
+    }
+    /**
      * Shutdown the bundle for this service.
      * @param service The service object
      */

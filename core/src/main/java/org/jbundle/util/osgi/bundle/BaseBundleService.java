@@ -60,7 +60,8 @@ public class BaseBundleService extends Object
         //?String type = properties.get(OsgiService.TYPE);
 
 		try {
-			context.addServiceListener(this, /*"(&" +*/ "(objectClass=" + objectClass + ")"); // + "(" + BundleService.PACKAGE_NAME + "=" + packageName + "))");
+			context.addServiceListener(this, ClassServiceUtility.addToFilter(null, "objectClass", objectClass));
+			// ClassServiceUtility.addToFilter(filter, BundleService.PACKAGE_NAME, packageName);
 		} catch (InvalidSyntaxException e) {
 			e.printStackTrace();
 		}
@@ -161,7 +162,7 @@ public class BaseBundleService extends Object
      */
     public boolean checkDependentServicesAndStartup(BundleContext bundleContext, String dependentBaseBundleClassName, String version)
     {
-    	BaseBundleService bundleService = (BaseBundleService)ClassFinderActivator.getClassFinder(bundleContext, -1).getClassBundleService(null, dependentBaseBundleClassName, version);
+    	BaseBundleService bundleService = (BaseBundleService)ClassFinderActivator.getClassFinder(bundleContext, -1).getClassBundleService(dependentBaseBundleClassName, version, null);
     	if (bundleService != null)
     		return this.startupThisService(bundleService, bundleContext);	// TODO - Synchronization issue
     	// Service has not started, so I need to start it and then listen

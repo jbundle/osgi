@@ -210,7 +210,7 @@ public abstract class BaseClassFinderService extends Object
         try {
             if (resource == null)
             {
-                BundleService classAccess = this.getClassBundleService(null, className, version);
+                BundleService classAccess = this.getClassBundleService(className, version, null);
                 if (classAccess != null)
                 	object = classAccess.convertStringToObject(string);
             }
@@ -278,7 +278,7 @@ public abstract class BaseClassFinderService extends Object
     	ClassLoader classLoader = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(null, className, version);
+            BundleService classAccess = this.getClassBundleService(className, version, null);
             if (classAccess != null)
             {
             	classLoader = classAccess.getClass().getClassLoader();
@@ -312,16 +312,30 @@ public abstract class BaseClassFinderService extends Object
      * @param className
      * @return
      */
-    public BundleService getClassBundleService(String interfaceName, String className, String version)
+    public BundleService getClassBundleService(String className, String version, Dictionary<String, String> filter)
     {
         try {
-            String filter = "(" + BundleService.PACKAGE_NAME + "=" + ClassFinderActivator.getPackageName(className, true) + ")";
-            filter = ClassFinderActivator.addVersionFilter(filter, version, false);
+            String serviceFilter = ClassServiceUtility.addToFilter(null, BundleService.PACKAGE_NAME, ClassFinderActivator.getPackageName(className, true));
+            String interfaceName = null;
+            if (filter != null)
+            {
+                interfaceName = filter.get(BundleService.INTERFACE);
+
+                Enumeration<String> keys = filter.keys();
+                while (keys.hasMoreElements())
+                {
+                    String key = keys.nextElement();
+                    if (key.equals(BundleService.INTERFACE))
+                        continue;
+                    serviceFilter = ClassServiceUtility.addToFilter(serviceFilter, key, filter.get(key));
+                }
+            }
             if (interfaceName == null)
             	interfaceName = className;
             if (interfaceName == null)
             	interfaceName = BundleService.class.getName();	// Never
-            ServiceReference[] refs = bundleContext.getServiceReferences(interfaceName, filter);
+            serviceFilter = ClassFinderActivator.addVersionFilter(serviceFilter, version, false);
+            ServiceReference[] refs = bundleContext.getServiceReferences(interfaceName, serviceFilter);
 
             if ((refs != null) && (refs.length > 0))
                 return (BundleService)bundleContext.getService(refs[0]);
@@ -341,7 +355,7 @@ public abstract class BaseClassFinderService extends Object
         Class<?> c = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(null, className, version);
+            BundleService classAccess = this.getClassBundleService(className, version, null);
             if (classAccess != null)
             {
             	try {
@@ -374,7 +388,7 @@ public abstract class BaseClassFinderService extends Object
         URL url = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(null, className, version);
+            BundleService classAccess = this.getClassBundleService(className, version, null);
             if (classAccess != null)
                 url = classAccess.getResource(className);
         }
@@ -397,7 +411,7 @@ public abstract class BaseClassFinderService extends Object
     	ResourceBundle resourceBundle = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(null, baseName, version);
+            BundleService classAccess = this.getClassBundleService(baseName, version, null);
             if (classAccess != null)
             {
                 if (USE_NO_RESOURCE_HACK)
@@ -459,7 +473,7 @@ public abstract class BaseClassFinderService extends Object
      */
     public boolean startBaseBundle(BundleContext context, String dependentBaseBundleClassName, String version)
     {
-    	BundleService bundleService = this.getClassBundleService(null, dependentBaseBundleClassName, version);
+    	BundleService bundleService = this.getClassBundleService(dependentBaseBundleClassName, version, null);
     	if (bundleService != null)
     		return true;	// Already up!
         // If the repository is not up, but the bundle is deployed, this will find it
@@ -478,7 +492,7 @@ public abstract class BaseClassFinderService extends Object
                     e.printStackTrace();
                 }
             }
-            bundleService = this.getClassBundleService(null, dependentBaseBundleClassName, version);	// This will wait until it is active to return
+            bundleService = this.getClassBundleService(dependentBaseBundleClassName, version, null);	// This will wait until it is active to return
             return (bundleService != null);	// Success
         }
         return false;	// Error! Where is my bundle?
