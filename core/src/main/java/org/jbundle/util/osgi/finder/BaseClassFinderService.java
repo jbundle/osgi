@@ -67,7 +67,8 @@ public abstract class BaseClassFinderService extends Object
         
         bundleContext = context;
 
-        context.registerService(ClassFinder.class.getName(), this, null);	// Should be only one of these
+        if (context != null)
+            context.registerService(ClassFinder.class.getName(), this, null);	// Should be only one of these
     }
     /**
      * Bundle shutting down.
