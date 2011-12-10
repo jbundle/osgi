@@ -39,7 +39,7 @@ public class ClassServiceUtility
      * @return
      */
     protected static boolean classServiceAvailable = true;
-    protected static org.jbundle.util.osgi.ClassFinder classFinder = null;
+    protected org.jbundle.util.osgi.ClassFinder classFinder = null; // Doesn't need to be static since this is only created once
     public org.jbundle.util.osgi.ClassFinder getClassFinder(Object context)
     {
         if (!classServiceAvailable)
