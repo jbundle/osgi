@@ -38,8 +38,8 @@ public class ClassServiceUtility
      * NOTE: Don't import this package as the ClassService class may not be available until this service is started.
      * @return
      */
-    public static boolean classServiceAvailable = true;
-    public org.jbundle.util.osgi.ClassFinder classFinder = null;
+    protected static boolean classServiceAvailable = true;
+    protected static org.jbundle.util.osgi.ClassFinder classFinder = null;
     public org.jbundle.util.osgi.ClassFinder getClassFinder(Object context)
     {
         if (!classServiceAvailable)
