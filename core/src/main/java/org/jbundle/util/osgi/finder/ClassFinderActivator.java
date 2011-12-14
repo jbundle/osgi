@@ -54,7 +54,7 @@ public final class ClassFinderActivator extends BaseBundleService
     
     /**
      * Find this class's class access service in the current workspace.
-     * @param waitForStart TODO
+     * @param waitForStart
      * @param className
      * @return
      */
@@ -64,7 +64,7 @@ public final class ClassFinderActivator extends BaseBundleService
     }
     /**
      * Find this class's class access service in the current workspace.
-     * @param secsToWait TODO
+     * @param secsToWait 
      * @param className
      * @return
      */
@@ -105,39 +105,6 @@ public final class ClassFinderActivator extends BaseBundleService
 
 		return classFinder;
     }
-    /**
-     * Get the package name of this class name.
-     * NOTE: This is exactly the same as Util.getPackageName, move this!
-     * @param className
-     * @return
-     */
-    public static String getPackageName(String className, boolean resource)
-    {
-        String packageName = null;
-        if (className != null)
-        {
-    		if (className.indexOf(File.separator) != -1)
-    		{
-    			className = className.substring(0, className.lastIndexOf(File.separator));
-        		packageName = className.replace(File.separator.charAt(0), '.');
-    		}
-    		else if (className.indexOf('/') != -1)
-    		{
-    			className = className.substring(0, className.lastIndexOf('/'));
-        		packageName = className.replace('/', '.');
-    		}
-        	else
-        	{
-	        	if (resource)
-	        		if (className.endsWith(PROPERTIES))
-	        			className = className.substring(0, className.length() - PROPERTIES.length());
-	            if (className.lastIndexOf('.') != -1)
-	                packageName = className.substring(0, className.lastIndexOf('.'));
-        	}
-        }
-        return packageName;
-    }
-    public static final String PROPERTIES = ".properties";
     /**
      * Wait for bundle class name.
      * @param context
@@ -210,4 +177,37 @@ public final class ClassFinderActivator extends BaseBundleService
 		}
     	return sb.toString();
     }
+    /**
+     * Get the package name of this class name.
+     * NOTE: This is exactly the same as Util.getPackageName, move this!
+     * @param className
+     * @return
+     */
+    public static String getPackageName(String className, boolean resource)
+    {
+        String packageName = null;
+        if (className != null)
+        {
+            if (className.indexOf(File.separator) != -1)
+            {
+                className = className.substring(0, className.lastIndexOf(File.separator));
+                packageName = className.replace(File.separator.charAt(0), '.');
+            }
+            else if (className.indexOf('/') != -1)
+            {
+                className = className.substring(0, className.lastIndexOf('/'));
+                packageName = className.replace('/', '.');
+            }
+            else
+            {
+                if (resource)
+                    if (className.endsWith(PROPERTIES))
+                        className = className.substring(0, className.length() - PROPERTIES.length());
+                if (className.lastIndexOf('.') != -1)
+                    packageName = className.substring(0, className.lastIndexOf('.'));
+            }
+        }
+        return packageName;
+    }
+    public static final String PROPERTIES = ".properties";
 }

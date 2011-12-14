@@ -508,8 +508,12 @@ public abstract class BaseClassFinderService extends Object
     {
     	// Lame code
     	String dependentBaseBundleClassName = service.getClass().getName();
-        Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), null, false);  // Get the bundle info from the repos
-    	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), null);
+    	String packageName = ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false);
+        Bundle bundle = this.findBundle(null, bundleContext, packageName, null);
+        if (bundle == null) {
+            Object resource = this.deployThisResource(packageName, null, false);  // Get the bundle info from the repos
+            bundle = this.findBundle(resource, bundleContext, packageName, null);
+        }
     	if (bundle != null)
     		if (bundle.getState() == Bundle.ACTIVE)
     		{

@@ -135,9 +135,9 @@ public class ObrClassFinderService extends BaseClassFinderService
     {
         waitingForRepositoryAdmin = false;
 
-        ClassServiceUtility.log(context, LogService.LOG_INFO, "ObrClassFinderImpl is up");
-
         this.startClassFinderActivator(context);    // Now that I have the repo, start the ClassService
+
+        ClassServiceUtility.log(context, LogService.LOG_INFO, "ObrClassFinderService is up");
     }
     /**
      * Bundle shutting down.
@@ -163,10 +163,13 @@ public class ObrClassFinderService extends BaseClassFinderService
     	if (ClassFinderActivator.getClassFinder(context, 0) == this)
     		return true;	// Already up!
         // If the repository is not up, but the bundle is deployed, this will find it
-        Resource resource = (Resource)this.deployThisResource(ClassFinderActivator.getPackageName(ClassFinderActivator.class.getName(), false), null, false);  // Get the bundle info from the repos
-        
-        String packageName = ClassFinderActivator.getPackageName(ClassFinderActivator.class.getName(), false);
-        Bundle bundle = this.findBundle(resource, context, packageName, null);
+    	String packageName = ClassFinderActivator.getPackageName(ClassFinderActivator.class.getName(), false);
+        Bundle bundle = this.findBundle(null, context, packageName, null);
+        if (bundle == null)
+        {
+            Resource resource = (Resource)this.deployThisResource(packageName, null, false);  // Get the bundle info from the repos
+            bundle = this.findBundle(resource, context, packageName, null);
+        }
         
         if (bundle != null)
         {

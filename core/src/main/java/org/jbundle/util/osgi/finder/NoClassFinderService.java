@@ -6,7 +6,7 @@ package org.jbundle.util.osgi.finder;
 import org.osgi.framework.BundleActivator;
 
 /**
- * NoClassFinderImpl - If there are not persistent class finders, I have to
+ * NoClassFinderImpl - If there are no persistent class finders, I have to
  * use this class finder which only looks in the currently installed bundles.
  *
  * @author don
