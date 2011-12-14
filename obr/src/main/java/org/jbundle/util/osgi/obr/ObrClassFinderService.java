@@ -161,7 +161,7 @@ public class ObrClassFinderService extends BaseClassFinderService
     public boolean startClassFinderActivator(BundleContext context)
     {
     	if (ClassFinderActivator.getClassFinder(context, 0) == this)
-    		return true;	// Already up!
+    	    return true;	// Already up!
         // If the repository is not up, but the bundle is deployed, this will find it
     	String packageName = ClassFinderActivator.getPackageName(ClassFinderActivator.class.getName(), false);
         Bundle bundle = this.findBundle(null, context, packageName, null);
@@ -193,7 +193,7 @@ public class ObrClassFinderService extends BaseClassFinderService
      * @param options 
      * @return
      */
-    public Object deployThisResource(String packageName, String version, boolean start)
+    public Object deployThisResource(String packageName, String versionRange, boolean start)
     {
     	int options = 0;
     	//?if (start)
@@ -204,14 +204,30 @@ public class ObrClassFinderService extends BaseClassFinderService
         if (this.getResourceFromCache(packageName) != null)
         	return this.getResourceFromCache(packageName);
         String filter = "(package=" + packageName + ")";
-        filter = ClassFinderActivator.addVersionFilter(filter, version, false);
+        filter = ClassFinderActivator.addVersionFilter(filter, versionRange, false);
         Requirement requirement = helper.requirement("package", filter);
         Requirement[] requirements = { requirement };// repositoryAdmin
         Resource[] resources = repositoryAdmin.discoverResources(requirements);
-        if ((resources != null) && (resources.length > 0))
+        Resource bestResource = null; 
+        if (resources != null)
         {
-            this.deployResources(resources, options);
-            Bundle bundle = this.findBundle(resources[0], bundleContext, packageName, version);
+            Version bestVersion = null; 
+            for (Resource resource : resources)
+            {
+                Version resourceVersion = resource.getVersion();
+                if (!isValidVersion(resourceVersion, versionRange))
+                    continue;
+                if ((bestVersion == null) || (resourceVersion.compareTo(bestVersion) >= 0))
+                {
+                    bestVersion = resourceVersion;  // Use the highest version number
+                    bestResource = resource;
+                }
+            }
+        }
+        if (bestResource != null)
+        {
+            this.deployResource(bestResource, options);
+            Bundle bundle = this.findBundle(bestResource, bundleContext, packageName, versionRange);
             if (start)
                 if (bundle != null)
                     if ((bundle.getState() != Bundle.ACTIVE) && (bundle.getState() != Bundle.STARTING))
@@ -222,11 +238,9 @@ public class ObrClassFinderService extends BaseClassFinderService
                     e.printStackTrace();
                 }
             }
-        	this.addResourceToCache(packageName, resources[0]);
-        	return resources[0];
+        	this.addResourceToCache(packageName, bestResource);
         }
-        else
-        	return null;
+    	return bestResource;
     }
     /**
      * Deploy this list of resources.
@@ -272,24 +286,54 @@ public class ObrClassFinderService extends BaseClassFinderService
     public boolean isResourceBundleMatch(Object objResource, Bundle bundle)
     {
     	Resource resource = (Resource)objResource;
-    	return ((bundle.getSymbolicName().equals(resource.getSymbolicName())) && (compareVersion(bundle, resource)));
+    	return ((bundle.getSymbolicName().equals(resource.getSymbolicName())) && (isValidVersion(bundle.getVersion(), resource.getVersion().toString())));
     }
     /**
-     * Does this bundle's version match this resource's version?
-     * @param bundle
-     * @param resource
-     * @return
+     * See if this version falls within this version range.
+     * @param version
+     * @param versionRange
+     * @return True if it is a valid version
      */
-    public boolean compareVersion(Bundle bundle, Resource resource)
+    public static boolean isValidVersion(Version version, String versionRange)
     {
-    	if (bundle.getVersion().equals(resource.getVersion()))
-    		return true;
-    	Version bundleVersion = bundle.getVersion();
-    	Version resourceVersion = resource.getVersion();
-    	if (bundleVersion.getMajor() == resourceVersion.getMajor())
-        	if (bundleVersion.getMinor() == resourceVersion.getMinor())
-        		return true;
-    	return false;
+        if (versionRange == null)
+            return true;
+       
+        if ((versionRange.contains("[")) || (versionRange.contains("]")) || (versionRange.contains("(")) || (versionRange.contains(")")))
+        {
+            // There has to be better code in the osgi framework that will parse ranges like [1.2.3)
+            try {
+                Version rangeVersion = new Version(versionRange.substring(1, versionRange.length() - 2));
+                boolean valid = true;
+                if ((versionRange.startsWith("[")) && (version.compareTo(rangeVersion)) < 0)
+                    valid = false;
+                if ((versionRange.startsWith("(")) && (version.compareTo(rangeVersion)) <= 0)
+                    valid = false;
+                if ((versionRange.endsWith("]")) && (version.compareTo(rangeVersion)) >= 0)
+                    valid = false;
+                if ((versionRange.endsWith(")")) && (version.compareTo(rangeVersion)) > 0)
+                    valid = false;
+                return valid;
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                return true;    // Weird version = okay?
+            }
+        }
+        else
+        {
+            try {
+                Version rangeVersion = new Version(versionRange);
+                if (rangeVersion.equals(version))
+                    return true;
+                // HACK HACK HACK - This code is for sloppy bundle definitions (standard practice okays major and minor match)
+                if (rangeVersion.getMajor() == version.getMajor())
+                    if (rangeVersion.getMinor() == version.getMinor())
+                        return true;
+                return false;
+            } catch (IllegalArgumentException e) {
+                return true;    // Weird version = okay?
+            }
+        }
     }
 }
 

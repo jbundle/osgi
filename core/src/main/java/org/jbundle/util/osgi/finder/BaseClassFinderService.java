@@ -83,14 +83,14 @@ public abstract class BaseClassFinderService extends Object
      * Find, resolve, and return this bundle.
      * @param packageName
      */
-    public Bundle findBundle(String packageName, String version)
+    public Bundle findBundle(String packageName, String versionRange)
     {
-        Bundle bundle = this.findBundle(null, bundleContext, packageName, version);
+        Bundle bundle = this.findBundle(null, bundleContext, packageName, versionRange);
 
         if (bundle == null) {
-            Object resource = this.deployThisResource(packageName, version, true);
+            Object resource = this.deployThisResource(packageName, versionRange, true);
             if (resource != null)
-            	bundle = this.findBundle(resource, bundleContext, packageName, version);
+            	bundle = this.findBundle(resource, bundleContext, packageName, versionRange);
         }
         return bundle;
     }
@@ -99,20 +99,20 @@ public abstract class BaseClassFinderService extends Object
      * @param className
      * @return The class definition or null if not found.
      */
-    public Class<?> findClass(String className, String version)
+    public Class<?> findClass(String className, String versionRange)
     {
         //if (ClassServiceBootstrap.repositoryAdmin == null)
         //    return null;
 
-        Class<?> c = this.getClassFromBundle(null, className, version);
+        Class<?> c = this.getClassFromBundle(null, className, versionRange);
 
         if (c == null) {
-            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, false), version, true);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, false), versionRange, true);
             if (resource != null)
             {
-            	c = this.getClassFromBundle(null, className, version);	// It is possible that the newly started bundle registered itself
+            	c = this.getClassFromBundle(null, className, versionRange);	// It is possible that the newly started bundle registered itself
             	if (c == null)
-            		c = this.getClassFromBundle(resource, className, version);
+            		c = this.getClassFromBundle(resource, className, versionRange);
             }
         }
 
@@ -123,17 +123,17 @@ public abstract class BaseClassFinderService extends Object
      * @param className
      * @return The class definition or null if not found.
      */
-    public URL findResourceURL(String className, String version)
+    public URL findResourceURL(String className, String versionRange)
     {
         //if (ClassServiceBootstrap.repositoryAdmin == null)
         //    return null;
 
-        URL url = this.getResourceFromBundle(null, className, version);
+        URL url = this.getResourceFromBundle(null, className, versionRange);
 
         if (url == null) {
-            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), version, true);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), versionRange, true);
             if (resource != null)
-            	url = this.getResourceFromBundle(resource, className, version);
+            	url = this.getResourceFromBundle(resource, className, versionRange);
         }
 
         return url;
@@ -144,21 +144,21 @@ public abstract class BaseClassFinderService extends Object
      * @return The class definition or null if not found.
      * TODO: Need to figure out how to get the bundle's class loader, so I can set up the resource chain
      */
-    public ResourceBundle findResourceBundle(String className, Locale locale, String version)
+    public ResourceBundle findResourceBundle(String className, Locale locale, String versionRange)
     {
         //if (ClassServiceBootstrap.repositoryAdmin == null)
         //    return null;
 
-        ResourceBundle resourceBundle = this.getResourceBundleFromBundle(null, className, locale, version);
+        ResourceBundle resourceBundle = this.getResourceBundleFromBundle(null, className, locale, versionRange);
 
         if (resourceBundle == null) {
-            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), version, true);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), versionRange, true);
             if (resource != null)
             {
-            	resourceBundle = this.getResourceBundleFromBundle(resource, className, locale, version);
+            	resourceBundle = this.getResourceBundleFromBundle(resource, className, locale, versionRange);
             	if (resourceBundle == null)
             	{
-            		Class<?> c = this.getClassFromBundle(resource, className, version);
+            		Class<?> c = this.getClassFromBundle(resource, className, versionRange);
             		if (c != null)
             		{
 					   try {
@@ -182,17 +182,17 @@ public abstract class BaseClassFinderService extends Object
      * @param string The string to convert.
      * @return The java object.
      */
-    public Object findConvertStringToObject(String className, String version, String string)
+    public Object findConvertStringToObject(String className, String versionRange, String string)
     {
-    	Object object = this.convertStringToObject(null, className, version, string);
+    	Object object = this.convertStringToObject(null, className, versionRange, string);
 
         if (object == null) {
-            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, false), version, true);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, false), versionRange, true);
             if (resource != null)
             {
-            	object = this.convertStringToObject(null, className, version, string);	// It is possible that the newly started bundle registered itself
+            	object = this.convertStringToObject(null, className, versionRange, string);	// It is possible that the newly started bundle registered itself
             	if (object == null)
-            		object = this.convertStringToObject(resource, className, version, string);
+            		object = this.convertStringToObject(resource, className, versionRange, string);
             }
         }
 
@@ -257,14 +257,14 @@ public abstract class BaseClassFinderService extends Object
      * @return The class loader.
      * @throws ClassNotFoundException
      */
-    public ClassLoader findBundleClassLoader(String packageName, String version)
+    public ClassLoader findBundleClassLoader(String packageName, String versionRange)
     {
-    	ClassLoader classLoader = this.getClassLoaderFromBundle(null, packageName, version);
+    	ClassLoader classLoader = this.getClassLoaderFromBundle(null, packageName, versionRange);
 
         if (classLoader == null) {
-            Object resource = this.deployThisResource(packageName, version, true);
+            Object resource = this.deployThisResource(packageName, versionRange, true);
             if (resource != null)
-            	classLoader = this.getClassLoaderFromBundle(resource, packageName, version);
+            	classLoader = this.getClassLoaderFromBundle(resource, packageName, versionRange);
         }
 
         return classLoader;    	
@@ -469,20 +469,20 @@ public abstract class BaseClassFinderService extends Object
      * Start up a basebundle service.
      * Note: You will probably want to call this from a thread and attach a service
      * listener since this may take some time.
-     * @param version version
+     * @param versionRange version
      * @param className
      * @return true If I'm up already
      * @return false If I had a problem.
      */
-    public boolean startBaseBundle(BundleContext context, String dependentBaseBundleClassName, String version)
+    public boolean startBaseBundle(BundleContext context, String dependentBaseBundleClassName, String versionRange)
     {
-    	BundleService bundleService = this.getClassBundleService(dependentBaseBundleClassName, version, null);
+    	BundleService bundleService = this.getClassBundleService(dependentBaseBundleClassName, versionRange, null);
     	if (bundleService != null)
     		return true;	// Already up!
         // If the repository is not up, but the bundle is deployed, this will find it
-        Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), version, false);  // Get the bundle info from the repos
+        Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), versionRange, false);  // Get the bundle info from the repos
         
-        Bundle bundle = this.findBundle(resource, context, ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), version);
+        Bundle bundle = this.findBundle(resource, context, ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), versionRange);
         
         if (bundle != null)
         {
@@ -495,7 +495,7 @@ public abstract class BaseClassFinderService extends Object
                     e.printStackTrace();
                 }
             }
-            bundleService = this.getClassBundleService(dependentBaseBundleClassName, version, null);	// This will wait until it is active to return
+            bundleService = this.getClassBundleService(dependentBaseBundleClassName, versionRange, null);	// This will wait until it is active to return
             return (bundleService != null);	// Success
         }
         return false;	// Error! Where is my bundle?
