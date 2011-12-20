@@ -7,13 +7,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 
-public class ClassFinderListener implements ServiceListener
+public class ServiceRegisteredListener implements ServiceListener
 {
     BundleContext context = null;
 
     private Thread thread = null;
     
-    public ClassFinderListener(Thread thread, BundleContext context)
+    public ServiceRegisteredListener(Thread thread, BundleContext context)
     {
         super();
         this.thread = thread;

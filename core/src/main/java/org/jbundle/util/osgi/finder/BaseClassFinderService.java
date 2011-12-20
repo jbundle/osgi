@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,21 +79,6 @@ public abstract class BaseClassFinderService extends Object
         // I'm unregistered automatically
 
         bundleContext = null;
-    }
-    /**
-     * Find, resolve, and return this bundle.
-     * @param packageName
-     */
-    public Bundle findBundle(String packageName, String versionRange)
-    {
-        Bundle bundle = this.findBundle(null, bundleContext, packageName, versionRange);
-
-        if (bundle == null) {
-            Object resource = this.deployThisResource(packageName, versionRange, true);
-            if (resource != null)
-            	bundle = this.findBundle(resource, bundleContext, packageName, versionRange);
-        }
-        return bundle;
     }
     /**
      * Find, resolve, and return this class definition.
@@ -201,11 +187,11 @@ public abstract class BaseClassFinderService extends Object
     /**
      * Convert this encoded string back to a Java Object.
      * TODO This is expensive, I need to synchronize and use a static writer.
-     * @param version version
+     * @param versionRange version
      * @param string The string to convert.
      * @return The java object.
      */
-    public Object convertStringToObject(Object resource, String className, String version, String string)
+    public Object convertStringToObject(Object resource, String className, String versionRange, String string)
     {
         if ((string == null) || (string.length() == 0))
             return null;
@@ -213,13 +199,13 @@ public abstract class BaseClassFinderService extends Object
         try {
             if (resource == null)
             {
-                BundleService classAccess = this.getClassBundleService(className, version, null);
+                BundleService classAccess = this.getClassBundleService(className, versionRange, null, 0);
                 if (classAccess != null)
                 	object = classAccess.convertStringToObject(string);
             }
             else
             {
-            	/*Bundle bundle =*/ this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), version);
+            	/*Bundle bundle =*/ this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), versionRange);
 	            object = this.convertStringToObject(string);
             }
         } catch (ClassNotFoundException e) {
@@ -271,17 +257,17 @@ public abstract class BaseClassFinderService extends Object
     }
     /**
      * Find this class's bundle in the repository
-     * @param version version
+     * @param versionRange version
      * @param className
      * @return
      */
-    private ClassLoader getClassLoaderFromBundle(Object resource, String packageName, String version)
+    private ClassLoader getClassLoaderFromBundle(Object resource, String packageName, String versionRange)
     {
     	String className = packageName + FAKE_CLASSNAME;
     	ClassLoader classLoader = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(className, version, null);
+            BundleService classAccess = this.getClassBundleService(className, versionRange, null, 0);
             if (classAccess != null)
             {
             	classLoader = classAccess.getClass().getClassLoader();
@@ -289,7 +275,7 @@ public abstract class BaseClassFinderService extends Object
         }
         else
         {
-        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), version);
+        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), versionRange);
         	if (bundle == null)
         		return null;
         	@SuppressWarnings("unchecked")
@@ -315,7 +301,24 @@ public abstract class BaseClassFinderService extends Object
      * @param className
      * @return
      */
-    public BundleService getClassBundleService(String className, String version, Dictionary<String, String> filter)
+    public BundleService getClassBundleService(String className, String versionRange, Dictionary<String, String> filter, int secsToWait)
+    {
+        ServiceReference ServiceReference = getClassServiceReference(bundleContext, className, versionRange, filter);
+        
+        if ((ServiceReference != null) && ((ServiceReference.getBundle().getState() & Bundle.ACTIVE) != 0))
+            return (BundleService)bundleContext.getService(ServiceReference);
+
+        if (secsToWait != 0)
+            return (BundleService)ClassFinderActivator.waitForServiceStartup(bundleContext, className, versionRange, filter, secsToWait);
+
+        return null;
+    }
+    /**
+     * Find this class's class access registered class access service in the current workspace.
+     * @param className
+     * @return
+     */
+    public static ServiceReference getClassServiceReference(BundleContext context, String className, String versionRange, Dictionary<String, String> filter)
     {
         try {
             String serviceFilter = ClassServiceUtility.addToFilter(null, BundleService.PACKAGE_NAME, ClassFinderActivator.getPackageName(className, true));
@@ -334,14 +337,14 @@ public abstract class BaseClassFinderService extends Object
                 }
             }
             if (interfaceName == null)
-            	interfaceName = className;
+                interfaceName = className;
             if (interfaceName == null)
-            	interfaceName = BundleService.class.getName();	// Never
-            serviceFilter = ClassFinderActivator.addVersionFilter(serviceFilter, version, false);
-            ServiceReference[] refs = bundleContext.getServiceReferences(interfaceName, serviceFilter);
+                interfaceName = BundleService.class.getName();  // Never
+            serviceFilter = ClassFinderActivator.addVersionFilter(serviceFilter, versionRange);
+            ServiceReference[] refs = context.getServiceReferences(interfaceName, serviceFilter);
 
             if ((refs != null) && (refs.length > 0))
-                return (BundleService)bundleContext.getService(refs[0]);
+                return refs[0];
         } catch (InvalidSyntaxException e) {
             e.printStackTrace();
         }
@@ -350,15 +353,15 @@ public abstract class BaseClassFinderService extends Object
     /**
      * Find this class's bundle in the repository
      * @param className
-     * @param version version
+     * @param versionRange version
      * @return
      */
-    private Class<?> getClassFromBundle(Object resource, String className, String version)
+    private Class<?> getClassFromBundle(Object resource, String className, String versionRange)
     {
         Class<?> c = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(className, version, null);
+            BundleService classAccess = this.getClassBundleService(className, versionRange, null, 0);
             if (classAccess != null)
             {
             	try {
@@ -370,7 +373,7 @@ public abstract class BaseClassFinderService extends Object
         }
         else
         {
-        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), version);
+        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), versionRange);
         	try {
 	            c = bundle.loadClass(className);
             } catch (ClassNotFoundException e) {
@@ -382,22 +385,22 @@ public abstract class BaseClassFinderService extends Object
     /**
      * makeClassFromBundle
      * @param className
-     * @param version version
+     * @param versionRange version
      * 
      * @return
      */
-    private URL getResourceFromBundle(Object resource, String className, String version)
+    private URL getResourceFromBundle(Object resource, String className, String versionRange)
     {
         URL url = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(className, version, null);
+            BundleService classAccess = this.getClassBundleService(className, versionRange, null, 0);
             if (classAccess != null)
                 url = classAccess.getResource(className);
         }
         else
         {
-        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, true), version);
+        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, true), versionRange);
             url = bundle.getEntry(className);
         }
         return url;
@@ -409,12 +412,12 @@ public abstract class BaseClassFinderService extends Object
      * @return
      */
     boolean USE_NO_RESOURCE_HACK = true; // TODO - There must be a way to get the class loader????
-    private ResourceBundle getResourceBundleFromBundle(Object resource, String baseName, Locale locale, String version)
+    private ResourceBundle getResourceBundleFromBundle(Object resource, String baseName, Locale locale, String versionRange)
     {
     	ResourceBundle resourceBundle = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(baseName, version, null);
+            BundleService classAccess = this.getClassBundleService(baseName, versionRange, null, 0);
             if (classAccess != null)
             {
                 if (USE_NO_RESOURCE_HACK)
@@ -436,7 +439,7 @@ public abstract class BaseClassFinderService extends Object
         }
         else
         {
-        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(baseName, true), version);
+        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(baseName, true), versionRange);
             if (USE_NO_RESOURCE_HACK)
             {
                 try {
@@ -463,42 +466,27 @@ public abstract class BaseClassFinderService extends Object
      * @param options 
      * @return
      */
-    public abstract Object deployThisResource(String packageName, String version, boolean start);
+    public abstract Object deployThisResource(String packageName, String versionRange, boolean start);
 
     /**
      * Start up a basebundle service.
      * Note: You will probably want to call this from a thread and attach a service
      * listener since this may take some time.
      * @param versionRange version
+     * @param secsToWait Time to wait for startup 0=0, -1=default
      * @param className
      * @return true If I'm up already
      * @return false If I had a problem.
      */
-    public boolean startBaseBundle(BundleContext context, String dependentBaseBundleClassName, String versionRange)
+    public boolean startBaseBundle(BundleContext context, String dependentBaseBundleClassName, String versionRange, int secsToWait)
     {
-    	BundleService bundleService = this.getClassBundleService(dependentBaseBundleClassName, versionRange, null);
-    	if (bundleService != null)
-    		return true;	// Already up!
+        ServiceReference ServiceReference = getClassServiceReference(bundleContext, dependentBaseBundleClassName, versionRange, null);
+        
+        if ((ServiceReference != null) && ((ServiceReference.getBundle().getState() & Bundle.ACTIVE) != 0))
+            return true;    // Already up!
+
         // If the repository is not up, but the bundle is deployed, this will find it
-        Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), versionRange, false);  // Get the bundle info from the repos
-        
-        Bundle bundle = this.findBundle(resource, context, ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false), versionRange);
-        
-        if (bundle != null)
-        {
-            if (((bundle.getState() & Bundle.ACTIVE) == 0)
-            		&& ((bundle.getState() & Bundle.STARTING) == 0))
-            {
-                try {
-                    bundle.start();
-                } catch (BundleException e) {
-                    e.printStackTrace();
-                }
-            }
-            bundleService = this.getClassBundleService(dependentBaseBundleClassName, versionRange, null);	// This will wait until it is active to return
-            return (bundleService != null);	// Success
-        }
-        return false;	// Error! Where is my bundle?
+    	return (ClassFinderActivator.waitForServiceStartup(context, dependentBaseBundleClassName, versionRange, null, secsToWait) != null);
     }
     /**
      * Shutdown the bundle for this service.
@@ -515,7 +503,7 @@ public abstract class BaseClassFinderService extends Object
             bundle = this.findBundle(resource, bundleContext, packageName, null);
         }
     	if (bundle != null)
-    		if (bundle.getState() == Bundle.ACTIVE)
+    		if ((bundle.getState() & Bundle.ACTIVE) != 0)
     		{
     			try {
 					bundle.stop();
@@ -540,74 +528,98 @@ public abstract class BaseClassFinderService extends Object
     }
 
     /**
+     * Find, resolve, and return this bundle.
+     * @param packageName
+     */
+    public Object findBundle(String packageName, String versionRange)
+    {
+        Bundle bundle = this.findBundle(null, bundleContext, packageName, versionRange);
+
+        if (bundle == null) {
+            Object resource = this.deployThisResource(packageName, versionRange, true);
+            if (resource != null)
+                bundle = this.findBundle(resource, bundleContext, packageName, versionRange);
+        }
+        return bundle;
+    }
+    /**
+     * Find the currently installed bundle that exports this package.
+     * @param bundleContext
+     * @param resource
+     * @return
+     */
+    public Bundle findBundle(Object objResource, Object bundleContext, String packageName, String versionRange)
+    {
+        if (bundleContext == null)
+            return null;
+        if (objResource == null)
+            return BaseClassFinderService.findBundle((BundleContext)bundleContext, packageName, versionRange);
+        Bundle[] bundles = ((BundleContext)bundleContext).getBundles();
+        for (Bundle bundle : bundles)
+        {
+            if (objResource != null)
+            {
+                if (this.isResourceBundleMatch(objResource, bundle))
+                    return bundle;               
+            }
+        }
+        return null;
+    }
+    /**
      * Find the currently installed bundle that exports this package.
      * @param context
      * @param resource
      * @return
      */
-    public Bundle findBundle(Object objResource, BundleContext context, String packageName, String version)
+    public static Bundle findBundle(BundleContext context, String packageName, String versionRange)
     {
         if (context == null)
             return null;
         Bundle[] bundles = context.getBundles();
         Bundle bestBundle = null;
-        Version bestVersion = (version == null) ? null : new Version(version.replace(',', '.'));
         for (Bundle bundle : bundles)
         {
-            if (objResource != null)
-            {
-            	if (this.isResourceBundleMatch(objResource, bundle))
-                    return bundle;               
-            }
-            else if (packageName != null)
+            if (packageName != null)
             {
                 Dictionary<?, ?> dictionary = bundle.getHeaders();
                 String packages = (String)dictionary.get(Constants.EXPORT_PACKAGE);
                 Version bundleVersion = new Version((String)dictionary.get(Constants.BUNDLE_VERSION));
-                if (packages != null)
+
+                StringBuilder sb = new StringBuilder(packages == null ? "" : packages);
+                while (true)
                 {
-                    StringBuilder sb = new StringBuilder(packages);
-                    while (true)
+                    int start = sb.indexOf("=\"");
+                    if (start == -1)
+                        break;
+                    int end = sb.indexOf("\"", start + 2);
+                    if ((start > -1) && (end > -1))
+                        sb.delete(start, end + 1);
+                    else
+                        break;  // never
+                }
+                while (true)
+                {
+                    int semi = sb.indexOf(";");
+                    if (semi == -1)
+                        break;
+                    int comma = sb.indexOf(",", semi);
+                    if (comma == -1)
+                        comma = sb.length();
+                    else if (sb.charAt(comma + 1) == ' ')
+                        comma++;
+                    if ((semi > -1) && (comma > -1))
+                        sb.delete(semi, comma);
+                    else
+                        break;  // never
+                }
+                
+                String[] packs = sb.toString().split(",");
+                for (String pack : packs)
+                {
+                    if (packageName.equals(pack))
                     {
-                        int start = sb.indexOf("=\"");
-                        if (start == -1)
-                            break;
-                        int end = sb.indexOf("\"", start + 2);
-                        if ((start > -1) && (end > -1))
-                            sb.delete(start, end + 1);
-                        else
-                            break;  // never
-                    }
-                    while (true)
-                    {
-                        int semi = sb.indexOf(";");
-                        if (semi == -1)
-                            break;
-                        int comma = sb.indexOf(",", semi);
-                        if (comma == -1)
-                            comma = sb.length();
-                        else if (sb.charAt(comma + 1) == ' ')
-                            comma++;
-                        if ((semi > -1) && (comma > -1))
-                            sb.delete(semi, comma);
-                        else
-                            break;  // never
-                    }
-                    
-                    String[] packs = sb.toString().split(",");
-                    for (String pack : packs)
-                    {
-                        if (packageName.equals(pack))
-                        {
-                        	if ((bestVersion == null)
-                        		|| ((bestVersion.getMajor() == bundleVersion.getMajor())
-                                	&& (bestVersion.getMinor() <= bundleVersion.getMinor())
-                                	/*&& (bestVersion.getMicro() <= bundleVersion.getMicro())*/))
-                        	{
-                        		bestBundle = bundle;
-                        		bestVersion = bundleVersion;
-                        	}
-                        }
+                        if (isValidVersion(bundleVersion, versionRange))
+                            bestBundle = bundle;
                     }
                 }
             }
@@ -679,6 +691,65 @@ public abstract class BaseClassFinderService extends Object
             if (level == Level.CONFIG)
                 osgiLevel = LogService.LOG_DEBUG;
             BaseClassFinderService.this.log(null, osgiLevel, message);
+        }
+    }
+    /**
+     * See if this version falls within this version range.
+     * @param version
+     * @param versionRange
+     * @return True if it is a valid version
+     */
+    public static final char SPACE = ' ';
+    public static boolean isValidVersion(Version version, String versionRange)
+    {
+        if (versionRange == null)
+            return true;
+       
+        if ((versionRange.contains(",")) || (versionRange.contains("[")) || (versionRange.contains("]")) || (versionRange.contains("(")) || (versionRange.contains(")")))
+        {
+            // There has to be better code in the osgi framework that will parse ranges like [1.2.3)
+            try {
+                boolean valid = true;
+                StringTokenizer st = new StringTokenizer(versionRange, ",");
+                while (st.hasMoreTokens())
+                {
+                    String range = st.nextToken();
+                    char start = SPACE, end = SPACE;
+                    if ((range.startsWith("[")) || (range.startsWith("(")))
+                        {start = range.charAt(0);range = range.substring(1);}
+                    if ((range.endsWith("]")) || (range.endsWith(")")))
+                        {end = range.charAt(range.length() - 1);range = range.substring(0, range.length() - 1);}
+
+                    Version rangeVersion = new Version(range);
+                    if ((start == '[') && (version.compareTo(rangeVersion)) < 0)
+                        valid = false;
+                    if ((start == '(') && (version.compareTo(rangeVersion)) <= 0)
+                        valid = false;
+                    if ((end == ']') && (version.compareTo(rangeVersion)) >= 0)
+                        valid = false;
+                    if ((end == ')') && (version.compareTo(rangeVersion)) > 0)
+                        valid = false;
+                }
+                return valid;
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                return true;    // Weird version = okay?
+            }
+        }
+        else
+        {
+            try {
+                Version rangeVersion = new Version(versionRange);
+                if (rangeVersion.equals(version))
+                    return true;
+                // HACK HACK HACK - This code is for sloppy bundle definitions (standard practice okays major and minor match)
+                if (version.getMajor() == rangeVersion.getMajor())
+                    if (version.getMinor() >= rangeVersion.getMinor())
+                        return true;
+                return false;
+            } catch (IllegalArgumentException e) {
+                return true;    // Weird version = okay?
+            }
         }
     }
 }

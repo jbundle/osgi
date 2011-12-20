@@ -18,17 +18,17 @@ public class BundleStarter extends Thread
 {
 	BundleContext bundleContext = null;
 	String dependentBaseBundleClassName = null;
-	String version = null;
+	String versionRange = null;
 	
-	public BundleStarter(BaseBundleService bundleService, BundleContext bundleContext, String dependentBaseBundleClassName, String version)
+	public BundleStarter(BaseBundleService bundleService, BundleContext bundleContext, String dependentBaseBundleClassName, String versionRange)
 	{
 		this.bundleContext = bundleContext;
 		this.dependentBaseBundleClassName = dependentBaseBundleClassName;
-		this.version = version;
+		this.versionRange = versionRange;
 	}
 	public void run()
 	{
 		BaseClassFinderService classFinder = (BaseClassFinderService)ClassFinderActivator.getClassFinder(bundleContext, -1);
-		classFinder.startBaseBundle(bundleContext, dependentBaseBundleClassName, version);
+		classFinder.startBaseBundle(bundleContext, dependentBaseBundleClassName, versionRange, -1);
 	}
 }

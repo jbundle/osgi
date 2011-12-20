@@ -3,7 +3,6 @@
  */
 package org.jbundle.util.osgi.bundle;
 
-import org.jbundle.util.osgi.BundleService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
@@ -16,13 +15,13 @@ import org.osgi.framework.ServiceReference;
  * @author don
  * 
  */
-public class BundleServiceDependentListener implements ServiceListener
+public class DependentServiceRegisteredListener implements ServiceListener
 {
 	BaseBundleService bundleService = null;
 	
     BundleContext context = null;
     
-    public BundleServiceDependentListener(BaseBundleService bundleService, BundleContext context)
+    public DependentServiceRegisteredListener(BaseBundleService bundleService, BundleContext context)
     {
         this.context = context;
         this.bundleService = bundleService;
@@ -39,12 +38,14 @@ public class BundleServiceDependentListener implements ServiceListener
             ServiceReference serviceReference = event.getServiceReference();
             Bundle bundle = serviceReference.getBundle();
             BundleContext context = bundle.getBundleContext();
-            Object service = context.getService(serviceReference);
-//x            if (bundleService == null)
+//x            Object service = context.getService(serviceReference);
+//xq            if (bundleService == null)
 //x            	if (service instanceof BaseBundleService)
 //x            		bundleService = (BaseBundleService)service;
 //x            context.removeServiceListener(this);	// Don't need this anymore
-            bundleService.startupThisService((BundleService)service, context);
+            bundleService.startupThisService(context);
+            
+            context.removeServiceListener(this);
         }
         if (event.getType() == ServiceEvent.UNREGISTERING)
         {

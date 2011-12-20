@@ -7,6 +7,8 @@ import java.net.URL;
 
 /**
  * Bundle resource access utilities for a service.
+
+ * WARNING: It is important that this class has no direct connections to org.osgi!
  * @author don
  */
 public interface BundleService {
@@ -32,10 +34,10 @@ public interface BundleService {
     public URL getResource(String className);
     /**
      * Convert this encoded string back to a Java Object.
-     * TODO This is expensive, I need to synchronize and use a static writer.
      * @param string The string to convert.
      * @return The java object.
      */
     public Object convertStringToObject(String string)
     	throws ClassNotFoundException;
+    
 }

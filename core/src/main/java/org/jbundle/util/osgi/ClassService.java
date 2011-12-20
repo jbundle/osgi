@@ -10,6 +10,8 @@ import java.util.ResourceBundle;
 
 /**
  * Thin specific static utility methods.
+
+ * WARNING: It is important that this class has no direct connections to org.osgi!
  */
 public interface ClassService
 {
@@ -39,7 +41,7 @@ public interface ClassService
     * @return
     * @throws RuntimeException If Error flag is set, return a runtime exception if object can't be created.
     */
-   public Object makeObjectFromClassName(String className, String version, boolean bErrorIfNotFound) throws RuntimeException;
+   public Object makeObjectFromClassName(String className, String versionRange, boolean bErrorIfNotFound) throws RuntimeException;
    /**
     * Create this object given the class name.
     * @param filepath
@@ -47,7 +49,7 @@ public interface ClassService
  * @return
     * @throws RuntimeException Not implemented yet
     */
-   public URL getResourceURL(String filepath, URL urlCodeBase, String version, ClassLoader classLoader) throws RuntimeException;
+   public URL getResourceURL(String filepath, URL urlCodeBase, String versionRange, ClassLoader classLoader) throws RuntimeException;
    /**
     * Gets a resource bundle using the specified base name and locale,
  * @param locale the locale for which a resource bundle is desired
@@ -58,7 +60,7 @@ public interface ClassService
  * @exception MissingResourceException if no resource bundle for the specified base name can be found
  * @return a resource bundle for the given base name and locale
     */
-   public ResourceBundle getResourceBundle(String className, Locale locale, String version, ClassLoader classLoader) throws MissingResourceException;
+   public ResourceBundle getResourceBundle(String className, Locale locale, String versionRange, ClassLoader classLoader) throws MissingResourceException;
    /**
     * Convert this encoded string back to a Java Object.
     * @param string The string to convert.
@@ -67,7 +69,7 @@ public interface ClassService
     * @throws RuntimeException Runtime errors
     * @throws ClassNotFoundException
     */
-   public Object convertStringToObject(String string, String version) throws ClassNotFoundException;
+   public Object convertStringToObject(String string, String versionRange) throws ClassNotFoundException;
    /**
     * Get the bundle classloader for this package.
  * @param version Version range
@@ -75,7 +77,7 @@ public interface ClassService
     * @return The class loader.
     * @throws ClassNotFoundException
     */
-   public ClassLoader getBundleClassLoader(String packageName, String version) throws ClassNotFoundException;
+   public ClassLoader getBundleClassLoader(String packageName, String versionRange) throws ClassNotFoundException;
    /**
     * Shutdown the bundle for this service.
     * @param service The service object

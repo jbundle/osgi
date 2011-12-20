@@ -204,7 +204,7 @@ public class ObrClassFinderService extends BaseClassFinderService
         if (this.getResourceFromCache(packageName) != null)
         	return this.getResourceFromCache(packageName);
         String filter = "(package=" + packageName + ")";
-        filter = ClassFinderActivator.addVersionFilter(filter, versionRange, false);
+        filter = ClassFinderActivator.addVersionFilter(filter, versionRange);
         Requirement requirement = helper.requirement("package", filter);
         Requirement[] requirements = { requirement };// repositoryAdmin
         Resource[] resources = repositoryAdmin.discoverResources(requirements);
@@ -287,53 +287,6 @@ public class ObrClassFinderService extends BaseClassFinderService
     {
     	Resource resource = (Resource)objResource;
     	return ((bundle.getSymbolicName().equals(resource.getSymbolicName())) && (isValidVersion(bundle.getVersion(), resource.getVersion().toString())));
-    }
-    /**
-     * See if this version falls within this version range.
-     * @param version
-     * @param versionRange
-     * @return True if it is a valid version
-     */
-    public static boolean isValidVersion(Version version, String versionRange)
-    {
-        if (versionRange == null)
-            return true;
-       
-        if ((versionRange.contains("[")) || (versionRange.contains("]")) || (versionRange.contains("(")) || (versionRange.contains(")")))
-        {
-            // There has to be better code in the osgi framework that will parse ranges like [1.2.3)
-            try {
-                Version rangeVersion = new Version(versionRange.substring(1, versionRange.length() - 2));
-                boolean valid = true;
-                if ((versionRange.startsWith("[")) && (version.compareTo(rangeVersion)) < 0)
-                    valid = false;
-                if ((versionRange.startsWith("(")) && (version.compareTo(rangeVersion)) <= 0)
-                    valid = false;
-                if ((versionRange.endsWith("]")) && (version.compareTo(rangeVersion)) >= 0)
-                    valid = false;
-                if ((versionRange.endsWith(")")) && (version.compareTo(rangeVersion)) > 0)
-                    valid = false;
-                return valid;
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                return true;    // Weird version = okay?
-            }
-        }
-        else
-        {
-            try {
-                Version rangeVersion = new Version(versionRange);
-                if (rangeVersion.equals(version))
-                    return true;
-                // HACK HACK HACK - This code is for sloppy bundle definitions (standard practice okays major and minor match)
-                if (rangeVersion.getMajor() == version.getMajor())
-                    if (rangeVersion.getMinor() == version.getMinor())
-                        return true;
-                return false;
-            } catch (IllegalArgumentException e) {
-                return true;    // Weird version = okay?
-            }
-        }
     }
 }
 

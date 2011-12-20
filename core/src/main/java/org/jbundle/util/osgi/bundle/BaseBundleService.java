@@ -13,13 +13,16 @@ import java.util.Hashtable;
 
 import org.jbundle.util.osgi.BundleService;
 import org.jbundle.util.osgi.ClassService;
+import org.jbundle.util.osgi.finder.BaseClassFinderService;
 import org.jbundle.util.osgi.finder.ClassFinderActivator;
 import org.jbundle.util.osgi.finder.ClassServiceUtility;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogService;
 
@@ -46,7 +49,7 @@ public class BaseBundleService extends Object
      * Bundle starting up.
      */
     public void start(BundleContext context) throws Exception {
-        ClassServiceUtility.log(context, LogService.LOG_INFO, "Starting a BaseBundleService bundle");
+        ClassServiceUtility.log(context, LogService.LOG_INFO, "Starting a BaseBundleService bundle: " + this.getClass().getName());
         
         this.context = context;
         
@@ -156,19 +159,25 @@ public class BaseBundleService extends Object
     }
     /**
      * Make sure the dependent services are up, then call startupService.
-     * @param version Bundle version
+     * @param versionRange Bundle version
      * @param baseBundleServiceClassName
      * @return false if I'm waiting for the service to startup.
      */
-    public boolean checkDependentServicesAndStartup(BundleContext bundleContext, String dependentBaseBundleClassName, String version)
+    public boolean checkDependentServicesAndStartup(BundleContext bundleContext, String dependentBaseBundleClassName, String versionRange)
     {
-    	BaseBundleService bundleService = (BaseBundleService)ClassFinderActivator.getClassFinder(bundleContext, -1).getClassBundleService(dependentBaseBundleClassName, version, null);
-    	if (bundleService != null)
-    		return this.startupThisService(bundleService, bundleContext);	// TODO - Synchronization issue
-    	// Service has not started, so I need to start it and then listen
+        ServiceReference serviceReference = BaseClassFinderService.getClassServiceReference(bundleContext, dependentBaseBundleClassName, versionRange, null);
+        
+        if ((serviceReference != null) && ((serviceReference.getBundle().getState() & Bundle.ACTIVE) != 0))
+        {    // Good, dependent service is already up; now I can start up.
+            return this.startupThisService(bundleContext);
+        }
+    	// Dependent service has not started, so I need to start it and then listen
 		try {
-			bundleContext.addServiceListener(new BundleServiceDependentListener(this, bundleContext), /*"(&" +*/ "(objectClass=" + dependentBaseBundleClassName + ")");	// This will call startupThisService once the service is up
-	    	new BundleStarter(this, bundleContext, dependentBaseBundleClassName, version).start();
+		    if (serviceReference == null)
+		        bundleContext.addServiceListener(new DependentServiceRegisteredListener(this, bundleContext), /*"(&" +*/ "(objectClass=" + dependentBaseBundleClassName + ")");	// This will call startupThisService once the service is up
+		    else
+                bundleContext.addBundleListener(new DependentBundleStartupListener(this, bundleContext, serviceReference.getBundle())); // This will call startupThisService once the service is up
+	    	new BundleStarter(this, bundleContext, dependentBaseBundleClassName, versionRange).start();
 		} catch (InvalidSyntaxException e) {
 			e.printStackTrace();
 		}
@@ -177,17 +186,18 @@ public class BaseBundleService extends Object
     /**
      * Start this service.
      * Override this to do all the startup.
-     * @param context TODO
+     * @param context bundle context
      * @return true if successful.
      */
-    public boolean startupThisService(BundleService bundleService, BundleContext context)
+    public boolean startupThisService(BundleContext bundleContext)
     {
         return true;
     }
     /**
      * Stop this service.
      * Override this to do all the startup.
-     * @param context TODO
+     * @param bundleService
+     * @param context bundle context
      * @return true if successful.
      */
     public boolean shutdownThisService(BundleService bundleService, BundleContext context)
