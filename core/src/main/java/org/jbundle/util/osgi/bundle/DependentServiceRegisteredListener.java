@@ -3,11 +3,13 @@
  */
 package org.jbundle.util.osgi.bundle;
 
+import org.jbundle.util.osgi.finder.ClassServiceUtility;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
 
 /**
  * RepositoryAdminServiceListener - Notify me when this dependent service is up.
@@ -38,12 +40,12 @@ public class DependentServiceRegisteredListener implements ServiceListener
             ServiceReference serviceReference = event.getServiceReference();
             Bundle bundle = serviceReference.getBundle();
             BundleContext context = bundle.getBundleContext();
-//x            Object service = context.getService(serviceReference);
-//xq            if (bundleService == null)
-//x            	if (service instanceof BaseBundleService)
-//x            		bundleService = (BaseBundleService)service;
-//x            context.removeServiceListener(this);	// Don't need this anymore
-            bundleService.startupThisService(context);
+            if ((bundle.getState() & Bundle.STARTING) != 0)
+                context.addBundleListener(new DependentBundleStartupListener(bundleService, context, bundle));  // Still starting, wait 'til it starts
+            if ((bundle.getState() & Bundle.ACTIVE) != 0)
+                bundleService.startupThisService(context);  // Good, it is started. Call the startup service
+            else if ((bundle.getState() & Bundle.STARTING) == 0)  // What?
+                ClassServiceUtility.log(context, LogService.LOG_ERROR, "BundleService never started: " + bundleService.getClass().getName());
             
             context.removeServiceListener(this);
         }
