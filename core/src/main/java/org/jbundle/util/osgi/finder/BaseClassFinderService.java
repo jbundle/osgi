@@ -526,22 +526,6 @@ public abstract class BaseClassFinderService extends Object
     {
     	resourceMap.put(packageName, resource);
     }
-
-    /**
-     * Find, resolve, and return this bundle.
-     * @param packageName
-     */
-    public Object findBundle(String packageName, String versionRange)
-    {
-        Bundle bundle = this.findBundle(null, bundleContext, packageName, versionRange);
-
-        if (bundle == null) {
-            Object resource = this.deployThisResource(packageName, versionRange, true);
-            if (resource != null)
-                bundle = this.findBundle(resource, bundleContext, packageName, versionRange);
-        }
-        return bundle;
-    }
     /**
      * Find the currently installed bundle that exports this package.
      * @param bundleContext
@@ -550,6 +534,8 @@ public abstract class BaseClassFinderService extends Object
      */
     public Bundle findBundle(Object objResource, Object bundleContext, String packageName, String versionRange)
     {
+        if (bundleContext == null)
+            bundleContext = this.bundleContext;
         if (bundleContext == null)
             return null;
         if (objResource == null)
