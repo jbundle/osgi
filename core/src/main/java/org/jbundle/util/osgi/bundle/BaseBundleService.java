@@ -85,14 +85,22 @@ public class BaseBundleService extends Object
     	// Override this to monitor event  if (event.getType() == ServiceEvent.REGISTERED)
     }
     
-	/**
-	 * Get the properties.
-	 * @return the properties.
-	 */
-	public Dictionary<String,String> getProperties()
-	{
-		return properties;
-	}
+    /**
+     * Get the properties.
+     * @return the properties.
+     */
+    public void setProperties(Dictionary<String,String> properties)
+    {
+        this.properties = properties;
+    }
+    /**
+     * Get the properties.
+     * @return the properties.
+     */
+    public Dictionary<String,String> getProperties()
+    {
+        return properties;
+    }
 	/**
 	 * Get the properties.
 	 * @return the properties.

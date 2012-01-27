@@ -24,29 +24,29 @@ public interface ClassService
    /**
     * Get the Osgi class service.
     * NOTE: Don't import this package as the ClassService class may not be available until this service is started.
-    * @param context TODO
- * @return
+    * @param context The bundle context
+    * @return The class finder
     */
    public ClassFinder getClassFinder(Object context);
    /**
     * Create this object given the class name.
     * @param className
-    * @return
+    * @return The object
     */
    public Object makeObjectFromClassName(String className);
    /**
     * Create this object given the class name.
     * @param className
- * @param version Version range
-    * @return
+    * @param version Version range
+    * @return The object
     * @throws RuntimeException If Error flag is set, return a runtime exception if object can't be created.
     */
    public Object makeObjectFromClassName(String className, String versionRange, boolean bErrorIfNotFound) throws RuntimeException;
    /**
     * Create this object given the class name.
     * @param filepath
- * @param version Version range
- * @return
+    * @param version Version range
+    * @return The resource url
     * @throws RuntimeException Not implemented yet
     */
    public URL getResourceURL(String filepath, URL urlCodeBase, String versionRange, ClassLoader classLoader) throws RuntimeException;
