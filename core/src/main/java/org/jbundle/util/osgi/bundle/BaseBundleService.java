@@ -41,7 +41,7 @@ public class BaseBundleService extends Object
 	 */
 	protected Dictionary<String,String> properties = null;
 	
-    ServiceRegistration serviceRegistration;
+    ServiceRegistration serviceRegistration = null;
     
     protected BundleContext context = null;
     
