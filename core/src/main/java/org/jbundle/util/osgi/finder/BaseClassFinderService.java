@@ -93,7 +93,7 @@ public abstract class BaseClassFinderService extends Object
         Class<?> c = this.getClassFromBundle(null, className, versionRange);
 
         if (c == null) {
-            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, false), versionRange, true);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, false), versionRange, false);
             if (resource != null)
             {
             	c = this.getClassFromBundle(null, className, versionRange);	// It is possible that the newly started bundle registered itself
@@ -117,7 +117,7 @@ public abstract class BaseClassFinderService extends Object
         URL url = this.getResourceFromBundle(null, className, versionRange);
 
         if (url == null) {
-            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), versionRange, true);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), versionRange, false);
             if (resource != null)
             	url = this.getResourceFromBundle(resource, className, versionRange);
         }
@@ -138,7 +138,7 @@ public abstract class BaseClassFinderService extends Object
         ResourceBundle resourceBundle = this.getResourceBundleFromBundle(null, className, locale, versionRange);
 
         if (resourceBundle == null) {
-            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), versionRange, true);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), versionRange, false);
             if (resource != null)
             {
             	resourceBundle = this.getResourceBundleFromBundle(resource, className, locale, versionRange);
@@ -173,7 +173,7 @@ public abstract class BaseClassFinderService extends Object
     	Object object = this.convertStringToObject(null, className, versionRange, string);
 
         if (object == null) {
-            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, false), versionRange, true);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, false), versionRange, false);
             if (resource != null)
             {
             	object = this.convertStringToObject(null, className, versionRange, string);	// It is possible that the newly started bundle registered itself
@@ -248,7 +248,7 @@ public abstract class BaseClassFinderService extends Object
     	ClassLoader classLoader = this.getClassLoaderFromBundle(null, packageName, versionRange);
 
         if (classLoader == null) {
-            Object resource = this.deployThisResource(packageName, versionRange, true);
+            Object resource = this.deployThisResource(packageName, versionRange, false);
             if (resource != null)
             	classLoader = this.getClassLoaderFromBundle(resource, packageName, versionRange);
         }
