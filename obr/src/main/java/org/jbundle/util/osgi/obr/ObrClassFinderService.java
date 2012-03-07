@@ -267,13 +267,25 @@ public class ObrClassFinderService extends BaseClassFinderService
     {
         Resolver resolver = repositoryAdmin.resolver();
         resolver.add(resource);
-        if (resolver.resolve(options))
+        int resolveAttempt = 5;
+        while (resolveAttempt-- > 0)
         {
-            resolver.deploy(options);
-        } else {
-            Reason[] reqs = resolver.getUnsatisfiedRequirements();
-            for (int i = 0; i < reqs.length; i++) {
-                ClassServiceUtility.log(bundleContext, LogService.LOG_ERROR, "Unable to resolve: " + reqs[i]);
+            try {
+                if (resolver.resolve(options))
+                {
+                    resolver.deploy(options);
+                    break;     // Resolve successful, exception thrown on previous instruction if not
+                } else {
+                    Reason[] reqs = resolver.getUnsatisfiedRequirements();
+                    for (int i = 0; i < reqs.length; i++) {
+                        ClassServiceUtility.log(bundleContext, LogService.LOG_ERROR, "Unable to resolve: " + reqs[i]);
+                    }
+                    break;     // Resolve unsuccessful, but it did finish
+                }
+            } catch (IllegalStateException e) {
+                // If resolve unsuccessful, try again
+                if (resolveAttempt == 0)
+                    e.printStackTrace();
             }
         }
     }
