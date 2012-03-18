@@ -52,9 +52,8 @@ public final class ClassFinderActivator extends BaseBundleService
      * Bundle shutting down.
      */
     public void stop(BundleContext context) throws Exception {
-        // I'm unregistered automatically
-        
-        super.stop(context);
+
+        super.stop(context);    // I'm unregistered automatically
 
         bundleContext = null;
     }
@@ -68,6 +67,8 @@ public final class ClassFinderActivator extends BaseBundleService
     public static void setClassFinder(ClassFinder classFinder)
     {
         ClassFinderActivator.classFinder = classFinder;
+        ClassServiceUtility classService = (ClassServiceUtility)ClassServiceUtility.getClassService();
+        classService.setClassFinder(classFinder);
     }
     /**
      * Find this class's class access service in the current workspace.

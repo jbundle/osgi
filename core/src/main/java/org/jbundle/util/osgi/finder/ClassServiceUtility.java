@@ -24,6 +24,14 @@ import org.jbundle.util.osgi.ClassService;
 public class ClassServiceUtility
 	implements ClassService
 {
+    
+    /**
+     * Default constructor.
+     */
+    public ClassServiceUtility()
+    {
+        super();
+    }
 
     static ClassService classService = null;
     public static ClassService getClassService()
@@ -69,6 +77,10 @@ public class ClassServiceUtility
             ex.printStackTrace();
             return null;
         }
+    }
+    public void setClassFinder(org.jbundle.util.osgi.ClassFinder classFinder)
+    {
+        this.classFinder = classFinder;
     }
     /**
      * Create this object given the class name.
