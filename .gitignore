@@ -2,6 +2,7 @@ target
 .settings
 .project
 .classpath
+.attach*
 raw_test_data*
 scratch_test_data*
 skeleton_test_data*
