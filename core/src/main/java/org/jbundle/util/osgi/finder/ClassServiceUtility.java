@@ -4,6 +4,7 @@
 package org.jbundle.util.osgi.finder;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -138,6 +139,8 @@ public class ClassServiceUtility
     {
         if (filepath == null)
             return null;
+        if (File.separatorChar != '/')
+            filepath = filepath.replace(File.separatorChar, '/'); // Just in case I get a window's path
 
         boolean isResource = true;
         if (urlCodeBase != null)
