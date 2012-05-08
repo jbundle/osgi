@@ -17,6 +17,10 @@
   <packaging>pom</packaging>
   <name>jbundle-util-osgi-reactor</name>
 
+  <properties>
+    <projectName>jbundle-util-osgi</projectName>
+  </properties>
+
   <scm>
     <url>https://github.com/jbundle/osgi</url>
     <connection>scm:git:git://github.com/jbundle/osgi.git</connection>
