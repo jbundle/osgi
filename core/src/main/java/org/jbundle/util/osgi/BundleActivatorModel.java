@@ -6,8 +6,9 @@ package org.jbundle.util.osgi;
 import java.net.URL;
 
 /**
- * Bundle resource access utilities for a service.
-
+ * A bundle activator class.
+ * Provides resource access utilities for a service.
+ * 
  * WARNING: It is important that this class has no direct connections to org.osgi!
  * @author don
  */

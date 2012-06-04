@@ -186,7 +186,6 @@ public abstract class BaseClassFinderService extends Object
     }
     /**
      * Convert this encoded string back to a Java Object.
-     * TODO This is expensive, I need to synchronize and use a static writer.
      * @param versionRange version
      * @param string The string to convert.
      * @return The java object.
