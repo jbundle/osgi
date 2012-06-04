@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -318,6 +320,19 @@ public class ClassServiceUtility
                 filter = filter.substring(0, filter.length() - 1) + newFilter + ")";
             else
                 filter = "(&" + filter + newFilter + ")";
+        }
+        return filter;
+    }
+    /**
+     * Add this key and value to this (Dictionary) filter.
+     */
+    public static Dictionary<String,String> addToFilter(Dictionary<String,String> filter, String key, String value)
+    {
+        if (value != null) 
+        {
+        	if (filter == null)
+        		filter = new Hashtable<String,String>();
+        	filter.put(key, value);
         }        
         return filter;
     }

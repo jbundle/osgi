@@ -7,9 +7,8 @@ import java.io.File;
 import java.util.Dictionary;
 import java.util.StringTokenizer;
 
-import org.jbundle.util.osgi.BundleService;
 import org.jbundle.util.osgi.ClassFinder;
-import org.jbundle.util.osgi.bundle.BaseBundleService;
+import org.jbundle.util.osgi.bundle.BaseBundleActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -26,7 +25,7 @@ import org.osgi.service.log.LogService;
  * @author don
  * 
  */
-public final class ClassFinderActivator extends BaseBundleService
+public final class ClassFinderActivator extends BaseBundleActivator
 	implements BundleActivator
 {
     public static final int DEFAULT_SERVICE_WAIT_SECS = 60;
@@ -99,7 +98,7 @@ public final class ClassFinderActivator extends BaseBundleService
 		if (classFinder == null)
 			if (secsToWait != 0)
 				if (bundleContext != null)
-					classFinder = (ClassFinder)ClassFinderActivator.waitForServiceStartup(bundleContext, ClassFinder.class.getName(), null, null, secsToWait);
+					classFinder = (ClassFinder)ClassFinderActivator.waitForServiceStartup(bundleContext, ClassFinder.class.getName(), ClassFinderActivator.class.getName(), null, null, secsToWait);
 
 		if (classFinder == null)
 		{	// Start up the 'no persistent storage' service.
@@ -156,9 +155,9 @@ public final class ClassFinderActivator extends BaseBundleService
      * @param bundleClassName
      * @return
      */
-    public static BundleActivator waitForServiceStartup(BundleContext context, String className, String versionRange, Dictionary<String, String> filter, int secsToWait)
+    public static Object waitForServiceStartup(BundleContext context, String interfaceClassName, String serviceClassName, String versionRange, Dictionary<String, String> filter, int secsToWait)
     {
-        ServiceReference ref = BaseClassFinderService.getClassServiceReference(context, className, versionRange, filter);
+        ServiceReference ref = BaseClassFinderService.getClassServiceReference(context, (interfaceClassName != null) ? interfaceClassName : serviceClassName, versionRange, filter);
         if (ref != null)
         {   // Good, it's registered - make sure it's started, or just start it!
             if (ClassFinderActivator.waitForBundleStartup(context, ref.getBundle(), secsToWait))
@@ -167,12 +166,13 @@ public final class ClassFinderActivator extends BaseBundleService
                 return null;    // Never
         }
         
-        Bundle bundle = BaseClassFinderService.findBundle(context, ClassFinderActivator.getPackageName(className, false), versionRange);
+        Bundle bundle = BaseClassFinderService.findBundle(context, ClassFinderActivator.getPackageName(serviceClassName, false), versionRange);
         if (bundle == null)
-            if (!className.equals(ClassFinder.class.getName())) // Never. This code is in the ClassFinder bundle.
+        	if (serviceClassName != null)
+        		if (!serviceClassName.equals(ClassFinder.class.getName())) // Never. This code is in the ClassFinder bundle.
         {
             ClassFinder classFinder = getClassFinder(context, secsToWait);        
-            String packageName = ClassFinderActivator.getPackageName(className, false);
+            String packageName = ClassFinderActivator.getPackageName(serviceClassName, false);
             Object resource = classFinder.deployThisResource(packageName, versionRange, true);  // Get the bundle info from the repos
             bundle = (Bundle)classFinder.findBundle(resource, context, packageName, versionRange);
         }
@@ -182,14 +182,14 @@ public final class ClassFinderActivator extends BaseBundleService
 		Thread thread = Thread.currentThread();
 		ServiceRegisteredListener classFinderListener = null;
 		try {
-			context.addServiceListener(classFinderListener = new ServiceRegisteredListener(thread, bundleContext), "(" + Constants.OBJECTCLASS + "=" + className + ")");
+			context.addServiceListener(classFinderListener = new ServiceRegisteredListener(thread, bundleContext), "(" + Constants.OBJECTCLASS + "=" + interfaceClassName + ")");
 		} catch (InvalidSyntaxException e) {
 			e.printStackTrace();
 		}
         if (!ClassFinderActivator.waitForBundleStartup(context, bundle, secsToWait))
             return null;
 		// Double-check to make sure it didn't startup while I was doing all this.
-		BundleService bundleService = getClassFinder(context, secsToWait).getClassBundleService(className, versionRange, filter, 0);
+		Object bundleService = getClassFinder(context, secsToWait).getClassBundleService((interfaceClassName != null) ? interfaceClassName : serviceClassName, serviceClassName, versionRange, filter, 0);
 		if (bundleService == null)
 		{ // Wait 15 seconds for the ClassService to come up while the activator starts this service
     		synchronized (thread) {
@@ -202,13 +202,13 @@ public final class ClassFinderActivator extends BaseBundleService
 		}
 		context.removeServiceListener(classFinderListener);
 		
-		ref = BaseClassFinderService.getClassServiceReference(context, className, versionRange, filter);
+		ref = BaseClassFinderService.getClassServiceReference(context, interfaceClassName, versionRange, filter);
 		if (ref == null)
 		{
-            ClassServiceUtility.log(context, LogService.LOG_WARNING, "The " + className + " was never registered - make sure you start it!");
+            ClassServiceUtility.log(context, LogService.LOG_WARNING, "The " + interfaceClassName + " was never registered - make sure you start it!");
 		    return null;
 		}
-		return (BundleActivator)context.getService(ref);
+		return context.getService(ref);
     }
     /**
      * 

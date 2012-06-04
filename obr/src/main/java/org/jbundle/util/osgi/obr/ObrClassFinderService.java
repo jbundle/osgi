@@ -229,18 +229,26 @@ public class ObrClassFinderService extends BaseClassFinderService
             this.deployResource(bestResource, options);
             Bundle bundle = this.findBundle(bestResource, bundleContext, packageName, versionRange);
             if (start)
-                if (bundle != null)
-                    if ((bundle.getState() != Bundle.ACTIVE) && (bundle.getState() != Bundle.STARTING))
-            {
-                try {
-                    bundle.start();
-                } catch (BundleException e) {
-                    e.printStackTrace();
-                }
-            }
+            	this.startBundle(bundle);
         	this.addResourceToCache(packageName, bestResource);
         }
     	return bestResource;
+    }
+    /**
+     * Start this bundle.
+     * @param bundle
+     */
+    public void startBundle(Bundle bundle)
+    {
+        if (bundle != null)
+            if ((bundle.getState() != Bundle.ACTIVE) && (bundle.getState() != Bundle.STARTING))
+        {
+            try {
+                bundle.start();
+            } catch (BundleException e) {
+                e.printStackTrace();
+            }
+        }
     }
     /**
      * Deploy this list of resources.

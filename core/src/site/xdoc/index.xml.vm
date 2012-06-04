@@ -1,0 +1,84 @@
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+  <properties>
+    <title>OSGi Bundle Utilities</title>
+    <author email="don@donandann.com">Don Corley</author>
+  </properties>
+
+  <!-- Optional HEAD element, which is copied as is into the XHTML <head> element -->
+  <!-- head>
+    <meta content=""/>
+  </head -->
+
+  <body>
+
+     <section name="Description">
+
+  <p>The <a href="http://www.jbundle.org">jbundle.org</a> <strong>OSGi Bundle Utilities</strong> simplifies
+  OSGi service handling.</p>
+
+<p>
+The OSGi Bundle Utilities:
+- Automatically deploy and start OSGi bundles
+- Handle OSGi services without declaration files
+- Automatically handle OSGi service dependencies
+</p>
+
+    </section>
+      <section name="Usage Information">
+<p>
+<ul>
+<li><a href="example.html">Example</a> (Under 2 minutes).</li>
+<li><a href="usage.html">Web Bundle Usage information.</a> (API and servlet parameters)</li>
+<li><a href="install.html">Installation.</a></li>
+</ul>
+</p>
+
+<subsection name="OSGi Services">
+<p>
+To create an OSGi service, just extend the BaseBundleActivator and add a few methods:
+<code>
+    public Class<?> getInterfaceClass()
+    {
+      return MyInterface.class;
+    }
+</code>
+That's it. The activator will be registered as a service under the MyInterface objectclass.
+</p>
+</subsection>
+
+<subsection name="Non-OSGi Services">
+<p>
+If your code needs to be able to run in a non-OSGi environment, you can have start your non-OSGi service
+from the BaseBundleActivator by overriding the startupService method:
+<code>
+    public Object startupService(BundleContext bundleContext)
+    {
+        return new MyImplementation();
+    }
+</code>
+This object will be registered as an OSGi service even though it has no OSGi imports.
+</p>
+</subsection>
+
+<subsection name="Dependencies">
+<p>
+If your classes require other services, you can check to see if they exist and have them auto-started.
+<code>
+    public boolean checkDependentServices(BundleContext bundleContext)
+    {
+        return addDependentServiceListener(bundleContext, MyInterface.class, DependentActivator.class, version);
+    }
+</code>
+The dependent service will automatically be started and if your specified an external service class, the
+class will not be started until the dependent service is up.
+</p>
+</subsection>
+
+</section>
+
+  </body>
+
+</document>

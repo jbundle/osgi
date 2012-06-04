@@ -19,11 +19,11 @@ import org.osgi.service.log.LogService;
  */
 public class DependentServiceRegisteredListener implements ServiceListener
 {
-	BaseBundleService bundleService = null;
+	BaseBundleActivator bundleService = null;
 	
     BundleContext context = null;
     
-    public DependentServiceRegisteredListener(BaseBundleService bundleService, BundleContext context)
+    public DependentServiceRegisteredListener(BaseBundleActivator bundleService, BundleContext context)
     {
         this.context = context;
         this.bundleService = bundleService;
@@ -43,15 +43,17 @@ public class DependentServiceRegisteredListener implements ServiceListener
             if ((bundle.getState() & Bundle.STARTING) != 0)
                 context.addBundleListener(new DependentBundleStartupListener(bundleService, context, bundle));  // Still starting, wait 'til it starts
             if ((bundle.getState() & Bundle.ACTIVE) != 0)
-                bundleService.startupThisService(context);  // Good, it is started. Call the startup service
+            {
+                Object service = bundleService.startupService(context);  // Good, it is started. Call the startup service
+                bundleService.setService(service);
+            }
             else if ((bundle.getState() & Bundle.STARTING) == 0)  // What?
                 ClassServiceUtility.log(context, LogService.LOG_ERROR, "BundleService never started: " + bundleService.getClass().getName());
-            
-            context.removeServiceListener(this);
         }
         if (event.getType() == ServiceEvent.UNREGISTERING)
         {
-            // Never
+            bundleService.registerService(null);
+            context.removeServiceListener(this);
         }
     }
 }

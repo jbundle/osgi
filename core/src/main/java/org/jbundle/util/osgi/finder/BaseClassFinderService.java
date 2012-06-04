@@ -20,7 +20,7 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jbundle.util.osgi.BundleService;
+import org.jbundle.util.osgi.BundleActivatorModel;
 import org.jbundle.util.osgi.ClassFinder;
 import org.jbundle.util.osgi.ClassService;
 import org.osgi.framework.Bundle;
@@ -199,9 +199,9 @@ public abstract class BaseClassFinderService extends Object
         try {
             if (resource == null)
             {
-                BundleService classAccess = this.getClassBundleService(className, versionRange, null, 0);
-                if (classAccess != null)
-                	object = classAccess.convertStringToObject(string);
+                Object classAccess = this.getClassBundleService(null, className, versionRange, null, 0);
+                if (classAccess instanceof BundleActivatorModel)
+                	object = ((BundleActivatorModel)classAccess).convertStringToObject(string);
             }
             else
             {
@@ -267,7 +267,7 @@ public abstract class BaseClassFinderService extends Object
     	ClassLoader classLoader = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(className, versionRange, null, 0);
+            Object classAccess = this.getClassBundleService(null, className, versionRange, null, 0);
             if (classAccess != null)
             {
             	classLoader = classAccess.getClass().getClassLoader();
@@ -301,45 +301,54 @@ public abstract class BaseClassFinderService extends Object
      * @param className
      * @return
      */
-    public BundleService getClassBundleService(String className, String versionRange, Dictionary<String, String> filter, int secsToWait)
+    public Object getClassBundleService(String interfaceClassName, String serviceClassName, String versionRange, Dictionary<String, String> filter, int secsToWait)
     {
-        ServiceReference ServiceReference = getClassServiceReference(bundleContext, className, versionRange, filter);
+        ServiceReference serviceReference = null;
         
-        if ((ServiceReference != null) && ((ServiceReference.getBundle().getState() & Bundle.ACTIVE) != 0))
-            return (BundleService)bundleContext.getService(ServiceReference);
+        if (interfaceClassName != null)
+        	serviceReference = getClassServiceReference(bundleContext, interfaceClassName, versionRange, filter);
+        if (serviceReference == null)
+        	if (serviceClassName != null)
+        		serviceReference = getClassServiceReference(bundleContext, serviceClassName, versionRange, filter);
+        
+        if ((serviceReference != null) && ((serviceReference.getBundle().getState() & Bundle.ACTIVE) != 0))
+            return bundleContext.getService(serviceReference);
 
         if (secsToWait != 0)
-            return (BundleService)ClassFinderActivator.waitForServiceStartup(bundleContext, className, versionRange, filter, secsToWait);
+            return ClassFinderActivator.waitForServiceStartup(bundleContext, interfaceClassName, serviceClassName, versionRange, filter, secsToWait);
 
         return null;
     }
     /**
      * Find this class's class access registered class access service in the current workspace.
-     * @param className
+     * @param context
+     * @param interfaceClassName
+     * @param versionRange
+     * @param filter
      * @return
      */
-    public static ServiceReference getClassServiceReference(BundleContext context, String className, String versionRange, Dictionary<String, String> filter)
+    public static ServiceReference getClassServiceReference(BundleContext context, String interfaceClassName, String versionRange, Dictionary<String, String> filter)
     {
         try {
-            String serviceFilter = ClassServiceUtility.addToFilter(null, BundleService.PACKAGE_NAME, ClassFinderActivator.getPackageName(className, true));
+            String serviceFilter = null;//ClassServiceUtility.addToFilter((String)null, BundleActivatorModel.PACKAGE_NAME, ClassFinderActivator.getPackageName(className, true));
             String interfaceName = null;
             if (filter != null)
             {
-                interfaceName = filter.get(BundleService.INTERFACE);
+                interfaceName = filter.get(BundleActivatorModel.INTERFACE);
 
                 Enumeration<String> keys = filter.keys();
                 while (keys.hasMoreElements())
                 {
                     String key = keys.nextElement();
-                    if (key.equals(BundleService.INTERFACE))
+                    if (key.equals(BundleActivatorModel.INTERFACE))
                         continue;
                     serviceFilter = ClassServiceUtility.addToFilter(serviceFilter, key, filter.get(key));
                 }
             }
             if (interfaceName == null)
-                interfaceName = className;
+                interfaceName = interfaceClassName;
             if (interfaceName == null)
-                interfaceName = BundleService.class.getName();  // Never
+                interfaceName = BundleActivatorModel.class.getName();  // Never
             serviceFilter = ClassFinderActivator.addVersionFilter(serviceFilter, versionRange);
             ServiceReference[] refs = context.getServiceReferences(interfaceName, serviceFilter);
 
@@ -361,11 +370,11 @@ public abstract class BaseClassFinderService extends Object
         Class<?> c = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(className, versionRange, null, 0);
-            if (classAccess != null)
+            Object classAccess = this.getClassBundleService(null, className, versionRange, null, 0);
+            if (classAccess instanceof BundleActivatorModel)
             {
             	try {
-                	c = classAccess.makeClass(className);
+                	c = ((BundleActivatorModel)classAccess).makeClass(className);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -394,9 +403,9 @@ public abstract class BaseClassFinderService extends Object
         URL url = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(className, versionRange, null, 0);
-            if (classAccess != null)
-                url = classAccess.getResource(className);
+            Object classAccess = this.getClassBundleService(null, className, versionRange, null, 0);
+            if (classAccess instanceof BundleActivatorModel)
+                url = ((BundleActivatorModel)classAccess).getResource(className);
         }
         else
         {
@@ -417,13 +426,13 @@ public abstract class BaseClassFinderService extends Object
     	ResourceBundle resourceBundle = null;
         if (resource == null)
         {
-            BundleService classAccess = this.getClassBundleService(baseName, versionRange, null, 0);
+            Object classAccess = this.getClassBundleService(null, baseName, versionRange, null, 0);
             if (classAccess != null)
             {
-                if (USE_NO_RESOURCE_HACK)
+                if ((classAccess instanceof BundleActivatorModel) && (USE_NO_RESOURCE_HACK))
                 {
 	                try {
-						URL url = classAccess.getResource(baseName);
+						URL url = ((BundleActivatorModel)classAccess).getResource(baseName);
 						InputStream stream = url.openStream();
 						resourceBundle = new PropertyResourceBundle(stream);
 					} catch (IOException e) {
@@ -478,15 +487,15 @@ public abstract class BaseClassFinderService extends Object
      * @return true If I'm up already
      * @return false If I had a problem.
      */
-    public boolean startBaseBundle(BundleContext context, String dependentBaseBundleClassName, String versionRange, int secsToWait)
+    public boolean startBaseBundle(BundleContext context, String interfaceClassName, String dependentServiceClassName, String versionRange, Dictionary<String,String> filter, int secsToWait)
     {
-        ServiceReference ServiceReference = getClassServiceReference(bundleContext, dependentBaseBundleClassName, versionRange, null);
+        ServiceReference ServiceReference = getClassServiceReference(bundleContext, interfaceClassName, versionRange, filter);
         
         if ((ServiceReference != null) && ((ServiceReference.getBundle().getState() & Bundle.ACTIVE) != 0))
             return true;    // Already up!
 
         // If the repository is not up, but the bundle is deployed, this will find it
-    	return (ClassFinderActivator.waitForServiceStartup(context, dependentBaseBundleClassName, versionRange, null, secsToWait) != null);
+    	return (ClassFinderActivator.waitForServiceStartup(context, interfaceClassName, dependentServiceClassName, versionRange, null, secsToWait) != null);
     }
     /**
      * Shutdown the bundle for this service.

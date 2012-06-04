@@ -77,7 +77,7 @@ public interface ClassFinder {
      * @param secsToWait Time to wait for service to start (0=don't wait) WARNING: This may take a while, so don't run this in your main thread.
      * @return
      */
-    public BundleService getClassBundleService(String className, String versionRange, Dictionary<String, String> filter, int secsToWait);
+    public Object getClassBundleService(String activatorClassName, String interfaceClassName, String versionRange, Dictionary<String, String> filter, int secsToWait);
     /**
      * Find this resource in the repository, then deploy and optionally start it.
      * @param version Version range

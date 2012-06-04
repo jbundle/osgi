@@ -16,13 +16,13 @@ import org.osgi.framework.BundleListener;
  */
 public class DependentBundleStartupListener implements BundleListener
 {
-	BaseBundleService bundleService = null;
+	BaseBundleActivator bundleService = null;
 	
     BundleContext context = null;
     
     Bundle bundle = null;
     
-    public DependentBundleStartupListener(BaseBundleService bundleService, BundleContext context, Bundle bundle)
+    public DependentBundleStartupListener(BaseBundleActivator bundleService, BundleContext context, Bundle bundle)
     {
         this.context = context;
         this.bundleService = bundleService;
@@ -33,7 +33,8 @@ public class DependentBundleStartupListener implements BundleListener
         if (event.getBundle() == bundle)
             if (event.getType() == BundleEvent.STARTED)
         {   // Class came up
-            bundleService.startupThisService(context);
+            Object service = bundleService.startupService(context);
+            bundleService.registerService(service);
             
             context.removeBundleListener(this);
         }
