@@ -9,7 +9,7 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 
 /**
- * RepositoryAdminServiceListener - Notify me when this dependent service is up.
+ * RepositoryAdminServiceListener - Notify me when this bundle is started.
  * 
  * @author don
  * 

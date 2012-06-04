@@ -26,8 +26,11 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
 
 /**
- * Bundle resource access utilities for a service.
+ * A base activator for a service.
  * Extend this class with your service activator.
+ * This is just a convenience class to avoid having to use a declarative service model.
+ * This makes it easy to programmatically register a service and require dependent bundles to start.
+ * Typically you only need to override the startupService, shutdownService, and getInterface class methods.
  * @author don
  *
  */
@@ -46,11 +49,17 @@ public class BaseBundleActivator extends Object
 	 * This is not necessary. I save it for debugging.
 	 */
 	protected Dictionary<String,String> properties = null;
-	
+	/**
+	 * My service registration.
+	 */
 	protected ServiceRegistration serviceRegistration = null;
-    
+    /**
+     * The bundle context.
+     */
     protected BundleContext context = null;
-    
+    /**
+     * The (optional) service that was started by this activator.
+     */
     protected Object service = null;
     
 	/**
@@ -67,7 +76,8 @@ public class BaseBundleActivator extends Object
 	}
     /**
      * Get the (persistent) configuration dictionary from the service manager.
-     * @return
+     * Note: Properties are stored under the activator's package name.
+     * @return The properties
      */
     @SuppressWarnings("unchecked")
     public Dictionary<String, String> getConfigurationProperties(Dictionary<String, String> dictionary, boolean returnCopy)
@@ -95,30 +105,10 @@ public class BaseBundleActivator extends Object
         }
         return dictionary;
     }
-    /**
-     * Copy all the values from one dictionary to another.
-     * @param sourceDictionary
-     * @param destDictionary
-     * @return
-     */
-    public static Dictionary<String, String> putAll(Dictionary<String, String> sourceDictionary, Dictionary<String, String> destDictionary)
-    {
-        if (destDictionary == null)
-            destDictionary = new Hashtable<String, String>();
-        if (sourceDictionary != null)
-        {
-            Enumeration<String> keys = sourceDictionary.keys();
-            while (keys.hasMoreElements())
-            {
-                String key = keys.nextElement();
-                destDictionary.put(key, sourceDictionary.get(key));
-            }
-        }
-        return destDictionary;
-    }
 
     /**
      * Bundle starting up.
+     * Don't override this, override startupService.
      */
     public void start(BundleContext context) throws Exception {
         ClassServiceUtility.log(context, LogService.LOG_INFO, "Starting " + this.getClass().getName() + " Bundle");
@@ -147,6 +137,7 @@ public class BaseBundleActivator extends Object
     }
     /**
      * Bundle stopping.
+     * Don't override this, override shutdownService.
      */
     public void stop(BundleContext context) throws Exception {
         ClassServiceUtility.log(context, LogService.LOG_INFO, "Stopping " + this.getClass().getName() + " Bundle");
@@ -166,7 +157,7 @@ public class BaseBundleActivator extends Object
         if (event.getType() == ServiceEvent.UNREGISTERING)
         {
             service = null;
-        }        
+        }
     }
 
     /**
@@ -295,8 +286,7 @@ public class BaseBundleActivator extends Object
         if (servicePid != null)
             return servicePid;
         servicePid = this.getServiceClassName();
-        if ((servicePid == null)
-                || (!servicePid.startsWith(BundleConstants.PACKAGE_NAME)))
+        if (servicePid == null)
             servicePid = this.getClass().getName();
         return ClassFinderActivator.getPackageName(servicePid, false);
     }
@@ -400,4 +390,25 @@ public class BaseBundleActivator extends Object
             value = properties.get(key);
 		return value;
 	}
+    /**
+     * Copy all the values from one dictionary to another.
+     * @param sourceDictionary
+     * @param destDictionary
+     * @return
+     */
+    public static Dictionary<String, String> putAll(Dictionary<String, String> sourceDictionary, Dictionary<String, String> destDictionary)
+    {
+        if (destDictionary == null)
+            destDictionary = new Hashtable<String, String>();
+        if (sourceDictionary != null)
+        {
+            Enumeration<String> keys = sourceDictionary.keys();
+            while (keys.hasMoreElements())
+            {
+                String key = keys.nextElement();
+                destDictionary.put(key, sourceDictionary.get(key));
+            }
+        }
+        return destDictionary;
+    }
 }

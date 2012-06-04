@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.jbundle.util.osgi.BundleConstants;
 import org.jbundle.util.osgi.ClassService;
 
 
@@ -223,7 +224,7 @@ public class ClassServiceUtility
 
         Object object  = null;
         try {
-            InputStream reader = new ByteArrayInputStream(string.getBytes(OBJECT_ENCODING));//Constants.STRING_ENCODING));
+            InputStream reader = new ByteArrayInputStream(string.getBytes(BundleConstants.OBJECT_ENCODING));//Constants.STRING_ENCODING));
             ObjectInputStream inStream = new ObjectInputStream(reader);
             object = inStream.readObject();
             reader.close();
@@ -299,7 +300,7 @@ public class ClassServiceUtility
                 			className = domainName + className;
                 	}
                 	else
-                        className = ClassService.ROOT_PACKAGE + className.substring(1);
+                        className = BundleConstants.ROOT_PACKAGE + className.substring(1);
                 }
             }
         return className;

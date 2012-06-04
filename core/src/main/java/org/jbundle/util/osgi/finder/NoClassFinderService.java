@@ -3,6 +3,7 @@
  */
 package org.jbundle.util.osgi.finder;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 
 /**
@@ -17,7 +18,10 @@ public class NoClassFinderService extends BaseClassFinderService
 {
 
 	@Override
-	public Object deployThisResource(String packageName, String version, boolean start) {
+	public Object deployThisResource(String packageName, String versionRange, boolean start) {
+        Bundle bundle = this.findBundle(null, bundleContext, packageName, versionRange);
+        if (start)
+        	this.startBundle(bundle);
 		return null;
 	}	
 

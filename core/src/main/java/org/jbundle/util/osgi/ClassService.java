@@ -15,12 +15,6 @@ import java.util.ResourceBundle;
 public interface ClassService
 {
     /**
-     * The byte to char and back encoding that I use.
-     */
-    public static final String OBJECT_ENCODING = "ISO-8859-1";
-    public static String ROOT_PACKAGE = "org.jbundle.";  // Default package prefix
-
-   /**
     * Get the Osgi class service.
     * NOTE: Don't import this package as the ClassService class may not be available until this service is started.
     * @param context The bundle context
@@ -51,19 +45,18 @@ public interface ClassService
    public URL getResourceURL(String filepath, URL urlCodeBase, String versionRange, ClassLoader classLoader) throws RuntimeException;
    /**
     * Gets a resource bundle using the specified base name and locale,
- * @param locale the locale for which a resource bundle is desired
- * @param version Version range
- * @param baseName the base name of the resource bundle, a fully qualified class name
- * @throws MissingResourceException TODO
- * @exception NullPointerException if <code>baseName</code> or <code>locale</code> is <code>null</code>
- * @exception MissingResourceException if no resource bundle for the specified base name can be found
- * @return a resource bundle for the given base name and locale
+    * @param locale the locale for which a resource bundle is desired
+    * @param version Version range
+    * @param baseName the base name of the resource bundle, a fully qualified class name
+    * @exception NullPointerException if <code>baseName</code> or <code>locale</code> is <code>null</code>
+    * @exception MissingResourceException if no resource bundle for the specified base name can be found
+    * @return a resource bundle for the given base name and locale
     */
    public ResourceBundle getResourceBundle(String className, Locale locale, String versionRange, ClassLoader classLoader) throws MissingResourceException;
    /**
     * Convert this encoded string back to a Java Object.
     * @param string The string to convert.
- * @param version Version range
+    * @param version Version range
     * @return The java object.
     * @throws RuntimeException Runtime errors
     * @throws ClassNotFoundException
@@ -71,8 +64,8 @@ public interface ClassService
    public Object convertStringToObject(String string, String versionRange) throws ClassNotFoundException;
    /**
     * Get the bundle classloader for this package.
- * @param version Version range
- * @param string The class name to find the bundle for.
+    * @param version Version range
+    * @param string The class name to find the bundle for.
     * @return The class loader.
     * @throws ClassNotFoundException
     */

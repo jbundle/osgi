@@ -10,10 +10,9 @@ import org.jbundle.util.osgi.finder.ClassFinderActivator;
 import org.osgi.framework.BundleContext;
 
 /**
- * This class starts the bundle that belongs to this class and then calls the classfinder
- * with the bundle object.
+ * This class find and start the bundle that belongs to this class.
  * Note: This is a thread since is is usually takes a while to run.
- * @author don
+ * @author don <don@tourgeek.com>
  *
  */
 public class BundleStarter extends Thread

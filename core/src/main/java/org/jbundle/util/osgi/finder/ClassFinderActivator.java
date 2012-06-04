@@ -20,9 +20,9 @@ import org.osgi.framework.Version;
 import org.osgi.service.log.LogService;
 
 /**
- * OsgiClassService - Service to find and load bundle classes and resources.
+ * ClassFinderActivator - Service to find and load bundle classes and resources.
  * 
- * @author don
+ * @author don <don@tourgeek.com>
  * 
  */
 public final class ClassFinderActivator extends BaseBundleActivator

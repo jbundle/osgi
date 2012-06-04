@@ -22,8 +22,6 @@ import java.util.logging.Logger;
 
 import org.jbundle.util.osgi.BundleConstants;
 import org.jbundle.util.osgi.ClassFinder;
-import org.jbundle.util.osgi.ClassService;
-import org.jbundle.util.osgi.bundle.BaseBundleActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -226,7 +224,7 @@ public abstract class BaseClassFinderService extends Object
         if ((string == null) || (string.length() == 0))
             return null;
         try {
-            InputStream reader = new ByteArrayInputStream(string.getBytes(ClassService.OBJECT_ENCODING));//Constants.STRING_ENCODING));
+            InputStream reader = new ByteArrayInputStream(string.getBytes(BundleConstants.OBJECT_ENCODING));//Constants.STRING_ENCODING));
             ObjectInputStream inStream = new ObjectInputStream(reader);
             Object obj = inStream.readObject();
             reader.close();
@@ -263,11 +261,10 @@ public abstract class BaseClassFinderService extends Object
      */
     private ClassLoader getClassLoaderFromBundle(Object resource, String packageName, String versionRange)
     {
-    	String className = packageName + FAKE_CLASSNAME;
     	ClassLoader classLoader = null;
         if (resource == null)
         {
-            Object classAccess = this.getClassBundleService(null, className, versionRange, null, 0);
+            Object classAccess = this.getClassBundleService(null, packageName + FAKE_CLASSNAME, versionRange, null, 0);
             if (classAccess != null)
             {
             	classLoader = classAccess.getClass().getClassLoader();
@@ -275,7 +272,7 @@ public abstract class BaseClassFinderService extends Object
         }
         else
         {
-        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, false), versionRange);
+        	Bundle bundle = this.findBundle(resource, bundleContext, packageName, versionRange);
         	if (bundle == null)
         		return null;
         	@SuppressWarnings("unchecked")
@@ -629,6 +626,23 @@ public abstract class BaseClassFinderService extends Object
     public boolean isResourceBundleMatch(Object objResource, Bundle bundle)
     {
     	return false;	// Override this
+    }
+
+    /**
+     * Start this bundle.
+     * @param bundle
+     */
+    public void startBundle(Bundle bundle)
+    {
+        if (bundle != null)
+            if ((bundle.getState() != Bundle.ACTIVE) && (bundle.getState() != Bundle.STARTING))
+        {
+            try {
+                bundle.start();
+            } catch (BundleException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
