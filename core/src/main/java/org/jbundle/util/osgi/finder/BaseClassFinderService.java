@@ -20,9 +20,10 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jbundle.util.osgi.BundleActivatorModel;
+import org.jbundle.util.osgi.BundleConstants;
 import org.jbundle.util.osgi.ClassFinder;
 import org.jbundle.util.osgi.ClassService;
+import org.jbundle.util.osgi.bundle.BaseBundleActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -34,7 +35,7 @@ import org.osgi.framework.Version;
 import org.osgi.service.log.LogService;
 
 /**
- * OsgiClassService - Service to find and load bundle classes and resources.
+ * BaseClassFinderService - Service to find and load bundle classes and resources.
  * 
  * @author don
  * 
@@ -199,8 +200,8 @@ public abstract class BaseClassFinderService extends Object
             if (resource == null)
             {
                 Object classAccess = this.getClassBundleService(null, className, versionRange, null, 0);
-                if (classAccess instanceof BundleActivatorModel)
-                	object = ((BundleActivatorModel)classAccess).convertStringToObject(string);
+                if (classAccess != null)
+                	object = this.convertStringToObject(string);
             }
             else
             {
@@ -333,21 +334,19 @@ public abstract class BaseClassFinderService extends Object
             String interfaceName = null;
             if (filter != null)
             {
-                interfaceName = filter.get(BundleActivatorModel.INTERFACE);
+                interfaceName = filter.get(BundleConstants.INTERFACE);
 
                 Enumeration<String> keys = filter.keys();
                 while (keys.hasMoreElements())
                 {
                     String key = keys.nextElement();
-                    if (key.equals(BundleActivatorModel.INTERFACE))
+                    if (key.equals(BundleConstants.INTERFACE))
                         continue;
                     serviceFilter = ClassServiceUtility.addToFilter(serviceFilter, key, filter.get(key));
                 }
             }
             if (interfaceName == null)
                 interfaceName = interfaceClassName;
-            if (interfaceName == null)
-                interfaceName = BundleActivatorModel.class.getName();  // Never
             serviceFilter = ClassFinderActivator.addVersionFilter(serviceFilter, versionRange);
             ServiceReference[] refs = context.getServiceReferences(interfaceName, serviceFilter);
 
@@ -370,10 +369,10 @@ public abstract class BaseClassFinderService extends Object
         if (resource == null)
         {
             Object classAccess = this.getClassBundleService(null, className, versionRange, null, 0);
-            if (classAccess instanceof BundleActivatorModel)
+            if (classAccess != null)
             {
             	try {
-                	c = ((BundleActivatorModel)classAccess).makeClass(className);
+                	c = Class.forName(className);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -392,24 +391,24 @@ public abstract class BaseClassFinderService extends Object
     }
     /**
      * makeClassFromBundle
-     * @param className
+     * @param resourcePath
      * @param versionRange version
      * 
      * @return
      */
-    private URL getResourceFromBundle(Object resource, String className, String versionRange)
+    private URL getResourceFromBundle(Object resource, String resourcePath, String versionRange)
     {
         URL url = null;
         if (resource == null)
         {
-            Object classAccess = this.getClassBundleService(null, className, versionRange, null, 0);
-            if (classAccess instanceof BundleActivatorModel)
-                url = ((BundleActivatorModel)classAccess).getResource(className);
+            Object classAccess = this.getClassBundleService(null, resourcePath, versionRange, null, 0);
+            if (classAccess != null)
+                url = classAccess.getClass().getClassLoader().getResource(resourcePath);
         }
         else
         {
-        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(className, true), versionRange);
-            url = bundle.getEntry(className);
+        	Bundle bundle = this.findBundle(resource, bundleContext, ClassFinderActivator.getPackageName(resourcePath, true), versionRange);
+            url = bundle.getEntry(resourcePath);
         }
         return url;
     }
@@ -428,10 +427,10 @@ public abstract class BaseClassFinderService extends Object
             Object classAccess = this.getClassBundleService(null, baseName, versionRange, null, 0);
             if (classAccess != null)
             {
-                if ((classAccess instanceof BundleActivatorModel) && (USE_NO_RESOURCE_HACK))
+                if ((classAccess != null) && (USE_NO_RESOURCE_HACK))
                 {
 	                try {
-						URL url = ((BundleActivatorModel)classAccess).getResource(baseName);
+						URL url = classAccess.getClass().getClassLoader().getResource(baseName);
 						InputStream stream = url.openStream();
 						resourceBundle = new PropertyResourceBundle(stream);
 					} catch (IOException e) {
@@ -523,7 +522,7 @@ public abstract class BaseClassFinderService extends Object
     
     /**
      * Resource cache code.
-     * TODO(don) - Need to listen for stopped bundles.
+     * TODO(don) - Need to listen for uninstalled bundles.
      */
     protected Map<String,Object> resourceMap = new HashMap<String,Object>(); 
     public Object getResourceFromCache(String packageName)

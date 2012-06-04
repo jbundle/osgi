@@ -12,7 +12,7 @@ import java.net.URL;
  * WARNING: It is important that this class has no direct connections to org.osgi!
  * @author don
  */
-public interface BundleActivatorModel {
+public interface BundleConstants {
 	
 	/**
 	 * Right now, services are registered under their class name. May want to change to package name.
@@ -24,24 +24,4 @@ public interface BundleActivatorModel {
     public static final String SERVICE_PID = "service.pid"; // The id of the data in the config registry
 	public static final String SERVICE_CLASS = "serviceClass"; // Optional class name for single servlets
 
-	/**
-	 * Given this class name, create the Class.
-	 * @param className The full class name.
-	 * @return The class or null if not found.
-	 */
-    public Class<?> makeClass(String className) throws ClassNotFoundException;
-	/**
-	 * Get the URL to the resource with this name.
-	 * @param name The full resource path.
-	 * @return The resource URL (usually bundle:more).
-	 */
-    public URL getResource(String className);
-    /**
-     * Convert this encoded string back to a Java Object.
-     * @param string The string to convert.
-     * @return The java object.
-     */
-    public Object convertStringToObject(String string)
-    	throws ClassNotFoundException;
-    
 }

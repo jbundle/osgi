@@ -9,9 +9,8 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
- * Thin specific static utility methods.
-
- * WARNING: It is important that this class has no direct connections to org.osgi!
+ * Class resource retrieval utilities.
+ * WARNING: It is important that this interface has no direct connections to org.osgi!
  */
 public interface ClassService
 {

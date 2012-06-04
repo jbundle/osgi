@@ -3,17 +3,12 @@
  */
 package org.jbundle.util.osgi.bundle;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.net.URL;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.jbundle.util.osgi.BundleActivatorModel;
-import org.jbundle.util.osgi.ClassService;
+import org.jbundle.util.osgi.BundleConstants;
 import org.jbundle.util.osgi.finder.BaseClassFinderService;
 import org.jbundle.util.osgi.finder.ClassFinderActivator;
 import org.jbundle.util.osgi.finder.ClassServiceUtility;
@@ -37,7 +32,7 @@ import org.osgi.service.log.LogService;
  *
  */
 public class BaseBundleActivator extends Object
-	implements BundleActivatorModel, BundleActivator, ServiceListener
+	implements BundleActivator, ServiceListener
 {
 	/**
 	 * Constructor.
@@ -67,8 +62,8 @@ public class BaseBundleActivator extends Object
 	{
 		Dictionary<String, String> properties = getConfigurationProperties(this.getProperties(), false);
 		this.setProperties(properties);
-        this.setProperty(BundleActivatorModel.SERVICE_PID, getServicePid());
-        this.setProperty(BundleActivatorModel.SERVICE_CLASS, getServiceClassName());		
+        this.setProperty(BundleConstants.SERVICE_PID, getServicePid());
+        this.setProperty(BundleConstants.SERVICE_CLASS, getServiceClassName());		
 	}
     /**
      * Get the (persistent) configuration dictionary from the service manager.
@@ -132,7 +127,7 @@ public class BaseBundleActivator extends Object
         this.init();	// Setup the properties
         
 		String interfaceClassName = getInterfaceClassName();
-		this.setProperty(ACTIVATOR, this.getClass().getName());	// In case I have to find this service by activator class
+		this.setProperty(BundleConstants.ACTIVATOR, this.getClass().getName());	// In case I have to find this service by activator class
 
         try {
 			context.addServiceListener(this, ClassServiceUtility.addToFilter((String)null, Constants.OBJECTCLASS, interfaceClassName));
@@ -296,12 +291,12 @@ public class BaseBundleActivator extends Object
      */
     public String getServicePid()
     {
-        String servicePid = context.getProperty(BundleActivatorModel.SERVICE_PID);
+        String servicePid = context.getProperty(BundleConstants.SERVICE_PID);
         if (servicePid != null)
             return servicePid;
         servicePid = this.getServiceClassName();
         if ((servicePid == null)
-                || (!servicePid.startsWith(BundleActivatorModel.PACKAGE_NAME)))
+                || (!servicePid.startsWith(BundleConstants.PACKAGE_NAME)))
             servicePid = this.getClass().getName();
         return ClassFinderActivator.getPackageName(servicePid, false);
     }
@@ -322,7 +317,7 @@ public class BaseBundleActivator extends Object
     	Class<?> interfaceClass = getInterfaceClass();
     	if (interfaceClass != null)
     		return interfaceClass.getName();
-		String interfaceClassName = this.getProperty(BundleActivatorModel.INTERFACE);
+		String interfaceClassName = this.getProperty(BundleConstants.INTERFACE);
 		if (interfaceClassName == null)
 		{
 			if (service != null)
@@ -349,7 +344,7 @@ public class BaseBundleActivator extends Object
     	Class<?> serviceClass = getServiceClass();
     	if (serviceClass != null)
     		return serviceClass.getName();
-		String serviceClassName = context.getProperty(BundleActivatorModel.SERVICE_CLASS);	// Don't use getProperty - endless loop
+		String serviceClassName = context.getProperty(BundleConstants.SERVICE_CLASS);	// Don't use getProperty - endless loop
 		if (serviceClassName == null)
 		{
 			if (service != null)
@@ -405,48 +400,4 @@ public class BaseBundleActivator extends Object
             value = properties.get(key);
 		return value;
 	}
-	/**
-	 * Given this class name, create the Class.
-	 * @param className The full class name.
-	 * @return The class or null if not found.
-	 */
-	public Class<?> makeClass(String className)
-		throws ClassNotFoundException
-	{
-		return Class.forName(className);
-	}
-	/**
-	 * Get the URL to the resource with this name.
-	 * @param name The full resource path.
-	 * @return The resource URL (usually bundle:more).
-	 */
-    public URL getResource(String name)
-    {
-    	return BaseBundleActivator.class.getClassLoader().getResource(name);
-    }
-
-    /**
-     * Convert this encoded string back to a Java Object.
-     * Note: This is expensive, I need to synchronize and use a static writer.
-     * @param string The string to convert.
-     * @return The java object.
-     * @throws ClassNotFoundException 
-     */
-    public Object convertStringToObject(String string)
-    	throws ClassNotFoundException
-    {
-        if ((string == null) || (string.length() == 0))
-            return null;
-        try {
-            InputStream reader = new ByteArrayInputStream(string.getBytes(ClassService.OBJECT_ENCODING));//Constants.STRING_ENCODING));
-            ObjectInputStream inStream = new ObjectInputStream(reader);
-            Object obj = inStream.readObject();
-            reader.close();
-            inStream.close();
-            return obj;
-        } catch (IOException ex)    {
-            ex.printStackTrace();   // Never
-        }
-        return null;
-    }
 }

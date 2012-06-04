@@ -20,9 +20,7 @@ import org.jbundle.util.osgi.ClassService;
 
 
 /**
- * Thin specific static utility methods.
- * 
- * WARNING: It is important that this class has no direct connections to org.osgi!
+ * Class resource retrieval utilities.
  */
 public class ClassServiceUtility
 	implements ClassService
