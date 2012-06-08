@@ -157,19 +157,21 @@ public final class ClassFinderActivator extends BaseBundleActivator
      */
     public static Object waitForServiceStartup(BundleContext context, String interfaceClassName, String serviceClassName, String versionRange, Dictionary<String, String> filter, int secsToWait)
     {
-        ServiceReference ref = BaseClassFinderService.getClassServiceReference(context, (interfaceClassName != null) ? interfaceClassName : serviceClassName, versionRange, filter);
+        if (interfaceClassName == null)
+            interfaceClassName = serviceClassName;
+        ServiceReference ref = BaseClassFinderService.getClassServiceReference(context, interfaceClassName, versionRange, filter);
         if (ref != null)
         {   // Good, it's registered - make sure it's started, or just start it!
             if (ClassFinderActivator.waitForBundleStartup(context, ref.getBundle(), secsToWait))
-                return (BundleActivator)context.getService(ref);
+                return ref.getBundle().getBundleContext().getService(ref);
             else
                 return null;    // Never
         }
         
         Bundle bundle = BaseClassFinderService.findBundle(context, ClassFinderActivator.getPackageName(serviceClassName, false), versionRange);
         if (bundle == null)
-        	if (serviceClassName != null)
-        		if (!serviceClassName.equals(ClassFinder.class.getName())) // Never. This code is in the ClassFinder bundle.
+            if (serviceClassName != null)
+                if (!serviceClassName.equals(ClassFinder.class.getName())) // Never. This code is in this bundle.
         {
             ClassFinder classFinder = getClassFinder(context, secsToWait);        
             String packageName = ClassFinderActivator.getPackageName(serviceClassName, false);
@@ -179,36 +181,36 @@ public final class ClassFinderActivator extends BaseBundleActivator
         if (bundle == null)
             return null;    // Error, can't find bundle
         
-		Thread thread = Thread.currentThread();
-		ServiceRegisteredListener classFinderListener = null;
-		try {
-			context.addServiceListener(classFinderListener = new ServiceRegisteredListener(thread, bundleContext), "(" + Constants.OBJECTCLASS + "=" + interfaceClassName + ")");
-		} catch (InvalidSyntaxException e) {
-			e.printStackTrace();
-		}
+        Thread thread = Thread.currentThread();
+        ServiceRegisteredListener classFinderListener = null;
+        try {
+            context.addServiceListener(classFinderListener = new ServiceRegisteredListener(thread, bundleContext), "(" + Constants.OBJECTCLASS + "=" + interfaceClassName + ")");
+        } catch (InvalidSyntaxException e) {
+            e.printStackTrace();
+        }
         if (!ClassFinderActivator.waitForBundleStartup(context, bundle, secsToWait))
             return null;
-		// Double-check to make sure it didn't startup while I was doing all this.
-		Object bundleService = getClassFinder(context, secsToWait).getClassBundleService((interfaceClassName != null) ? interfaceClassName : serviceClassName, serviceClassName, versionRange, filter, 0);
-		if (bundleService == null)
-		{ // Wait 15 seconds for the ClassService to come up while the activator starts this service
-    		synchronized (thread) {
-    			try {
-    				thread.wait((secsToWait == -1) ? DEFAULT_SERVICE_WAIT_SECS * 1000 : secsToWait * 1000);    // Will notify me when it is up
-    			} catch (InterruptedException ex) {
-    				ex.printStackTrace();
-    			}
-    		}
-		}
-		context.removeServiceListener(classFinderListener);
-		
-		ref = BaseClassFinderService.getClassServiceReference(context, interfaceClassName, versionRange, filter);
-		if (ref == null)
-		{
-            ClassServiceUtility.log(context, LogService.LOG_WARNING, "The " + interfaceClassName + " was never registered - make sure you start it!");
-		    return null;
-		}
-		return context.getService(ref);
+        // Double-check to make sure it didn't startup while I was doing all this.
+        Object bundleService = getClassFinder(context, secsToWait).getClassBundleService(interfaceClassName, serviceClassName, versionRange, filter, 0);
+        if (bundleService == null)
+        { // Wait 15 seconds for the ClassService to come up while the activator starts this service
+            synchronized (thread) {
+                try {
+                    thread.wait((secsToWait == -1) ? DEFAULT_SERVICE_WAIT_SECS * 1000 : secsToWait * 1000);    // Will notify me when it is up
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        context.removeServiceListener(classFinderListener);
+        
+        ref = BaseClassFinderService.getClassServiceReference(context, interfaceClassName, versionRange, filter);
+        if (ref == null)
+        {
+            ClassServiceUtility.log(context, LogService.LOG_WARNING, "The " + interfaceClassName + " service was never registered - make sure you start it!");
+            return null;
+        }
+        return ref.getBundle().getBundleContext().getService(ref);
     }
     /**
      * 
