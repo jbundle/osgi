@@ -236,6 +236,16 @@ public class BaseBundleActivator extends Object
     	this.service = service;
     }
     /**
+     * Convenience method to get the service for this implementation class.
+     * Note: You typically override this and cast the service to the correct class.
+     * @param interfaceClassName
+     * @return
+     */
+    public Object getService()
+    {
+        return service;       // Get the service object for this activator
+    }
+    /**
      * Get the service for this implementation class.
      * @param interfaceClassName
      * @return
