@@ -13,7 +13,14 @@
   <name>jbundle-util-osgi - base bundle retrieval</name>
   <packaging>bundle</packaging>
 
- <build>
+  <distributionManagement>
+    <site>
+      <id>jbundle.org</id>
+      <url>scp://www.donandann.com://space/web/jbundle/osgi</url>
+    </site>
+  </distributionManagement>
+
+  <build>
     <plugins>
       <plugin>
         <groupId>org.apache.felix</groupId>

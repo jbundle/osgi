@@ -40,7 +40,7 @@ The OSGi Bundle Utilities:
 <p>
 To create an OSGi service, just extend the BaseBundleActivator and add a few methods:
 <code>
-    public Class<?> getInterfaceClass()
+    public Class&lt;?&gt; getInterfaceClass()
     {
       return MyInterface.class;
     }
