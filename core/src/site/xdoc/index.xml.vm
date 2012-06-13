@@ -22,19 +22,19 @@
 <p>
 The OSGi Bundle Utilities:
 - Automatically deploy and start OSGi bundles
-- Handle OSGi services without declaration files
+- Handle OSGi services without declarations (blueprint.xml or spring.xml) or annotations
 - Automatically handle OSGi service dependencies
 </p>
 
     </section>
       <section name="Usage Information">
-<p>
+<!-- p>
 <ul>
 <li><a href="example.html">Example</a> (Under 2 minutes).</li>
 <li><a href="usage.html">Web Bundle Usage information.</a> (API and servlet parameters)</li>
 <li><a href="install.html">Installation.</a></li>
 </ul>
-</p>
+</p -->
 
 <subsection name="OSGi Services">
 <p>
@@ -51,7 +51,7 @@ That's it. The activator will be registered as a service under the MyInterface o
 
 <subsection name="Non-OSGi Services">
 <p>
-If your code needs to be able to run in a non-OSGi environment, you can have start your non-OSGi service
+If your code needs to be able to run in a non-OSGi environment, you can start your non-OSGi service
 from the BaseBundleActivator by overriding the startupService method:
 <code>
     public Object startupService(BundleContext bundleContext)
