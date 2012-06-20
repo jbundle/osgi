@@ -90,7 +90,7 @@ public interface ClassFinder {
      * Shutdown the bundle for this service.
      * @param service The service object
      */
-    public void shutdownService(Object service);
+    public boolean shutdownService(String serviceClass, Object service);
     /**
      * Log this message.
      * @param bundleContext

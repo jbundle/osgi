@@ -496,25 +496,46 @@ public abstract class BaseClassFinderService extends Object
      * Shutdown the bundle for this service.
      * @param service The service object
      */
-    public void shutdownService(Object service)
+    public boolean shutdownService(String serviceClass, Object service)
     {
-    	// Lame code
-    	String dependentBaseBundleClassName = service.getClass().getName();
-    	String packageName = ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false);
-        Bundle bundle = this.findBundle(null, bundleContext, packageName, null);
-        if (bundle == null) {
-            Object resource = this.deployThisResource(packageName, null, false);  // Get the bundle info from the repos
-            bundle = this.findBundle(resource, bundleContext, packageName, null);
+        if (service == null)
+            return false;
+        if (bundleContext == null)
+            return false;
+        if (serviceClass == null)
+            serviceClass = service.getClass().getName();
+        ServiceReference[] refs;
+        try {
+            refs = bundleContext.getServiceReferences(serviceClass, null);
+
+            if ((refs == null) || (refs.length == 0))
+                return false;
+            for (ServiceReference reference : refs)
+            {
+                if (bundleContext.getService(reference) == service)
+                {
+                    if (refs.length == 1)
+                    {    // Last/only one, shut down the service
+                        // Lame code
+                        String dependentBaseBundleClassName = service.getClass().getName();
+                        String packageName = ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false);
+                        Bundle bundle = this.findBundle(null, bundleContext, packageName, null);
+                        if (bundle != null)
+                            if ((bundle.getState() & Bundle.ACTIVE) != 0)
+                        {
+                            try {
+                                bundle.stop();
+                            } catch (BundleException e) {
+                                e.printStackTrace();
+                            }
+                        }                   
+                    }
+                }
+            }
+        } catch (InvalidSyntaxException e1) {
+            e1.printStackTrace();
         }
-    	if (bundle != null)
-    		if ((bundle.getState() & Bundle.ACTIVE) != 0)
-    		{
-    			try {
-					bundle.stop();
-				} catch (BundleException e) {
-					e.printStackTrace();
-				}
-    		}
+        return false;    // Not found?
     }
     
     /**

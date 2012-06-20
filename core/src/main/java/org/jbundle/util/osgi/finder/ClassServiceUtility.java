@@ -339,10 +339,11 @@ public class ClassServiceUtility
      * Shutdown the bundle for this service.
      * @param service The service object
      */
-    public void shutdownService(Object service)
+    public boolean shutdownService(String serviceClass, Object service)
     {
         if (this.getClassFinder(null) != null)
-            this.getClassFinder(null).shutdownService(service);   // Shutdown the bundle for this service
+            return this.getClassFinder(null).shutdownService(serviceClass, service);   // Shutdown the bundle for this service
+        return false;
     }
 
     /**
