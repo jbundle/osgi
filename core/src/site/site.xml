@@ -38,10 +38,12 @@ under the License.
     </menu>
 
     <menu name="JBundle Projects">
-      <item name="OSGi Web Servlet" href="http://www.jbundle.org/osgi-webstart"/>
-      <item name="Simple Servlets" href="http://www.jbundle.org/simpleservlets"/>
-      <item name="JCalendarButton" href="http://www.jbundle.org/jcalendarbutton"/>
-      <item name="Calendar Panel" href="http://www.jbundle.org/calendarpanel"/>      
+      <item name="App framework" href="/jbundle"/>
+      <item name="OSGi Web Servlet" href="/osgi-webstart"/>
+      <item name="OSGi Utilities" href="/osgi"/>
+      <item name="Simple Servlets" href="/simpleservlets"/>
+      <item name="JCalendarButton" href="/jcalendarbutton"/>
+      <item name="Calendar Panel" href="/calendarpanel"/>      
     </menu>
     
     <menu ref="reports"/>
