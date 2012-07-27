@@ -27,19 +27,19 @@ public interface ClassFinder {
     /**
      * Find, resolve, and return this resource's URL.
      * Static convenience method.
-     * @param className
+     * @param resourcePath
      * @param version Version range
      * @return The class definition or null if not found.
      */
-    public URL findResourceURL(String className, String versionRange);
+    public URL findResourceURL(String resourcePath, String versionRange);
     /**
      * Find, resolve, and return this ResourceBundle.
      * Static convenience method.
-     * @param className
+     * @param resourcePath
      * @param version Version range
      * @return The class definition or null if not found.
      */
-    public ResourceBundle findResourceBundle(String className, Locale locale, String versionRange);
+    public ResourceBundle findResourceBundle(String resourcePath, Locale locale, String versionRange);
 
     /**
      * Convert this encoded string back to a Java Object.
@@ -88,7 +88,9 @@ public interface ClassFinder {
     public Object deployThisResource(String packageName, String versionRange, boolean start);
     /**
      * Shutdown the bundle for this service.
-     * @param service The service object
+     * @param service The interface the service is registered under.
+     * @param service The service or the package name of the service (service pid) that I'm looking for.
+     * @return True if successful
      */
     public boolean shutdownService(String serviceClass, Object service);
     /**
@@ -98,4 +100,17 @@ public interface ClassFinder {
      * @param message
      */
     public boolean log(Object context, int level, String message);
+    /**
+     * Get the configuration properties for this Pid.
+     * @param servicePid The service Pid
+     * @return The properties or null if they don't exist.
+     */
+    public Dictionary<String, String> getProperties(String servicePid);
+    /**
+     * Set the configuration properties for this Pid.
+     * @param servicePid The service Pid
+     * @param The properties to save.
+     * @return True if successful
+     */
+    public boolean saveProperties(String servicePid, Dictionary<String, String> properties);
 }

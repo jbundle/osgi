@@ -22,6 +22,7 @@ import org.jbundle.util.osgi.ClassService;
 
 /**
  * Class resource retrieval utilities.
+ * WARNING: It is important that this class has no direct connections to org.osgi!
  */
 public class ClassServiceUtility
 	implements ClassService
@@ -335,17 +336,6 @@ public class ClassServiceUtility
         }        
         return filter;
     }
-    /**
-     * Shutdown the bundle for this service.
-     * @param service The service object
-     */
-    public boolean shutdownService(String serviceClass, Object service)
-    {
-        if (this.getClassFinder(null) != null)
-            return this.getClassFinder(null).shutdownService(serviceClass, service);   // Shutdown the bundle for this service
-        return false;
-    }
-
     /**
      * Log this message.
      * @param context

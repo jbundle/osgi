@@ -30,6 +30,8 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
 
 /**
@@ -105,45 +107,45 @@ public abstract class BaseClassFinderService extends Object
     }
     /**
      * Find, resolve, and return this resource's URL.
-     * @param className
+     * @param resourcePath
      * @return The class definition or null if not found.
      */
-    public URL findResourceURL(String className, String versionRange)
+    public URL findResourceURL(String resourcePath, String versionRange)
     {
         //if (ClassServiceBootstrap.repositoryAdmin == null)
         //    return null;
 
-        URL url = this.getResourceFromBundle(null, className, versionRange);
+        URL url = this.getResourceFromBundle(null, resourcePath, versionRange);
 
         if (url == null) {
-            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), versionRange, false);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(resourcePath, true), versionRange, false);
             if (resource != null)
-            	url = this.getResourceFromBundle(resource, className, versionRange);
+            	url = this.getResourceFromBundle(resource, resourcePath, versionRange);
         }
 
         return url;
     }
     /**
      * Find, resolve, and return this ResourceBundle.
-     * @param className
+     * @param resourcePath
      * @return The class definition or null if not found.
      * TODO: Need to figure out how to get the bundle's class loader, so I can set up the resource chain
      */
-    public ResourceBundle findResourceBundle(String className, Locale locale, String versionRange)
+    public ResourceBundle findResourceBundle(String resourcePath, Locale locale, String versionRange)
     {
         //if (ClassServiceBootstrap.repositoryAdmin == null)
         //    return null;
 
-        ResourceBundle resourceBundle = this.getResourceBundleFromBundle(null, className, locale, versionRange);
+        ResourceBundle resourceBundle = this.getResourceBundleFromBundle(null, resourcePath, locale, versionRange);
 
         if (resourceBundle == null) {
-            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(className, true), versionRange, false);
+            Object resource = this.deployThisResource(ClassFinderActivator.getPackageName(resourcePath, true), versionRange, false);
             if (resource != null)
             {
-            	resourceBundle = this.getResourceBundleFromBundle(resource, className, locale, versionRange);
+            	resourceBundle = this.getResourceBundleFromBundle(resource, resourcePath, locale, versionRange);
             	if (resourceBundle == null)
             	{
-            		Class<?> c = this.getClassFromBundle(resource, className, versionRange);
+            		Class<?> c = this.getClassFromBundle(resource, resourcePath, versionRange);
             		if (c != null)
             		{
 					   try {
@@ -494,7 +496,9 @@ public abstract class BaseClassFinderService extends Object
     }
     /**
      * Shutdown the bundle for this service.
-     * @param service The service object
+     * @param service The interface the service is registered under.
+     * @param service The service or the package name of the service (service pid) that I'm looking for.
+     * @return True if successful
      */
     public boolean shutdownService(String serviceClass, Object service)
     {
@@ -502,23 +506,29 @@ public abstract class BaseClassFinderService extends Object
             return false;
         if (bundleContext == null)
             return false;
+        String filter = null;
         if (serviceClass == null)
-            serviceClass = service.getClass().getName();
+            if (!(service instanceof String))
+                serviceClass = service.getClass().getName();
+        if (service instanceof String)
+            filter = ClassServiceUtility.addToFilter("", BundleConstants.SERVICE_PID, (String)service);
         ServiceReference[] refs;
         try {
-            refs = bundleContext.getServiceReferences(serviceClass, null);
+            refs = bundleContext.getServiceReferences(serviceClass, filter);
 
             if ((refs == null) || (refs.length == 0))
                 return false;
             for (ServiceReference reference : refs)
             {
-                if (bundleContext.getService(reference) == service)
+                if ((bundleContext.getService(reference) == service) || (service instanceof String))
                 {
                     if (refs.length == 1)
                     {    // Last/only one, shut down the service
                         // Lame code
                         String dependentBaseBundleClassName = service.getClass().getName();
                         String packageName = ClassFinderActivator.getPackageName(dependentBaseBundleClassName, false);
+                        if (service instanceof String)
+                            packageName = (String)service;
                         Bundle bundle = this.findBundle(null, bundleContext, packageName, null);
                         if (bundle != null)
                             if ((bundle.getState() & Bundle.ACTIVE) != 0)
@@ -528,7 +538,8 @@ public abstract class BaseClassFinderService extends Object
                             } catch (BundleException e) {
                                 e.printStackTrace();
                             }
-                        }                   
+                        }
+                        return true;
                     }
                 }
             }
@@ -780,4 +791,58 @@ public abstract class BaseClassFinderService extends Object
             }
         }
     }
+    /**
+     * Get the configuration properties for this Pid.
+     * @param servicePid The service Pid
+     * @return The properties or null if they don't exist.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Dictionary<String, String> getProperties(String servicePid)
+    {
+        Dictionary<String, String> properties = null;
+         try {
+             if (servicePid != null)
+             {
+                 ServiceReference caRef = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
+                 if (caRef != null)
+                 {
+                     ConfigurationAdmin configAdmin = (ConfigurationAdmin)bundleContext.getService(caRef);
+                     Configuration config = configAdmin.getConfiguration(servicePid);
+    
+                     properties = config.getProperties();
+                 }
+             }
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+         return properties;
+    }
+    /**
+     * Set the configuration properties for this Pid.
+     * @param servicePid The service Pid
+     * @param The properties to save.
+     * @return True if successful
+     */
+     @Override
+     public boolean saveProperties(String servicePid, Dictionary<String, String> properties)
+     {
+         try {
+             if (servicePid != null)
+             {
+                 ServiceReference caRef = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
+                 if (caRef != null)
+                 {
+                     ConfigurationAdmin configAdmin = (ConfigurationAdmin)bundleContext.getService(caRef);
+                     Configuration config = configAdmin.getConfiguration(servicePid);
+    
+                     config.update(properties);
+                     return true;
+                 }
+             }
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+         return false;
+     }
 }

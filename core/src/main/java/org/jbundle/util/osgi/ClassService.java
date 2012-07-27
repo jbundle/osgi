@@ -70,9 +70,4 @@ public interface ClassService
     * @throws ClassNotFoundException
     */
    public ClassLoader getBundleClassLoader(String packageName, String versionRange) throws ClassNotFoundException;
-   /**
-    * Shutdown the bundle for this service.
-    * @param service The service object
-    */
-   public boolean shutdownService(String serviceClass, Object service);
 }
