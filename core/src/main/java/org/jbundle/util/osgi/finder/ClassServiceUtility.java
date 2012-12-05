@@ -11,6 +11,7 @@ import java.io.ObjectInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -328,13 +329,30 @@ public class ClassServiceUtility
      */
     public static Dictionary<String,String> addToFilter(Dictionary<String,String> filter, String key, String value)
     {
-        if (value != null) 
+        return ClassServiceUtility.addToFilter(filter, key, value, false);
+    }
+    /**
+     * Add this key and value to this (Dictionary) filter.
+     */
+    public static Dictionary<String,String> addToFilter(Dictionary<String,String> filter, String key, String value, boolean cloneFilter)
+    {
+        Dictionary<String,String> newFilter = filter;
+        if ((cloneFilter) || (filter == null))
         {
-        	if (filter == null)
-        		filter = new Hashtable<String,String>();
-        	filter.put(key, value);
-        }        
-        return filter;
+            newFilter = new Hashtable<String,String>();
+            if (filter != null)
+            {
+                Enumeration<String> keys = filter.keys();
+                while (keys.hasMoreElements())
+                {
+                    String filterKey = keys.nextElement();
+                    newFilter.put(filterKey, filter.get(filterKey));
+                }
+            }
+        }
+        if (value != null) 
+            newFilter.put(key, value);
+        return newFilter;
     }
     /**
      * Log this message.

@@ -16,7 +16,7 @@
   <distributionManagement>
     <site>
       <id>jbundle.org</id>
-      <url>scp://www.donandann.com://space/web/jbundle/osgi</url>
+      <url>${documentationURL}/jbundle/osgi</url>
     </site>
   </distributionManagement>
 

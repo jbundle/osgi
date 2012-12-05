@@ -33,6 +33,7 @@ import org.osgi.framework.Version;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * BaseClassFinderService - Service to find and load bundle classes and resources.
@@ -297,8 +298,12 @@ public abstract class BaseClassFinderService extends Object
     }
     /**
      * Find this class's class access registered class access service in the current workspace.
-     * @param className
-     * @return
+     * @param interfaceClassName The class name (that has the package that the object was registered under)
+     * @param serviceClassName The service (or activator) class name.
+     * @param version Version range
+     * @param filter Other filters to use to find the service
+     * @param secsToWait Time to wait for service to start (0=don't wait) WARNING: This may take a while, so don't run this in your main thread.
+     * @return The service
      */
     public Object getClassBundleService(String interfaceClassName, String serviceClassName, String versionRange, Dictionary<String, String> filter, int secsToWait)
     {
@@ -308,7 +313,19 @@ public abstract class BaseClassFinderService extends Object
         	serviceReference = getClassServiceReference(bundleContext, interfaceClassName, versionRange, filter);
         if (serviceReference == null)
         	if (serviceClassName != null)
-        		serviceReference = getClassServiceReference(bundleContext, serviceClassName, versionRange, filter);
+    	{
+    		serviceReference = getClassServiceReference(bundleContext, serviceClassName, versionRange, filter);
+    		if (serviceReference == null)
+                serviceReference = getClassServiceReference(bundleContext, ServiceTracker.class.getName(), versionRange, ClassServiceUtility.addToFilter(filter, BundleConstants.SERVICE_CLASS, serviceClassName, true));
+            if (serviceReference == null)
+                serviceReference = getClassServiceReference(bundleContext, ServiceTracker.class.getName(), versionRange, ClassServiceUtility.addToFilter(filter, BundleConstants.ACTIVATOR, serviceClassName, true));
+            // If you pass an activator class name, the service class may be different
+    	}
+        if (serviceReference == null)
+            serviceReference = getClassServiceReference(bundleContext, ServiceTracker.class.getName(), versionRange, ClassServiceUtility.addToFilter(filter, BundleConstants.PACKAGE, ClassFinderActivator.getPackageName((interfaceClassName == null) ? serviceClassName : interfaceClassName, false), true));
+        if (serviceReference == null)
+            serviceReference = getClassServiceReference(bundleContext, ServiceTracker.class.getName(), versionRange, ClassServiceUtility.addToFilter(filter, BundleConstants.SERVICE_PID, ClassFinderActivator.getPackageName((interfaceClassName == null) ? serviceClassName : interfaceClassName, false), true));
+        serviceReference = checkService(serviceReference, interfaceClassName);
         
         if ((serviceReference != null) && ((serviceReference.getBundle().getState() & Bundle.ACTIVE) != 0))
             return bundleContext.getService(serviceReference);
@@ -317,6 +334,31 @@ public abstract class BaseClassFinderService extends Object
             return ClassFinderActivator.waitForServiceStartup(bundleContext, interfaceClassName, serviceClassName, versionRange, filter, secsToWait);
 
         return null;
+    }
+    /**
+     * Make sure this service reference is the correct interface/class
+     * @param serviceReference
+     * @param interfaceClassName
+     * @param serviceClassName
+     * @return
+     */
+    private ServiceReference checkService(ServiceReference serviceReference, String interfaceClassName)
+    {
+        if (serviceReference != null)
+        {
+            Object service = bundleContext.getService(serviceReference);
+            if (service != null)
+            {
+                try {
+                    if (interfaceClassName != null)
+                        if (!service.getClass().isAssignableFrom(Class.forName(interfaceClassName)))
+                            serviceReference = null;
+                } catch (ClassNotFoundException e) {
+                    // Ignore this error
+                }
+            }
+        }
+        return serviceReference;
     }
     /**
      * Find this class's class access registered class access service in the current workspace.

@@ -71,13 +71,14 @@ public interface ClassFinder {
 
     /**
      * Find this class's class access registered class access service in the current workspace.
-     * @param className The class name (that has the package that the object was registered under)
+     * @param interfaceClassName The class name (that has the package that the object was registered under)
+     * @param serviceClassName The service (or activator) class name.
      * @param version Version range
      * @param filter Other filters to use to find the service
      * @param secsToWait Time to wait for service to start (0=don't wait) WARNING: This may take a while, so don't run this in your main thread.
-     * @return
+     * @return The service
      */
-    public Object getClassBundleService(String activatorClassName, String interfaceClassName, String versionRange, Dictionary<String, String> filter, int secsToWait);
+    public Object getClassBundleService(String interfaceClassName, String serviceClassName, String versionRange, Dictionary<String, String> filter, int secsToWait);
     /**
      * Find this resource in the repository, then deploy and optionally start it.
      * @param version Version range
