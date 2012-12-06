@@ -528,7 +528,7 @@ public abstract class BaseClassFinderService extends Object
      */
     public boolean startBaseBundle(BundleContext context, String interfaceClassName, String dependentServiceClassName, String versionRange, Dictionary<String,String> filter, int secsToWait)
     {
-        ServiceReference ServiceReference = getClassServiceReference(bundleContext, interfaceClassName, versionRange, filter);
+        ServiceReference ServiceReference = getClassServiceReference((bundleContext != null) ? bundleContext : context, interfaceClassName, versionRange, filter);
         
         if ((ServiceReference != null) && ((ServiceReference.getBundle().getState() & Bundle.ACTIVE) != 0))
             return true;    // Already up!
