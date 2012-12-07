@@ -442,7 +442,7 @@ public abstract class BaseClassFinderService extends Object
         URL url = null;
         if (resource == null)
         {
-            Object classAccess = this.getClassBundleService(null, resourcePath, versionRange, null, 0);
+            Object classAccess = this.getClassBundleService(null, ClassFinderActivator.getPackageName(resourcePath, true) + FAKE_CLASSNAME, versionRange, null, 0);
             if (classAccess != null)
                 url = classAccess.getClass().getClassLoader().getResource(resourcePath);
         }
