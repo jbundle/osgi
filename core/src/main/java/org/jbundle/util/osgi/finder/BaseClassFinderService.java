@@ -389,7 +389,9 @@ public abstract class BaseClassFinderService extends Object
             if (interfaceName == null)
                 interfaceName = interfaceClassName;
             serviceFilter = ClassFinderActivator.addVersionFilter(serviceFilter, versionRange);
-            ServiceReference[] refs = context.getServiceReferences(interfaceName, serviceFilter);
+            ServiceReference[] refs = null;
+            if (context != null)
+                refs = context.getServiceReferences(interfaceName, serviceFilter);
 
             if ((refs != null) && (refs.length > 0))
                 return refs[0];
