@@ -6,7 +6,7 @@
   <parent>
     <artifactId>jbundle-parent</artifactId>
     <groupId>org.jbundle.config</groupId>
-    <version>1.2.5-SNAPSHOT</version>
+    <version>1.2.6-SNAPSHOT</version>
     <relativePath>../../jbundle-parent</relativePath>
   </parent>
 
