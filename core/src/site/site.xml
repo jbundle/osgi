@@ -41,7 +41,7 @@ under the License.
       <item name="App framework" href="../jbundle"/>
       <item name="Auto Web Start" href="../auto-webstart"/>
       <item name="OSGi Utilities" href="../osgi"/>
-      <item name="Simple Servlets" href="../simpleservlets"/>
+      <item name="Simple Servlets" href="../webapp"/>
       <item name="JCalendarButton" href="../jcalendarbutton"/>
       <item name="Calendar Panel" href="../calendarpanel"/>      
     </menu>
