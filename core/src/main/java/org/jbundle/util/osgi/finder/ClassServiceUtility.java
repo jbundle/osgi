@@ -153,7 +153,12 @@ public class ClassServiceUtility
         try {
         	if (isResource)
         		if (classLoader != null)
+        		{
         			url = classLoader.getResource(filepath);
+        			if (url == null)
+        			    if (filepath.startsWith("/"))
+        			        url = classLoader.getResource(filepath.substring(1));    // Classpaths shouldn't start with root
+        		}
         } catch (Exception e) {
             // Keep trying
         }
