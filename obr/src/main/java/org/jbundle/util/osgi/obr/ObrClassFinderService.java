@@ -3,6 +3,12 @@
  */
 package org.jbundle.util.osgi.obr;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.felix.bundlerepository.DataModelHelper;
 import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Repository;
@@ -257,29 +263,69 @@ public class ObrClassFinderService extends BaseClassFinderService
      */
     public void deployResource(Resource resource, int options)
     {
-        Resolver resolver = repositoryAdmin.resolver();
-        resolver.add(resource);
-        int resolveAttempt = 5;
-        while (resolveAttempt-- > 0)
-        {
-            try {
-                if (resolver.resolve(options))
-                {
-                    resolver.deploy(options);
-                    break;     // Resolve successful, exception thrown on previous instruction if not
-                } else {
-                    Reason[] reqs = resolver.getUnsatisfiedRequirements();
-                    for (int i = 0; i < reqs.length; i++) {
-                        ClassServiceUtility.log(bundleContext, LogService.LOG_ERROR, "Unable to resolve: " + reqs[i]);
-                    }
-                    break;     // Resolve unsuccessful, but it did finish
-                }
-            } catch (IllegalStateException e) {
-                // If resolve unsuccessful, try again
-                if (resolveAttempt == 0)
-                    e.printStackTrace();
-            }
+    	String name = resource.getSymbolicName() + "/" + resource.getVersion();
+        
+    	Lock lock = this.getLock(name);
+        try {
+	        boolean acquired = lock.tryLock();
+			if (acquired) {	// Good, deploy this resource
+			    try {
+			        Resolver resolver = repositoryAdmin.resolver();
+			        resolver.add(resource);
+			        int resolveAttempt = 5;
+			        while (resolveAttempt-- > 0)
+			        {
+			            try {
+			                if (resolver.resolve(options))
+			                {
+			                    resolver.deploy(options);
+			                    break;     // Resolve successful, exception thrown on previous instruction if not
+			                } else {
+			                    Reason[] reqs = resolver.getUnsatisfiedRequirements();
+			                    for (int i = 0; i < reqs.length; i++) {
+			                        ClassServiceUtility.log(bundleContext, LogService.LOG_ERROR, "Unable to resolve: " + reqs[i]);
+			                    }
+			                    break;     // Resolve unsuccessful, but it did finish
+			                }
+			            } catch (IllegalStateException e) {
+			                // If resolve unsuccessful, try again
+			                if (resolveAttempt == 0)
+			                    e.printStackTrace();
+			            }
+			        }
+			    } finally {
+			        lock.unlock();
+			    }
+			} else {	// Lock was not acquired, wait until it is unlocked and return (resource should be deployed by then)
+				acquired = lock.tryLock(secondsToWait, TimeUnit.SECONDS);
+				if (acquired) {
+				    try {
+				        // Success
+				    } finally {
+				        lock.unlock();
+				    }
+				} else {
+				    // failure code here
+				}
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
+			this.removeLock(name);
+		}
+    }
+    public static final int secondsToWait = 25;
+    private Map<String,  Lock> mLocks = new HashMap<String,  Lock>();
+    private synchronized Lock getLock(String name) {
+        Lock l = mLocks.get(name);
+        if (l == null) {
+            l = new ReentrantLock();
+            mLocks.put(name, l);
         }
+        return l;
+    }
+    private synchronized Lock removeLock(String name) {
+        return mLocks.remove(name);
     }
     /**
      * Does this resource match this bundle?
