@@ -11,3 +11,5 @@ skeleton_test_data*
 .metadata
 *.releaseBackup
 release.properties
+*.iml
+.idea
