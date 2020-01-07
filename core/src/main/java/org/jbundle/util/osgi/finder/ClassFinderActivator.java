@@ -59,8 +59,7 @@ public final class ClassFinderActivator extends BaseBundleActivator
     
     /**
      * Find this class's class access service in the current workspace.
-     * @param waitForStart
-     * @param className
+     * @param classFinder
      * @return
      */
     public static void setClassFinder(ClassFinder classFinder)
@@ -72,7 +71,7 @@ public final class ClassFinderActivator extends BaseBundleActivator
     /**
      * Find this class's class access service in the current workspace.
      * @param secsToWait 
-     * @param className
+     * @param context
      * @return
      */
     public static ClassFinder getClassFinder(Object context, int secsToWait)
@@ -115,7 +114,7 @@ public final class ClassFinderActivator extends BaseBundleActivator
     /**
      * Wait for bundle class name.
      * @param context
-     * @param bundleClassName
+     * @param bundle
      * @return
      */
     public static boolean waitForBundleStartup(BundleContext context, Bundle bundle, int secsToWait)
@@ -152,10 +151,10 @@ public final class ClassFinderActivator extends BaseBundleActivator
     /**
      * Wait for bundle class name.
      * @param context
-     * @param bundleClassName
+     * @param serviceClassName
      * @return
      */
-    public static Object waitForServiceStartup(BundleContext context, String interfaceClassName, String serviceClassName, String versionRange, Dictionary<String, String> filter, int secsToWait)
+    public static Object waitForServiceStartup(BundleContext context, String interfaceClassName, String serviceClassName, String versionRange, Dictionary<String, Object> filter, int secsToWait)
     {
         if (interfaceClassName == null)
             interfaceClassName = serviceClassName;

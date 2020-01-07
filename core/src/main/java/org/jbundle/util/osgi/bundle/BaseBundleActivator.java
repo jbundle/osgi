@@ -48,7 +48,7 @@ public class BaseBundleActivator extends Object
 	/**
 	 * This is not necessary. I save it for debugging.
 	 */
-	protected Dictionary<String,String> properties = null;
+	protected Dictionary<String, Object> properties = null;
 	/**
 	 * My service registration.
 	 */
@@ -69,7 +69,7 @@ public class BaseBundleActivator extends Object
 	 */
 	public void init()
 	{
-		Dictionary<String, String> properties = getConfigurationProperties(this.getProperties(), false);
+		Dictionary<String, Object> properties = getConfigurationProperties(this.getProperties(), false);
 		this.setProperties(properties);
         this.setProperty(BundleConstants.SERVICE_PID, getServicePid());
         this.setProperty(BundleConstants.SERVICE_CLASS, getServiceClassName());		
@@ -80,12 +80,12 @@ public class BaseBundleActivator extends Object
      * @return The properties
      */
     @SuppressWarnings("unchecked")
-    public Dictionary<String, String> getConfigurationProperties(Dictionary<String, String> dictionary, boolean returnCopy)
+    public Dictionary<String, Object> getConfigurationProperties(Dictionary<String, Object> dictionary, boolean returnCopy)
     {
         if (returnCopy)
             dictionary = putAll(dictionary, null);
         if (dictionary == null)
-            dictionary = new Hashtable<String, String>();
+            dictionary = new Hashtable<String, Object>();
         try {
             String servicePid = this.getServicePid();
             if (servicePid != null)
@@ -96,7 +96,7 @@ public class BaseBundleActivator extends Object
                     ConfigurationAdmin configAdmin = (ConfigurationAdmin)context.getService(caRef);
                     Configuration config = configAdmin.getConfiguration(servicePid);
 
-                    Dictionary<String, String> configProperties = config.getProperties();
+                    Dictionary<String, Object> configProperties = config.getProperties();
                     dictionary = putAll(configProperties, dictionary);
                 }
             }
@@ -162,8 +162,7 @@ public class BaseBundleActivator extends Object
 
     /**
      * Make sure the dependent services are up, then call startupService.
-     * @param versionRange Bundle version
-     * @param baseBundleServiceClassName
+     * @param bundleContext
      * @return false if I'm waiting for the service to startup.
      */
     public boolean checkDependentServices(BundleContext bundleContext)
@@ -176,10 +175,10 @@ public class BaseBundleActivator extends Object
      * @param defaultServiceClassName The default service to start
      * @param versionRange Bundle version
      * @param properties Properties to pass when/if starting the service
-     * @param baseBundleServiceClassName
+     * @param bundleContext
      * @return false if I'm waiting for the service to startup.
      */
-    public boolean addDependentService(BundleContext bundleContext, String interfaceClassName, String defaultServiceClassName, String versionRange, Dictionary<String, String> properties)
+    public boolean addDependentService(BundleContext bundleContext, String interfaceClassName, String defaultServiceClassName, String versionRange, Dictionary<String, Object> properties)
     {
     	if (interfaceClassName == null)
     		interfaceClassName = defaultServiceClassName;
@@ -208,7 +207,7 @@ public class BaseBundleActivator extends Object
     /**
      * Start this service.
      * Override this to do all the startup.
-     * @param context bundle context
+     * @param bundleContext bundle context
      * @return true if successful.
      */
     public Object startupService(BundleContext bundleContext)
@@ -218,7 +217,7 @@ public class BaseBundleActivator extends Object
     /**
      * Stop this service.
      * Override this to do all the startup.
-     * @param bundleService
+     * @param service
      * @param context bundle context
      * @return true if successful.
      */
@@ -228,7 +227,7 @@ public class BaseBundleActivator extends Object
     }
     /**
      * Get the service for this implementation class.
-     * @param interfaceClassName
+     * @param service
      * @return
      */
     public void setService(Object service)
@@ -238,7 +237,6 @@ public class BaseBundleActivator extends Object
     /**
      * Convenience method to get the service for this implementation class.
      * Note: You typically override this and cast the service to the correct class.
-     * @param interfaceClassName
      * @return
      */
     public Object getService()
@@ -247,7 +245,7 @@ public class BaseBundleActivator extends Object
     }
     /**
      * Get the service for this implementation class.
-     * @param interfaceClassName
+     * @param service
      * @return
      */
     public void registerService(Object service)
@@ -260,7 +258,7 @@ public class BaseBundleActivator extends Object
     }
     /**
      * Convenience method to get the service for this implementation class.
-     * @param interfaceClassName
+     * @param interfaceClass
      * @return
      */
     public Object getService(Class<?> interfaceClass)
@@ -281,7 +279,7 @@ public class BaseBundleActivator extends Object
      * @param interfaceClassName
      * @return
      */
-    public Object getService(String interfaceClassName, String serviceClassName, String versionRange, Dictionary<String,String> filter)
+    public Object getService(String interfaceClassName, String serviceClassName, String versionRange, Dictionary<String, Object> filter)
     {
         return ClassServiceUtility.getClassService().getClassFinder(context).getClassBundleService(interfaceClassName, serviceClassName, versionRange, filter, -1);
     }
@@ -317,7 +315,7 @@ public class BaseBundleActivator extends Object
     	Class<?> interfaceClass = getInterfaceClass();
     	if (interfaceClass != null)
     		return interfaceClass.getName();
-		String interfaceClassName = this.getProperty(BundleConstants.INTERFACE);
+		Object interfaceClassName = this.getProperty(BundleConstants.INTERFACE);
 		if (interfaceClassName == null)
 		{
 			if (service != null)
@@ -325,7 +323,7 @@ public class BaseBundleActivator extends Object
 			else
 				interfaceClassName = this.getClass().getName();	// Default - register under class name
 		}
-		return interfaceClassName;
+		return interfaceClassName == null ? null : interfaceClassName.toString();
     }
     /**
      * Get the interface/service class name.
@@ -358,7 +356,7 @@ public class BaseBundleActivator extends Object
      * Get the properties.
      * @return the properties.
      */
-    public void setProperties(Dictionary<String,String> properties)
+    public void setProperties(Dictionary<String, Object> properties)
     {
         this.properties = properties;
     }
@@ -366,7 +364,7 @@ public class BaseBundleActivator extends Object
      * Get the properties.
      * @return the properties.
      */
-    public Dictionary<String,String> getProperties()
+    public Dictionary<String, Object> getProperties()
     {
         return properties;
     }
@@ -374,20 +372,20 @@ public class BaseBundleActivator extends Object
 	 * Get the properties.
 	 * @return the properties.
 	 */
-	public void setProperty(String key, String value)
+	public void setProperty(String key, Object value)
 	{
 		if (properties == null)
-			properties = new Hashtable<String, String>();
+			properties = new Hashtable<String, Object>();
 		properties.put(key, value);
 	}
 	/**
 	 * Get the properties.
 	 * @return the properties.
 	 */
-	public String getProperty(String key)
+	public Object getProperty(String key)
 	{
 		String servicePid = this.getServicePid();
-		String value = null;
+		Object value = null;
 		if (!key.contains("."))
 		{
 			value = context.getProperty(servicePid + '.' + key);
@@ -406,10 +404,10 @@ public class BaseBundleActivator extends Object
      * @param destDictionary
      * @return
      */
-    public static Dictionary<String, String> putAll(Dictionary<String, String> sourceDictionary, Dictionary<String, String> destDictionary)
+    public static Dictionary<String, Object> putAll(Dictionary<String, Object> sourceDictionary, Dictionary<String, Object> destDictionary)
     {
         if (destDictionary == null)
-            destDictionary = new Hashtable<String, String>();
+            destDictionary = new Hashtable<String, Object>();
         if (sourceDictionary != null)
         {
             Enumeration<String> keys = sourceDictionary.keys();

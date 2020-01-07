@@ -21,9 +21,9 @@ public class BundleStarter extends Thread
 	String dependentServiceClassName = null;
 	String interfaceClassName = null;
 	String versionRange = null;
-	Dictionary<String, String> properties = null;
+	Dictionary<String, Object> properties = null;
 	
-	public BundleStarter(BaseBundleActivator bundleService, BundleContext bundleContext, String interfaceClassName, String dependentServiceClassName, String versionRange, Dictionary<String, String> properties)
+	public BundleStarter(BaseBundleActivator bundleService, BundleContext bundleContext, String interfaceClassName, String dependentServiceClassName, String versionRange, Dictionary<String, Object> properties)
 	{
 		this.bundleContext = bundleContext;
 		this.dependentServiceClassName = dependentServiceClassName;

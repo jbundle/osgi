@@ -187,7 +187,7 @@ public class ClassServiceUtility
     /**
      * Gets a resource bundle using the specified base name and locale,
      * @param locale the locale for which a resource bundle is desired
-     * @param baseName the base name of the resource bundle, a fully qualified class name
+     * @param className the base name of the resource bundle, a fully qualified class name
      * @exception NullPointerException if <code>baseName</code> or <code>locale</code> is <code>null</code>
      * @exception MissingResourceException if no resource bundle for the specified base name can be found
      * @return a resource bundle for the given base name and locale
@@ -256,7 +256,7 @@ public class ClassServiceUtility
     }
     /**
      * Get the bundle classloader for this package.
-     * @param string The class name to find the bundle for.
+     * @param packageName The class name to find the bundle for.
      * @return The class loader.
      * @throws ClassNotFoundException
      */
@@ -315,7 +315,7 @@ public class ClassServiceUtility
     /**
      * Add this key and value to this (ldap) filter.
      */
-    public static String addToFilter(String filter, String key, String value)
+    public static String addToFilter(String filter, String key, Object value)
     {
         if (value != null) 
         {
@@ -332,19 +332,19 @@ public class ClassServiceUtility
     /**
      * Add this key and value to this (Dictionary) filter.
      */
-    public static Dictionary<String,String> addToFilter(Dictionary<String,String> filter, String key, String value)
+    public static Dictionary<String, Object> addToFilter(Dictionary<String, Object> filter, String key, Object value)
     {
         return ClassServiceUtility.addToFilter(filter, key, value, false);
     }
     /**
      * Add this key and value to this (Dictionary) filter.
      */
-    public static Dictionary<String,String> addToFilter(Dictionary<String,String> filter, String key, String value, boolean cloneFilter)
+    public static Dictionary<String, Object> addToFilter(Dictionary<String, Object> filter, String key, Object value, boolean cloneFilter)
     {
-        Dictionary<String,String> newFilter = filter;
+        Dictionary<String, Object> newFilter = filter;
         if ((cloneFilter) || (filter == null))
         {
-            newFilter = new Hashtable<String,String>();
+            newFilter = new Hashtable<String, Object>();
             if (filter != null)
             {
                 Enumeration<String> keys = filter.keys();

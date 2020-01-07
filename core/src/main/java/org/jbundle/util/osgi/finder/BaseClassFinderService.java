@@ -240,7 +240,7 @@ public abstract class BaseClassFinderService extends Object
     }
     /**
      * Get the bundle classloader for this package.
-     * @param string The class name to find the bundle for.
+     * @param packageName The class name to find the bundle for.
      * @return The class loader.
      * @throws ClassNotFoundException
      */
@@ -259,7 +259,7 @@ public abstract class BaseClassFinderService extends Object
     /**
      * Find this class's bundle in the repository
      * @param versionRange version
-     * @param className
+     * @param packageName
      * @return
      */
     private ClassLoader getClassLoaderFromBundle(Object resource, String packageName, String versionRange)
@@ -300,12 +300,12 @@ public abstract class BaseClassFinderService extends Object
      * Find this class's class access registered class access service in the current workspace.
      * @param interfaceClassName The class name (that has the package that the object was registered under)
      * @param serviceClassName The service (or activator) class name.
-     * @param version Version range
+     * @param versionRange Version range
      * @param filter Other filters to use to find the service
      * @param secsToWait Time to wait for service to start (0=don't wait) WARNING: This may take a while, so don't run this in your main thread.
      * @return The service
      */
-    public Object getClassBundleService(String interfaceClassName, String serviceClassName, String versionRange, Dictionary<String, String> filter, int secsToWait)
+    public Object getClassBundleService(String interfaceClassName, String serviceClassName, String versionRange, Dictionary<String, Object> filter, int secsToWait)
     {
         ServiceReference serviceReference = null;
         
@@ -339,7 +339,6 @@ public abstract class BaseClassFinderService extends Object
      * Make sure this service reference is the correct interface/class
      * @param serviceReference
      * @param interfaceClassName
-     * @param serviceClassName
      * @return
      */
     private ServiceReference checkService(ServiceReference serviceReference, String interfaceClassName)
@@ -368,14 +367,14 @@ public abstract class BaseClassFinderService extends Object
      * @param filter
      * @return
      */
-    public static ServiceReference getClassServiceReference(BundleContext context, String interfaceClassName, String versionRange, Dictionary<String, String> filter)
+    public static ServiceReference getClassServiceReference(BundleContext context, String interfaceClassName, String versionRange, Dictionary<String, Object> filter)
     {
         try {
             String serviceFilter = null;//ClassServiceUtility.addToFilter((String)null, BundleActivatorModel.PACKAGE_NAME, ClassFinderActivator.getPackageName(className, true));
             String interfaceName = null;
             if (filter != null)
             {
-                interfaceName = filter.get(BundleConstants.INTERFACE);
+                interfaceName = filter.get(BundleConstants.INTERFACE) == null ? null : filter.get(BundleConstants.INTERFACE).toString();
 
                 Enumeration<String> keys = filter.keys();
                 while (keys.hasMoreElements())
@@ -512,8 +511,8 @@ public abstract class BaseClassFinderService extends Object
     }
     /**
      * Find this resource in the repository, then deploy and optionally start it.
-     * @param className
-     * @param options 
+     * @param packageName
+     * @param versionRange
      * @return
      */
     public abstract Object deployThisResource(String packageName, String versionRange, boolean start);
@@ -524,11 +523,11 @@ public abstract class BaseClassFinderService extends Object
      * listener since this may take some time.
      * @param versionRange version
      * @param secsToWait Time to wait for startup 0=0, -1=default
-     * @param className
+     * @param dependentServiceClassName
      * @return true If I'm up already
      * @return false If I had a problem.
      */
-    public boolean startBaseBundle(BundleContext context, String interfaceClassName, String dependentServiceClassName, String versionRange, Dictionary<String,String> filter, int secsToWait)
+    public boolean startBaseBundle(BundleContext context, String interfaceClassName, String dependentServiceClassName, String versionRange, Dictionary<String, Object> filter, int secsToWait)
     {
         ServiceReference ServiceReference = getClassServiceReference((bundleContext != null) ? bundleContext : context, interfaceClassName, versionRange, filter);
         
@@ -609,7 +608,7 @@ public abstract class BaseClassFinderService extends Object
     /**
      * Find the currently installed bundle that exports this package.
      * @param bundleContext
-     * @param resource
+     * @param objResource
      * @return
      */
     public Bundle findBundle(Object objResource, Object bundleContext, String packageName, String versionRange)
@@ -634,7 +633,7 @@ public abstract class BaseClassFinderService extends Object
     /**
      * Find the currently installed bundle that exports this package.
      * @param context
-     * @param resource
+     * @param packageName
      * @return
      */
     public static Bundle findBundle(BundleContext context, String packageName, String versionRange)
@@ -723,7 +722,7 @@ public abstract class BaseClassFinderService extends Object
 
     /**
      * Log this message.
-     * @param bundleContext
+     * @param context
      * @param level
      * @param message
      */
@@ -842,9 +841,9 @@ public abstract class BaseClassFinderService extends Object
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Dictionary<String, String> getProperties(String servicePid)
+    public Dictionary<String, Object> getProperties(String servicePid)
     {
-        Dictionary<String, String> properties = null;
+        Dictionary<String, Object> properties = null;
          try {
              if (servicePid != null)
              {
@@ -865,11 +864,11 @@ public abstract class BaseClassFinderService extends Object
     /**
      * Set the configuration properties for this Pid.
      * @param servicePid The service Pid
-     * @param The properties to save.
+     * @param properties The properties to save.
      * @return True if successful
      */
      @Override
-     public boolean saveProperties(String servicePid, Dictionary<String, String> properties)
+     public boolean saveProperties(String servicePid, Dictionary<String, Object> properties)
      {
          try {
              if (servicePid != null)
