@@ -12,7 +12,7 @@
 
   <groupId>org.jbundle.util.osgi</groupId>
   <artifactId>jbundle-util-osgi-reactor</artifactId>
-  <version>2.0.10</version>
+  <version>2.0.11-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>jbundle-util-osgi-reactor</name>
@@ -25,7 +25,7 @@
     <url>https://github.com/jbundle/osgi</url>
     <connection>scm:git:https://github.com/jbundle/osgi</connection>
     <developerConnection>scm:git:https://github.com/jbundle/osgi</developerConnection>
-    <tag>jbundle-util-osgi-reactor-2.0.10</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <modules>
